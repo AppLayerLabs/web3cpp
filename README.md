@@ -10,3 +10,5 @@ The following modules are **not** implemented:
 
 * web3.bzz
 * web3.shh
+* web3.eth.ens
+* web3.eth.Iban
