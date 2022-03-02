@@ -1,6 +1,9 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <string>
 
-// Namespace that provides utility functions.
+// Module that provides utility functions.
 
 // TODO: 
 // - Check if we need to implement bloom filters
@@ -14,7 +17,7 @@
 // - Find a way to deal with mixed params (String|Number|BN|BigNumber|etc.)
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
-namespace utils {
+public class Utils {
   public:
     std::string randomHex(int size);
     std::string sha3(std::string string);
@@ -49,3 +52,5 @@ namespace utils {
     std::string rightPad(std::string string, int characterAmount, std::string sign = "0"); // ALIAS of padRight()
     //std::string toTwosComplement(number);
 };
+
+#endif  // UTILS_H

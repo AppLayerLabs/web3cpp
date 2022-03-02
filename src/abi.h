@@ -1,3 +1,6 @@
+#ifndef ABI_H
+#define ABI_H
+
 #include <string>
 
 // Module that encodes/decodes ABI parameters for function calls
@@ -6,7 +9,7 @@
 // - Check if the following functions can use objects as parameters:
 //   - encodeFunctionSignature(), encodeEventSignature(), decodeParameter()
 
-public class abi {
+public class ABI {
   public:
     std::string encodeFunctionSignature(std::string functionName);
     std::string encodeEventSignature(std::string eventName);
@@ -17,3 +20,5 @@ public class abi {
     //object decodeParameters(array<string|object>|object typesArray, std::string hexString);
     //object decodeLog(object inputs, std::string hexString, array topics);
 };
+
+#endif  // ABI_H

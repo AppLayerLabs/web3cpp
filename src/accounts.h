@@ -1,3 +1,6 @@
+#ifndef ACCOUNTS_H
+#define ACCOUNTS_H
+
 #include <future>
 #include <string>
 
@@ -9,7 +12,7 @@
 // - Check if some ints can be unsigned
 // - Check if wallet address list and length should be implemented this way
 
-public class accounts {
+public class Accounts {
   public:
     //wallet w;
 
@@ -43,3 +46,5 @@ public class accounts {
         //object load(std::string password, std::string keyName = "web3js_wallet"); // Shouldn't it be "web3cpp_wallet"?
     };
 };
+
+#endif  // ACCOUNTS_H

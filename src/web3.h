@@ -1,3 +1,6 @@
+#ifndef WEB3_H
+#define WEB3_H
+
 #include <string>
 
 // Main/Umbrella class that houses all modules.
@@ -15,3 +18,5 @@ public class Web3 {
     //object BatchRequest();
     //object extend();
 };
+
+#endif  // WEB3_H

@@ -1,3 +1,6 @@
+#ifndef ETH_H
+#define ETH_H
+
 #include <string>
 #include <future>
 
@@ -15,7 +18,7 @@
 // - Decide how to deal with "PromiEvents" for some functions
 //   - sendTransaction(), sendSignedTransaction()
 
-public class eth {
+public class Eth {
   public:
     std::string defaultAccount;
     //mixed defaultBlock; // Number|BigNumber|string ("earliest", "latest", "pending")
@@ -64,3 +67,5 @@ public class eth {
     //std::promise<object> getProof(std::string address, storageKey, blockNumber);
     //std::promise<object> createAccessList(callObject); // callObject is the same as sendTransaction(), this is specific for contract method executions
 };
+
+#endif  // ETH_H

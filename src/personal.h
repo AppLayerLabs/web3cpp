@@ -1,3 +1,6 @@
+#ifndef PERSONAL_H
+#define PERSONAL_H
+
 #include <future>
 #include <string>
 
@@ -9,7 +12,7 @@
 // - Decide how to deal with callbacks on (almost) all functions
 // - Check if some ints can be unsigned
 
-public class personal {
+public class Personal {
   public:
     std::promise<std::string> newAccount(std::string password);
     std::promise<std::string> sign(std::string dataToSign, std::string address, std::string password);
@@ -21,3 +24,5 @@ public class personal {
     std::promise<std::vector<std::string>> getAccounts();
     std::promise<std::string> importRawKey(std::string privateKey, std::string password); // Priv key is hex string
 };
+
+#endif  // PERSONAL_H
