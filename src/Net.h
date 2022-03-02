@@ -4,17 +4,22 @@
 #include <future>
 #include <string>
 
-// Module that interacts with network properties.
+// Module that interacts with a node's network properties.
+// https://web3js.readthedocs.io/en/v1.7.0/web3-net.html
 
 // TODO:
 // - Decide what to do with callbacks for all functions
-// - Maybe check if ints can be unsigned?
 
 public class Net {
   public:
-    std::promise<int> getId();
+    // Gets the current network ID.
+    std::promise<unsigned int> getId();
+
+    // Checks if the node is listening to peers.
     std::promise<bool> isListening();
-    std::promise<int> getPeerCount();
+
+    // Get the number of peers connected to.
+    std::promise<unsigned int> getPeerCount();
 };
 
 #endif  // NET_H
