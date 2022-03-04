@@ -11,7 +11,7 @@
 // - Check if "array" types would actually be "mixed"
 //   - Docs sometimes shows examples using only strings, other times with ints mixed in
 
-public class ABI {
+class ABI {
   public:
     // Encodes the function name to its ABI signature (first 4 bytes of the
     // sha3 hash of the function name including types).

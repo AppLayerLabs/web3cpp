@@ -11,7 +11,7 @@
 // - Understand why BatchRequest() is a *class*
 // - Understand how will extend()... extend a C++ class on the spot
 
-public class Web3 {
+class Web3 {
   public:
     // Object with the classes of all major sub modulesm to be able to
     // instantiate them manually.

@@ -18,7 +18,7 @@
 // - Find a way to deal with mixed params (String|Number|BN|BigNumber|etc.)
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
-public class Utils {
+class Utils {
   public:
     // Generates a cryptographically strong pseudo-random HEX string from a given byte size.
     // e.g. a size of 32 will result in a 32-byte HEX string,

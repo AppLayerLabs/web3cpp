@@ -10,7 +10,7 @@
 // TODO:
 // - Decide what to do with callbacks for all functions
 
-public class Net {
+class Net {
   public:
     // Gets the current network ID.
     std::future<unsigned int> getId();

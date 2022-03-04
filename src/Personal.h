@@ -12,7 +12,7 @@
 //   - setProvider(), providers, givenProvider, currentProvider, BatchRequest(), extend()
 // - Decide how to deal with callbacks on (almost) all functions
 
-public class Personal {
+class Personal {
   public:
     // Creates a new account.
     std::future<std::string> newAccount(std::string password);

@@ -14,7 +14,7 @@
 // - decrypt() shows string as parameter but example shows a JSON object?
 // - save() and load(): shouldn't "web3js_wallet" be "web3cpp_wallet"?
 
-public class Accounts {
+class Accounts {
   public:
     //wallet w;
 
@@ -63,7 +63,7 @@ public class Accounts {
 
     // In-memory wallet with multiple accounts. These accounts can be used
     // when using Eth.sendTransaction().
-    public class Wallet {
+    class Wallet {
       private:
         std::vector<std::string> addresses;
         unsigned int length;

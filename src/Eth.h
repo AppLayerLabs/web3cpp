@@ -24,7 +24,7 @@
 //   - defaultBlock: Number|BigNumber|string ("earliest", "latest", "pending")
 //   - getHashrate(): is just an unsigned int enough?
 
-public class Eth {
+class Eth {
   public:
     // Default address used as the default "from" property, if no "from"
     // property is specified in functions like sendTransaction() or call().
