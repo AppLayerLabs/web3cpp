@@ -3,6 +3,7 @@
 
 #include <future>
 #include <string>
+#include <vector>
 
 // Module that contains functions to generate accounts and sign transactions and data.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-accounts.html

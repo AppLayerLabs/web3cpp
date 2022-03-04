@@ -3,6 +3,7 @@
 
 #include <string>
 #include <future>
+#include <vector>
 
 // Module that interacts with the blockchain and smart contracts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth.html
@@ -185,7 +186,7 @@ class Eth {
 
     // Returns work for miners to mine on.
     // Returned strings are all in hex form.
-    std::future<std::vector<string>> getWork();
+    std::future<std::vector<std::string>> getWork();
 
     // Submits a proof-of-work solution.
     // Provided strings are all in hex form.

@@ -3,6 +3,7 @@
 
 #include <future>
 #include <string>
+#include <vector>
 
 // Module that interacts with a node's accounts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html
