@@ -78,23 +78,23 @@ public class Eth {
     unsigned int maxListenersWarningThreshold = 100;
 
     // Returns the protocol version of the node.
-    std::promise<std::string> getProtocolVersion();
+    std::future<std::string> getProtocolVersion();
 
     // Checks if the node is currently syncing and returns either a
     // JSON syncing object, or false.
-    //std::promise<jsonObj|bool> isSyncing();
+    //std::future<jsonObj|bool> isSyncing();
 
     // Returns the Coinbase address to which mining rewards will go.
-    std::promise<std::string> getCoinbase();
+    std::future<std::string> getCoinbase();
 
     // Checks whether the node is mining or not.
-    std::promise<bool> isMining();
+    std::future<bool> isMining();
 
     // Returns the number of hashes per second that the node is mining with.
-    std::promise<unsigned int> getHashrate();
+    std::future<unsigned int> getHashrate();
 
     // Returns the current gas price oracle in Wei (median gas price of the last few blocks).
-    std::promise<std::string> getGasPrice();
+    std::future<std::string> getGasPrice();
 
     // Returns base fee per gas and transaction effective priority fee per gas
     // history for the requested block range if available.
@@ -103,94 +103,94 @@ public class Eth {
     // optional to support.
     // For pre-EIP-1559 blocks, the gas prices are returned as rewards and
     // zeroes are returned for the base fee per gas.
-    //std::promise<jsonObj> getFeeHistory(blockCount, newestBlock, rewardPercentiles);
+    //std::future<jsonObj> getFeeHistory(blockCount, newestBlock, rewardPercentiles);
 
     // Returns a list of accounts the node controls.
-    std::promise<std::vector<std::string>> getAccounts();
+    std::future<std::vector<std::string>> getAccounts();
 
     // Returns the current block number.
-    std::promise<unsigned int> getBlockNumber();
+    std::future<unsigned int> getBlockNumber();
 
     // Returns the balance in Wei of an address at a given block.
-    //std::promise<std::string> getBalance(std::string address, defaultBlock);
+    //std::future<std::string> getBalance(std::string address, defaultBlock);
 
     // Returns the value in storage at a specific position of an address.
-    //std::promise<std::string> getStorageAt(std::string address, position, defaultBlock);
+    //std::future<std::string> getStorageAt(std::string address, position, defaultBlock);
 
     // Returns the code at a specific address.
-    //std::promise<std::string> getCode(std::string address, defaultBlock);
+    //std::future<std::string> getCode(std::string address, defaultBlock);
 
     // Returns a block matching the given block number or hash.
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
-    //std::promise<jsonObj> getBlock(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    //std::future<jsonObj> getBlock(blockHashOrBlockNumber, bool returnTransactionObjects = false);
 
     // Returns the number of transactions in a given block.
-    //std::promise<unsigned int> getBlockTransactionCount(blockHashOrBlockNumber);
+    //std::future<unsigned int> getBlockTransactionCount(blockHashOrBlockNumber);
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
-    //std::promise<unsigned int> getBlockUncleCount(blockHashOrBlockNumber);
+    //std::future<unsigned int> getBlockUncleCount(blockHashOrBlockNumber);
 
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
-    //std::promise<jsonObj> getUncle(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    //std::future<jsonObj> getUncle(blockHashOrBlockNumber, bool returnTransactionObjects = false);
 
     // Returns a transaction matching the given hash.
-    //std::promise<jsonObj> getTransaction(std::string transactionHash);
+    //std::future<jsonObj> getTransaction(std::string transactionHash);
 
     // Returns a list of pending transactions.
     // Return structure is the same as getTransaction().
-    //std::promise<std::vector<jsonObj>> getPendingTransactions();
+    //std::future<std::vector<jsonObj>> getPendingTransactions();
 
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
     // Return structure is the same as getTransaction().
-    //std::promise<jsonObj> getTransactionFromBlock(hashStringOrNumber, unsigned int indexNumber);
+    //std::future<jsonObj> getTransactionFromBlock(hashStringOrNumber, unsigned int indexNumber);
 
     // Returns the receipt of a transaction by transaction hash,
     // or NULL on pending/non-existant transactions.
-    //std::promise<jsonObj> getTransactionReceipt(hash);
+    //std::future<jsonObj> getTransactionReceipt(hash);
 
     // Returns the number of transactions sent from the given address.
-    //std::promise<unsigned int> getTransactionCount(std::string address, defaultBlock);
+    //std::future<unsigned int> getTransactionCount(std::string address, defaultBlock);
 
     // Signs data using a specific account, which needs to be unlocked.
     // dataToSign will be converted using Utils.utf8ToHex().
     // Address can be a string or the index of a local wallet in Accounts.Wallet.
-    std::promise<std::string> sign(std::string dataToSign, std::string address);
-    std::promise<std::string> sign(std::string dataToSign, unsigned int address);
+    std::future<std::string> sign(std::string dataToSign, std::string address);
+    std::future<std::string> sign(std::string dataToSign, unsigned int address);
 
     // Signs a transaction with a given address, which needs to be unlocked.
     // transactionObject is the same as sendTransaction().
-    //std::promise<jsonObj> signTransaction(jsonObj transactionObject, std::string address);
+    //std::future<jsonObj> signTransaction(jsonObj transactionObject, std::string address);
 
     // Executes a message call transaction, which is directly executed in the
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    //std::promise<std::string> call(jsonObj callObject, defaultBlock);
+    //std::future<std::string> call(jsonObj callObject, defaultBlock);
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.
     // callObject is the same as sendTransaction().
     // Returns the used gas for the simulated call/transaction, as a HEX string.
-    //std::promise<std::string> estimateGas(jsonObj callObject);
+    //std::future<std::string> estimateGas(jsonObj callObject);
 
     // Returns past logs matching the given options.
     // jsonObj return is actually a JSON array of log objects.
-    //std::promise<std::vector<jsonObj>> getPastLogs(jsonObj options);
+    //std::future<std::vector<jsonObj>> getPastLogs(jsonObj options);
 
     // Returns work for miners to mine on.
     // Returned strings are all in hex form.
-    std::promise<std::vector<string>> getWork();
+    std::future<std::vector<string>> getWork();
 
     // Submits a proof-of-work solution.
     // Provided strings are all in hex form.
     // Returns true if solution is valid, false otherwise.
-    std::promise<bool> submitWork(std::string nonce, std::string powHash, std::string digest);
+    std::future<bool> submitWork(std::string nonce, std::string powHash, std::string digest);
 
     // Requests/enables the accounts from the current environment.
     // Only works if using an injected provider from an application like
@@ -199,19 +199,19 @@ public class Eth {
     // See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
     // for more info about the behaviour of this method.
     // Returns an array of enabled accounts.
-    std::promise<std::vector<std::string>> requestAccounts();
+    std::future<std::vector<std::string>> requestAccounts();
 
     // Returns the chain ID of the current connected node as described here:
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-695.md
-    std::promise<unsigned int> getChainId();
+    std::future<unsigned int> getChainId();
 
     // Returns a string with the current client version and info about the node.
-    std::promise<std::string> getNodeInfo();
+    std::future<std::string> getNodeInfo();
 
     // Returns the account and storage values of the specified account,
     // including the Merkle-proof as described here:
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1186.md
-    //std::promise<jsonObj> getProof(std::string address, storageKey, blockNumber);
+    //std::future<jsonObj> getProof(std::string address, storageKey, blockNumber);
 
     // Calls to create an access list that amethod execution will access
     // when executed in the VM.
@@ -219,7 +219,7 @@ public class Eth {
     // in `options` when instantiating a parent contract object.
     // callObject is the same as sendTransaction(), except this method is
     // specifically for contract method executions.
-    //std::promise<jsonObj> createAccessList(jsonObj callObject);
+    //std::future<jsonObj> createAccessList(jsonObj callObject);
 };
 
 #endif  // ETH_H

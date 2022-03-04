@@ -13,13 +13,13 @@
 public class Net {
   public:
     // Gets the current network ID.
-    std::promise<unsigned int> getId();
+    std::future<unsigned int> getId();
 
     // Checks if the node is listening to peers.
-    std::promise<bool> isListening();
+    std::future<bool> isListening();
 
     // Get the number of peers connected to.
-    std::promise<unsigned int> getPeerCount();
+    std::future<unsigned int> getPeerCount();
 };
 
 #endif  // NET_H

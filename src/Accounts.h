@@ -29,7 +29,7 @@ public class Accounts {
     //object privateKeyToAccount(std::string privateKey, bool ignoreLength = false);
 
     // Signs a transaction with a given private key.
-    //std::promise<jsonObj> signTransaction(jsonObj tx, std::string privateKey);
+    //std::future<jsonObj> signTransaction(jsonObj tx, std::string privateKey);
 
     // Recovers the address which was used to sign the given transaction.
     // rawTransaction is also called "signature" in the docs.

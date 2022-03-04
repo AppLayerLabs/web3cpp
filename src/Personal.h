@@ -15,27 +15,27 @@
 public class Personal {
   public:
     // Creates a new account.
-    std::promise<std::string> newAccount(std::string password);
+    std::future<std::string> newAccount(std::string password);
 
     // Signs a data string as an "Ethereum Signed Message". Usable with ecRecover().
     // dataToSign will be converted to hex using Utils.utf8ToHex().
-    std::promise<std::string> sign(std::string dataToSign, std::string address, std::string password);
+    std::future<std::string> sign(std::string dataToSign, std::string address, std::string password);
 
     // Recovers the account that signed the data.
     // dataThatWasSigned will be converted to hex using Utils.utf8ToHex().
-    std::promise<std::string> ecRecover(std::string dataThatWasSigned, std::string signature);
+    std::future<std::string> ecRecover(std::string dataThatWasSigned, std::string signature);
 
     // Signs a transaction. "from" account needs to be unlocked.
-    //std::promise<jsonObj> signTransaction(jsonObj transaction, std::string password);
+    //std::future<jsonObj> signTransaction(jsonObj transaction, std::string password);
 
     // Sends a transaction over the management API.
-    //std::promise<std::string> sendTransaction(jsonObj transactionOptions, std::string password);
+    //std::future<std::string> sendTransaction(jsonObj transactionOptions, std::string password);
 
     // Unlocks a specific account for a given number of seconds.
     void unlockAccount(std::string address, std::string password, unsigned int unlockDuration);
 
     // Locks a specific account.
-    std::promise<bool> lockAccount(std::string address);
+    std::future<bool> lockAccount(std::string address);
 
     // Returns a list of accounts the node controls by using the provider and
     // calling the RPC method `personal_listAccounts`.
@@ -43,12 +43,12 @@ public class Personal {
     // For that use Personal.newAccount().
     // Results are the same as Eth.getAccounts() except that calls the
     // RPC method `eth_accounts`.
-    std::promise<std::vector<std::string>> getAccounts();
+    std::future<std::vector<std::string>> getAccounts();
 
     // Imports a given private key into the keystore, encrypting it with the password.
     // privateKey is a hex string without the "0x".
     // Returns the address of the new account.
-    std::promise<std::string> importRawKey(std::string privateKey, std::string password);
+    std::future<std::string> importRawKey(std::string privateKey, std::string password);
 };
 
 #endif  // PERSONAL_H
