@@ -1,0 +1,4 @@
+build/
+.directory
+*.kate-swp
+.vscode/*.*
