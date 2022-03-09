@@ -5,6 +5,8 @@
 #include "Utils.h"
 #include "Wallet.h"
 
+#include <nlohmann/json.hpp>
+
 // Main/Umbrella class that houses all modules.
 
 // TODO:
