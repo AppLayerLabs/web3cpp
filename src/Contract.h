@@ -18,14 +18,6 @@
 
 class Contract {
   public:
-    //Contract(jsonObj jsonInterface, std::string address, jsonObj options = NULL);
-
-    //jsonObj options;
-
-    Contract clone();
-    //object deploy(jsonObj options); // data, arguments
-    std::vector<Method> methods;
-
     class Method {
       //array arguments;  // Probably a JSON array?
       //std::future<mixed> call(jsonObj options, defaultBlock); // from, gasPrice, gas
@@ -34,6 +26,14 @@ class Contract {
       std::string encodeABI();
       //std::future<jsonObj> createAccessList(jsonObj options, block); // from, gas
     };
+
+    //Contract(jsonObj jsonInterface, std::string address, jsonObj options = NULL);
+
+    //jsonObj options;
+
+    Contract clone();
+    //object deploy(jsonObj options); // data, arguments
+    std::vector<Method> methods;
 };
 
 #endif  // CONTRACT_H
