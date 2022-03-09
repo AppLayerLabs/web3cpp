@@ -2,6 +2,17 @@
 #define UTILS_H
 
 #include <string>
+#include <mutex>
+
+#include <boost/filesystem.hpp>
+
+#ifdef __MINGW32__
+#include <winsock2.h> // Windows.h asked for winsock2 to be included.
+#include <windows.h>
+#include <io.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#endif
 
 // Module that provides utility functions.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
@@ -18,8 +29,30 @@
 // - Find a way to deal with mixed params (String|Number|BN|BigNumber|etc.)
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
-class Utils {
-  public:
+namespace Utils {
+
+    // Struct for a new provider, contain the information about the provider.
+    struct Provider {
+      std::string networkName;
+      std::string rpcUrl;
+      std::string rpcTarget;
+      uint64_t rpcPort;
+      uint64_t chainID;
+      std::string currencySymbol;
+      std::string blockExplorerUrl;
+      std::mutex m_lock;
+    };
+
+    /**
+     * Handle the web3cpp history storage directory.
+     * Default data dir paths are as follows:
+     *   Windows: C:\Users\Username\AppData\Roaming\web3cpp
+     *   Unix: ~/.web3cpp
+     */
+    #ifdef __MINGW32__
+    boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
+    #endif
+    boost::filesystem::path getDefaultDataDir();
     // Generates a cryptographically strong pseudo-random HEX string from a given byte size.
     // e.g. a size of 32 will result in a 32-byte HEX string,
     // which is a 64-char string prefixed with "0x".

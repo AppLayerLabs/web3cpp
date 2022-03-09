@@ -14,26 +14,34 @@ message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
 message("Using PIC: ${CMAKE_POSITION_INDEPENDENT_CODE}")
 message("Building as static: ${BUILD_STATIC}")
 
+# Load external libraries...
+# TODO: add options to set boost path.
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost CONFIG REQUIRED filesystem system thread)
+
 # Organize sources and headers
-file(GLOB WEB3CPP_HEADERS "src/*.h")
+file(GLOB WEB3CPP_HEADERS "include/web3cpp/*.h")
+file(GLOB WEB3CPP_SOURCES "src/*.cpp")
 
 # Declare library target
 if(BUILD_STATIC)
   add_library(${PROJECT_NAME} STATIC
-    ${WEB3CPP_HEADERS}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
   )
 else()
   add_library(${PROJECT_NAME} SHARED
-    ${WEB3CPP_HEADERS}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
   )
 endif()
 
 # Configure directories to search for header files
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Set required properties
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "src/Web3.h")
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-
+set_target_properties(${PROJECT_NAME} PROPERTIES LANGUAGE CXX)
+target_link_libraries(${PROJECT_NAME} Boost)

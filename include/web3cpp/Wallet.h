@@ -1,9 +1,10 @@
-#ifndef PERSONAL_H
-#define PERSONAL_H
+#ifndef WALLET_H
+#define WALLET_H
 
 #include <future>
 #include <string>
 #include <vector>
+#include "Utils.h"
 
 // Module that interacts with a node's accounts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html
@@ -13,7 +14,11 @@
 //   - setProvider(), providers, givenProvider, currentProvider, BatchRequest(), extend()
 // - Decide how to deal with callbacks on (almost) all functions
 
-class Personal {
+class Wallet {
+  private:
+    boost::filesystem::path* path;
+    Utils::Provider* provider;
+
   public:
     // Creates a new account.
     std::future<std::string> newAccount(std::string password);
@@ -50,6 +55,9 @@ class Personal {
     // privateKey is a hex string without the "0x".
     // Returns the address of the new account.
     std::future<std::string> importRawKey(std::string privateKey, std::string password);
+
+    // Constructor
+    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
 };
 
-#endif  // PERSONAL_H
+#endif  // WALLET_H
