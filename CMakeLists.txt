@@ -18,7 +18,7 @@ message("Building as static: ${BUILD_STATIC}")
 # TODO: add options to set boost path.
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost CONFIG REQUIRED filesystem system thread)
+find_package(Boost CONFIG REQUIRED filesystem system thread nowide)
 
 # Organize sources and headers
 file(GLOB WEB3CPP_HEADERS "include/web3cpp/*.h")

@@ -5,6 +5,7 @@
 #include <mutex>
 
 #include <boost/filesystem.hpp>
+#include <boost/nowide/filesystem.hpp>
 
 #ifdef __MINGW32__
 #include <winsock2.h> // Windows.h asked for winsock2 to be included.

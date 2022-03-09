@@ -2,6 +2,7 @@
 
 
 Web3::Web3() : wallet(&defaultProvider, &defaultPath) {
+  boost::nowide::nowide_filesystem();
   defaultProvider.m_lock.lock();
   defaultProvider.networkName = "Avalanche Mainnet";
   defaultProvider.rpcUrl = "https://api.avax.network/"; 
@@ -16,6 +17,7 @@ Web3::Web3() : wallet(&defaultProvider, &defaultPath) {
 
 Web3::Web3(Utils::Provider provider) : wallet(&defaultProvider, &defaultPath) {
   // We cannot set provider = defaultProvider due to the mutex inside the provider itself.
+  boost::nowide::nowide_filesystem();
   defaultProvider.m_lock.lock();
   defaultProvider.networkName = provider.networkName;
   defaultProvider.rpcUrl = provider.rpcUrl; 
@@ -30,6 +32,7 @@ Web3::Web3(Utils::Provider provider) : wallet(&defaultProvider, &defaultPath) {
 
 Web3::Web3(boost::filesystem::path path) : wallet(&defaultProvider, &defaultPath) {
   // We cannot set provider = defaultProvider due to the mutex inside the provider itself.
+  boost::nowide::nowide_filesystem();
   defaultProvider.m_lock.lock();
   defaultProvider.networkName = "Avalanche Mainnet";
   defaultProvider.rpcUrl = "https://api.avax.network/"; 
@@ -44,6 +47,7 @@ Web3::Web3(boost::filesystem::path path) : wallet(&defaultProvider, &defaultPath
 
 Web3::Web3(Utils::Provider provider, boost::filesystem::path path) : wallet(&defaultProvider, &defaultPath) {
   // We cannot set provider = defaultProvider due to the mutex inside the provider itself.
+  boost::nowide::nowide_filesystem();
   defaultProvider.m_lock.lock();
   defaultProvider.networkName = provider.networkName;
   defaultProvider.rpcUrl = provider.rpcUrl; 
