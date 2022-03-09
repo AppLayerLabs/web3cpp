@@ -15,25 +15,35 @@
 // - Check if Method implementation should be this way
 // - Decide how to deal with callbacks and promievents for some functions
 // - estimateGas can handle just an unsigned int? Probably it'll need a big number
+// - Maybe force json::array in Method::arguments and Contract::options?
 
 class Contract {
   public:
     class Method {
-      //array arguments;  // Probably a JSON array?
-      //std::future<mixed> call(jsonObj options, defaultBlock); // from, gasPrice, gas
-      //promievent send(jsonObj options); // from, gasPrice, gas, value, nonce
-      //std::future<unsigned int> estimateGas(jsonObj options); // from, gas, value
+      //json arguments;  // Probably a JSON array?
+      //std::future<mixed> call(json options, defaultBlock); // from, gasPrice, gas
+      //promievent send(json options); // from, gasPrice, gas, value, nonce
+      std::future<unsigned int> estimateGas(json options); // from, gas, value
       std::string encodeABI();
-      //std::future<jsonObj> createAccessList(jsonObj options, block); // from, gas
+      //std::future<json> createAccessList(json options, block); // from, gas
     };
 
-    //Contract(jsonObj jsonInterface, std::string address, jsonObj options = NULL);
+    // Constructor.
+    Contract(json jsonInterface, std::string address, json options = NULL);
 
-    //jsonObj options;
+    // Array of options.
+    json options;
 
-    Contract clone();
-    //object deploy(jsonObj options); // data, arguments
+    // Methods from the contract.
     std::vector<Method> methods;
+
+    // Clones the current contract instance.
+    Contract clone();
+
+    // Deploys the contract to the blockchain.
+    // After successful deployment it will resolve to a new contract instance.
+    // object is a transaction object.
+    //object deploy(json options); // data, arguments
 };
 
 #endif  // CONTRACT_H

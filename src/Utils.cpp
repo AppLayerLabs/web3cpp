@@ -13,7 +13,7 @@ boost::filesystem::path Utils::GetSpecialFolderPath(int nFolder, bool fCreate) {
 boost::filesystem::path Utils::getDefaultDataDir() {
   namespace fs = boost::filesystem;
   #ifdef __MINGW32__
-    // Windows: C:\Users\Username\AppData\Roaming\AVME
+    // Windows: C:\Users\Username\AppData\Roaming\web3cpp
     return GetSpecialFolderPath(CSIDL_APPDATA) / "web3cpp";
   #else
     // Unix: ~/.web3cpp
@@ -25,7 +25,7 @@ boost::filesystem::path Utils::getDefaultDataDir() {
       pathRet = fs::path(pszHome);
   #ifdef __APPLE__
     return pathRet / "Library/Application Support/web3cpp";
-  #else 
+  #else
     return pathRet / ".web3cpp";
   #endif
   #endif

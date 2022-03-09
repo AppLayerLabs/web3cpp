@@ -4,7 +4,12 @@
 #include <future>
 #include <string>
 #include <vector>
+
 #include "Utils.h"
+
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 // Module that interacts with a node's accounts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html
@@ -20,6 +25,9 @@ class Wallet {
     Utils::Provider* provider;
 
   public:
+    // Constructor.
+    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
+
     // Creates a new account.
     std::future<std::string> newAccount(std::string password);
 
@@ -32,10 +40,10 @@ class Wallet {
     std::future<std::string> ecRecover(std::string dataThatWasSigned, std::string signature);
 
     // Signs a transaction. "from" account needs to be unlocked.
-    //std::future<jsonObj> signTransaction(jsonObj transaction, std::string password);
+    std::future<json> signTransaction(json transaction, std::string password);
 
     // Sends a transaction over the management API.
-    //std::future<std::string> sendTransaction(jsonObj transactionOptions, std::string password);
+    std::future<std::string> sendTransaction(json transactionOptions, std::string password);
 
     // Unlocks a specific account for a given number of seconds.
     void unlockAccount(std::string address, std::string password, unsigned int unlockDuration);
@@ -55,9 +63,6 @@ class Wallet {
     // privateKey is a hex string without the "0x".
     // Returns the address of the new account.
     std::future<std::string> importRawKey(std::string privateKey, std::string password);
-
-    // Constructor
-    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
 };
 
 #endif  // WALLET_H

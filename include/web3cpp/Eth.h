@@ -5,13 +5,16 @@
 #include <future>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 // Module that interacts with the blockchain and smart contracts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth.html
 
 // TODO:
 // - Implement the other module properties here when they're ready
-//   - Personal, Accounts, ABI, Net
-//   - Contract and Subscribe weren't implemented yet
+//   - Personal, Accounts, ABI, Net, Contract, Subscribe (this one is missing)
 // - Inherit the main Web3 class to access the common provider functions
 // - Implement defaultHardfork and defaultChain names for Avalanche
 // - Replace default Ethereum values for Avalanche ones(?)
@@ -24,6 +27,8 @@
 // - Decide how to deal with big numbers for some functions and properties
 //   - defaultBlock: Number|BigNumber|string ("earliest", "latest", "pending")
 //   - getHashrate(): is just an unsigned int enough?
+// - Decide if isSyncing() should always return a JSON object (even on false)
+// - Decide if getTransactionReceipt() should always return a JSON object (even on NULL)
 
 class Eth {
   public:
@@ -83,7 +88,7 @@ class Eth {
 
     // Checks if the node is currently syncing and returns either a
     // JSON syncing object, or false.
-    //std::future<jsonObj|bool> isSyncing();
+    //std::future<json|bool> isSyncing();
 
     // Returns the Coinbase address to which mining rewards will go.
     std::future<std::string> getCoinbase();
@@ -104,7 +109,7 @@ class Eth {
     // optional to support.
     // For pre-EIP-1559 blocks, the gas prices are returned as rewards and
     // zeroes are returned for the base fee per gas.
-    //std::future<jsonObj> getFeeHistory(blockCount, newestBlock, rewardPercentiles);
+    //std::future<json> getFeeHistory(blockCount, newestBlock, rewardPercentiles);
 
     // Returns a list of accounts the node controls.
     std::future<std::vector<std::string>> getAccounts();
@@ -125,7 +130,7 @@ class Eth {
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
-    //std::future<jsonObj> getBlock(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    //std::future<json> getBlock(blockHashOrBlockNumber, bool returnTransactionObjects = false);
 
     // Returns the number of transactions in a given block.
     //std::future<unsigned int> getBlockTransactionCount(blockHashOrBlockNumber);
@@ -137,23 +142,23 @@ class Eth {
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
-    //std::future<jsonObj> getUncle(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    //std::future<json> getUncle(blockHashOrBlockNumber, bool returnTransactionObjects = false);
 
     // Returns a transaction matching the given hash.
-    //std::future<jsonObj> getTransaction(std::string transactionHash);
+    std::future<json> getTransaction(std::string transactionHash);
 
     // Returns a list of pending transactions.
     // Return structure is the same as getTransaction().
-    //std::future<std::vector<jsonObj>> getPendingTransactions();
+    std::future<std::vector<json>> getPendingTransactions();
 
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
     // Return structure is the same as getTransaction().
-    //std::future<jsonObj> getTransactionFromBlock(hashStringOrNumber, unsigned int indexNumber);
+    //std::future<json> getTransactionFromBlock(hashStringOrNumber, unsigned int indexNumber);
 
     // Returns the receipt of a transaction by transaction hash,
     // or NULL on pending/non-existant transactions.
-    //std::future<jsonObj> getTransactionReceipt(hash);
+    std::future<json> getTransactionReceipt(std::string hash);
 
     // Returns the number of transactions sent from the given address.
     //std::future<unsigned int> getTransactionCount(std::string address, defaultBlock);
@@ -166,23 +171,23 @@ class Eth {
 
     // Signs a transaction with a given address, which needs to be unlocked.
     // transactionObject is the same as sendTransaction().
-    //std::future<jsonObj> signTransaction(jsonObj transactionObject, std::string address);
+    std::future<json> signTransaction(json transactionObject, std::string address);
 
     // Executes a message call transaction, which is directly executed in the
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    //std::future<std::string> call(jsonObj callObject, defaultBlock);
+    //std::future<std::string> call(json callObject, defaultBlock);
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.
     // callObject is the same as sendTransaction().
     // Returns the used gas for the simulated call/transaction, as a HEX string.
-    //std::future<std::string> estimateGas(jsonObj callObject);
+    std::future<std::string> estimateGas(json callObject);
 
     // Returns past logs matching the given options.
-    // jsonObj return is actually a JSON array of log objects.
-    //std::future<std::vector<jsonObj>> getPastLogs(jsonObj options);
+    // json return is actually a JSON array of log objects.
+    std::future<std::vector<json>> getPastLogs(json options);
 
     // Returns work for miners to mine on.
     // Returned strings are all in hex form.
@@ -212,7 +217,7 @@ class Eth {
     // Returns the account and storage values of the specified account,
     // including the Merkle-proof as described here:
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1186.md
-    //std::future<jsonObj> getProof(std::string address, storageKey, blockNumber);
+    //std::future<json> getProof(std::string address, storageKey, blockNumber);
 
     // Calls to create an access list that amethod execution will access
     // when executed in the VM.
@@ -220,7 +225,7 @@ class Eth {
     // in `options` when instantiating a parent contract object.
     // callObject is the same as sendTransaction(), except this method is
     // specifically for contract method executions.
-    //std::future<jsonObj> createAccessList(jsonObj callObject);
+    std::future<json> createAccessList(json callObject);
 };
 
 #endif  // ETH_H

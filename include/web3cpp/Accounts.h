@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 // Module that contains functions to generate accounts and sign transactions and data.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-accounts.html
 
@@ -14,6 +18,7 @@
 // - Check if wallet address list and length should be implemented this way
 // - decrypt() shows string as parameter but example shows a JSON object?
 // - save() and load(): shouldn't "web3js_wallet" be "web3cpp_wallet"?
+// - Maybe force json::array on encrypt() and decrypt()?
 
 class Accounts {
   public:
@@ -22,7 +27,7 @@ class Accounts {
     // Generates an account object with private key and public key.
     // If entropy is given, it should be at least 32 chars.
     // If not, a random string will be generated using Utils.randomHex().
-    //jsonObj create(std::string entropy = "");
+    json create(std::string entropy = "");
 
     // Creates an account object from a private key.
     // privateKey MUST have 32 bytes. If it is in hex, it MUST have the "0x" prefix.
@@ -30,7 +35,7 @@ class Accounts {
     //object privateKeyToAccount(std::string privateKey, bool ignoreLength = false);
 
     // Signs a transaction with a given private key.
-    //std::future<jsonObj> signTransaction(jsonObj tx, std::string privateKey);
+    std::future<json> signTransaction(json tx, std::string privateKey);
 
     // Recovers the address which was used to sign the given transaction.
     // rawTransaction is also called "signature" in the docs.
@@ -45,18 +50,18 @@ class Accounts {
     // Signs arbitrary data.
     // data will be UTF-* HEX decoded and wrapped as follows:
     // `"\x19Ethereum Signed Message:\n" + message.length + message`
-    //jsonObj sign(std::string data, std::string privateKey);
+    json sign(std::string data, std::string privateKey);
 
     // Recovers the address which was used to sign the given data.
     // If preFixed is true, the given message will NOT automatically be prefixed with
     // `"\x19Ethereum Signed Message:\n" + message.length + message`
     // and assumed to be already prefixed.
-    //std::string recover(jsonObj signatureObject);
+    std::string recover(json signatureObject);
     std::string recover(std::string message, std::string signature, bool preFixed = false);
     std::string recover(std::string message, std::string v, std::string r, std::string s, bool preFixed = false);
 
     // Encrypts a private key to the web3 keystore v3 standard.
-    //jsonObj encrypt(std::string privateKey, std::string password);
+    json encrypt(std::string privateKey, std::string password);
 
     // Decrypts a keystore v3 JSON, and creates the account.
     // encryptedPrivateKey is also called "keystoreJsonV3" in the docs.
@@ -78,8 +83,8 @@ class Accounts {
 
         // Adds an account to the wallet, using a private key or account object
         // created with Accounts.create().
-        //jsonObj add(std::string account);
-        //jsonObj add(jsonObj account);
+        json add(std::string account);
+        json add(json account);
 
         // Removes an account from the wallet, using the account address or
         // its index number in the wallet.
@@ -92,12 +97,12 @@ class Accounts {
         Wallet clear();
 
         // Encrypts all wallet accounts to an array of encrypted keystore v3 objects.
-        // jsonObj here is actually a JSON array.
-        //jsonObj encrypt(std::string password);
+        // json here is actually a JSON array.
+        json encrypt(std::string password);
 
         // Decrypts keystore v3 objects.
-        // jsonObj here is actually a JSON array.
-        //Wallet decrypt(jsonObj keystoreArray, std::string password);
+        // json here is actually a JSON array.
+        Wallet decrypt(json keystoreArray, std::string password);
 
         // Stores the wallet encrypted as a string in local storage.
         // Browser only.
