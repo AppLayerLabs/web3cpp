@@ -8,6 +8,9 @@
 #include "Utils.h"
 
 #include <nlohmann/json.hpp>
+#include <web3cpp/devcore/Common.h>
+#include <web3cpp/devcore/FixedHash.h>
+#include <web3cpp/ethcore/KeyManager.h>
 
 using json = nlohmann::json;
 
@@ -21,10 +24,25 @@ using json = nlohmann::json;
 
 class Wallet {
   private:
+    dev::bytesSec passHash;
+    dev::h256 passSalt;
+    int passIterations = 100000;
+
     boost::filesystem::path* path;
     Utils::Provider* provider;
+    dev::eth::KeyManager keyManager;
+
+    boost::filesystem::path walletFile()    { return path->string() + "/wallet/wallet.info"; };
+    boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
+
+    bool createNewWallet(std::string password);
 
   public:
+    // Wallet load with passphrase, create new wallet if empty.
+    // Return false if incorrect password
+    bool loadWallet(std::string password);
+
+    bool isLoaded() { return this->keyManager.exists(); }
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
 
