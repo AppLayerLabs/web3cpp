@@ -35,7 +35,8 @@ class Wallet {
     boost::filesystem::path walletFile()    { return path->string() + "/wallet/wallet.info"; };
     boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
 
-    bool createNewWallet(std::string password);
+    bool createNewWallet(std::string password); // Should be private and only called by loadWallet if no wallet is found on the desired path.
+    
 
   public:
     // Wallet load with passphrase, create new wallet if empty.
@@ -43,6 +44,9 @@ class Wallet {
     bool loadWallet(std::string password);
 
     bool isLoaded() { return this->keyManager.exists(); }
+
+    // Helper function that tells if a web3cpp wallet exists in a path.
+    static bool walletExists(boost::filesystem::path &wallet_path);
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
 

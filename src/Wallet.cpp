@@ -1,6 +1,5 @@
 #include <web3cpp/Wallet.h>
 
-
 bool Wallet::createNewWallet(std::string password) {
   // Create the paths if they don't exist yet
   if (!boost::filesystem::exists(walletFile().parent_path())) { boost::filesystem::create_directories(walletFile().parent_path()); }
@@ -29,8 +28,17 @@ bool Wallet::loadWallet(std::string password) {
     this->keyManager = std::move(tmpManager);
     this->passSalt = dev::h256::random();
     this->passHash = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
+    this->loadAccounts();
     return true;
   } else {
     return false;
   }
+}
+
+bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
+  // We basically check if the wallet file and it's keys folder exists,
+  if (boost::filesystem::exists(wallet_path.string() + "/wallet/wallet.info") && boost::filesystem::exists(wallet_path.string() + "/wallet/secrets")) {
+    return true;
+  }
+  return false;
 }

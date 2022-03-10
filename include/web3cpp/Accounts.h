@@ -17,8 +17,10 @@ class Account {
   const std::string address;
   const std::string derivationPath;
   const bool isLedger;
-  //
 
+
+  // Constructors
+  Account() {}
 };
 
 #endif  // ACCOUNTS_H
