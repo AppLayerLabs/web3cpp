@@ -8,6 +8,7 @@ Implementation of [Web3](https://web3js.readthedocs.io) in C++.
 
 * **CMake 3.19.0** or higher
 * **GCC** with support for **C++17** or higher
+* **Boost**, **libhidapi** and **OpenSSL**
 
 ### Known caveats
 
@@ -18,7 +19,7 @@ Implementation of [Web3](https://web3js.readthedocs.io) in C++.
 * Clone the project: `git clone https://github.com/avme/web3cpp`
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd web3cpp && mkdir build && cd build`
-* Run `cmake ..` then `make` inside the build folder
+* Run `cmake ..` then `cmake --build .` inside the build folder
   * Compiling defaults to a static build, use `-DBUILD_STATIC=OFF` to do a shared build
 
 ## Missing modules

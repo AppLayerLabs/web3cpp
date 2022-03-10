@@ -2,8 +2,6 @@
 cmake_minimum_required(VERSION 3.19.0)
 include(FetchContent)
 
-# ===========================
-# OLDLIB - REMOVE WHEN DONE
 include(cmake/cable/bootstrap.cmake)
 include(CableBuildInfo)
 include(CableBuildType)
@@ -21,7 +19,6 @@ HunterGate(
   SHA1 "6c9b2bc606d86ae31f96a62fc68f0a593024815b"
   LOCAL # Load config from `${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake`
 )
-# ===========================
 
 # Project data
 project(web3cpp VERSION 0.0.1 DESCRIPTION "Implementation of Web3.js in C++")
@@ -45,8 +42,6 @@ message("Fetching nlohmann/json...")
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-# ===========================
-# OLDLIB - REMOVE WHEN DONE
 cable_add_buildinfo_library(PROJECT_NAME web3cpp)
 set(DEPENDS_PREFIX "")
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
@@ -102,8 +97,6 @@ link_directories(
   "${CMAKE_SOURCE_DIR}/build/deps/lib"
 )
 
-# ===========================
-
 # Organize sources and headers
 file(GLOB WEB3CPP_HEADERS "include/web3cpp/*.h")
 file(GLOB WEB3CPP_SOURCES "src/*.cpp")
@@ -119,14 +112,18 @@ file(GLOB LEDGER_SOURCES "src/ledger/*.cpp")
 # Declare library target
 if(BUILD_STATIC)
   add_library(${PROJECT_NAME} STATIC
-    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES} ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
-    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES} ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
+    ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
+    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES}
+    ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
     ${LEDGER_HEADERS} ${LEDGER_SOURCES}
   )
 else()
   add_library(${PROJECT_NAME} SHARED
-    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES} ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
-    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES} ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
+    ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
+    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES}
+    ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
     ${LEDGER_HEADERS} ${LEDGER_SOURCES}
   )
 endif()
@@ -135,8 +132,10 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link project to dependencies and external libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost nlohmann_json::nlohmann_json ledger cryptopp-static libscrypt::scrypt Secp256k1 bip39 toolbox)
-# OLDLIB - REMOVE WHEN DONE
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  Boost nlohmann_json::nlohmann_json ledger cryptopp-static libscrypt::scrypt
+  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash
+)
 
 # Set required properties
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})

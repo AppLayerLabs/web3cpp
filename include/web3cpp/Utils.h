@@ -1,11 +1,15 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <algorithm>
+#include <sstream>
 #include <string>
 #include <mutex>
+#include <regex>
 
 #include <boost/filesystem.hpp>
 #include <boost/nowide/filesystem.hpp>
+#include <openssl/rand.h>
 
 #ifdef __MINGW32__
 #include <winsock2.h> // Windows.h asked for winsock2 to be included.
@@ -16,6 +20,8 @@
 #endif
 
 #include <nlohmann/json.hpp>
+#include <web3cpp/devcore/CommonIO.h>
+#include <web3cpp/devcore/SHA3.h>
 
 using json = nlohmann::json;
 
@@ -50,8 +56,8 @@ namespace Utils {
   /**
    * Handle the web3cpp history storage directory.
    * Default data dir paths are as follows:
-   *   Windows: C:\Users\Username\AppData\Roaming\web3cpp
-   *   Unix: ~/.web3cpp
+   * - Windows: C:\Users\Username\AppData\Roaming\web3cpp
+   * - Unix: ~/.web3cpp
    */
   #ifdef __MINGW32__
   boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
@@ -98,7 +104,10 @@ namespace Utils {
    */
   bool isAddress(std::string address);
 
-  // Converts an upper or lowercase address to a checksum address.
+  /**
+   * Converts an upper or lowercase address to a checksum address.
+   * Adapted from https://github.com/ethereum/EIPs/issues/55
+   */
   std::string toChecksumAddress(std::string address);
 
   /**
@@ -143,11 +152,11 @@ namespace Utils {
    * Returns the HEX representation of a given UTF-8 string.
    * stringToHex() is an alias of utf8ToHex().
    */
-  std::string utf8ToHex(std::string hex);
-  std::string stringToHex(std::string hex);
+  std::string utf8ToHex(std::string str);
+  std::string stringToHex(std::string str);
 
   // Returns the HEX representation of a given ASCII string.
-  std::string asciiToHex(std::string hex);
+  std::string asciiToHex(std::string str);
 
   // Returns a byte array from the given HEX string.
   //bytes[] hexToBytes(hex);
@@ -155,12 +164,13 @@ namespace Utils {
   // Returns a HEX string form a byte array.
   //std::string bytesToHex(byteArray);
 
-  // Converts any value to/from Wei, respectively.
-  std::string toWei(std::string number, std::string unit);
-  std::string fromWei(std::string number, std::string unit);
-
-  // Shows all possible values and their amounts in Wei.
-  json unitMap();
+  /**
+   * Converts any amount to/from Wei, respectively.
+   * decimals is the number of decimals said amount has (for toWei)
+   * and the number of decimals you want the amount to have (for fromWei).
+   */
+  std::string toWei(std::string amount, int decimals);
+  std::string fromWei(std::string amount, int decimals);
 
   /**
    * Adds a padding on the left or right of a string, respectively.
