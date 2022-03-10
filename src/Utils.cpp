@@ -253,3 +253,39 @@ std::string rightPad(std::string string, unsigned int characterAmount, std::stri
   return padRight(string, characterAmount, sign);
 }
 
+json Utils::readJSONFile(boost::filesystem::path &filePath) {
+  json returnData;
+  storageLock.lock();
+
+  if (!boost::filesystem::exists(filePath)) {
+    throw "Error reading json file: File does not exist";
+  }
+  try {
+    boost::nowide::ifstream jsonFile(filePath.string());
+    jsonFile >> returnData;
+    jsonFile.close();
+  } catch (std::exception &e) {
+    storageLock.unlock();
+    throw std::string("Error reading json file: ") + std::string(e.what());
+  }
+
+  storageLock.unlock();
+  return returnData.dump();
+}
+
+void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
+  json returnData;
+  storageLock.lock();
+
+  try {
+    boost::nowide::ofstream os(filePath.string());
+    os << std::setw(2) << obj << std::endl;
+    os.close();
+  } catch (std::exception &e) {
+    storageLock.unlock();
+    throw std::string("Error writing json file: ") + std::string(e.what());
+  }
+
+  storageLock.unlock();
+  return;
+}

@@ -9,6 +9,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/nowide/filesystem.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <openssl/rand.h>
 
 #ifdef __MINGW32__
@@ -41,6 +42,7 @@ using json = nlohmann::json;
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
 namespace Utils {
+  std::mutex storageLock;
   // Struct that contains information about a provider.
   struct Provider {
     std::string networkName;
@@ -185,6 +187,16 @@ namespace Utils {
   // Converts a negative number into a two's complement.
   // Returns the converted HEX string.
   //std::string toTwosComplement(number);
+
+  /**
+   * Read from/write to a JSON file, respectively.
+   * Read returns the stringified JSON with the file's contents on success,
+   * throws in case of failure.
+   * Write returns an empty string on success, throws in case of failute
+   */
+  json readJSONFile(boost::filesystem::path &filePath);
+  void writeJSONFile(json &obj, boost::filesystem::path &filePath);
+
 };
 
 #endif  // UTILS_H
