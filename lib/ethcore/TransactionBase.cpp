@@ -6,8 +6,6 @@
 #include <lib/devcrypto/Common.h>
 #include <lib/ethcore/Exceptions.h>
 #include "TransactionBase.h"
-#include "EVMSchedule.h"
-
 using namespace std;
 using namespace dev;
 using namespace dev::eth;
@@ -202,18 +200,6 @@ void TransactionBase::checkChainId(uint64_t _chainId) const
 {
     if (m_chainId.has_value() && *m_chainId != _chainId)
         BOOST_THROW_EXCEPTION(InvalidSignature());
-}
-
-int64_t TransactionBase::baseGasRequired(bool _contractCreation, bytesConstRef _data, EVMSchedule const& _es)
-{
-    int64_t g = _contractCreation ? _es.txCreateGas : _es.txGas;
-
-    // Calculate the cost of input data.
-    // No risk of overflow by using int64 as long as txDataNonZeroGas is quite small
-    // (the value not in billions).
-    for (auto i: _data)
-        g += i ? _es.txDataNonZeroGas : _es.txDataZeroGas;
-    return g;
 }
 
 h256 TransactionBase::sha3(IncludeSignature _sig) const

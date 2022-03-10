@@ -9,7 +9,6 @@
 #include <lib/devcore/CommonIO.h>
 #include <lib/devcore/SHA3.h>
 #include "Exceptions.h"
-#include "BlockHeader.h"
 
 using namespace std;
 using namespace dev;
@@ -102,30 +101,6 @@ std::string formatBalance(bigint const& _b)
 		}
 	ret << b << " wei";
 	return ret.str();
-}
-
-static void badBlockInfo(BlockHeader const& _bi, string const& _err)
-{
-	string const c_line = EthReset EthOnMaroon + string(80, ' ') + EthReset;
-	string const c_border = EthReset EthOnMaroon + string(2, ' ') + EthReset EthMaroonBold;
-	string const c_space = c_border + string(76, ' ') + c_border + EthReset;
-	stringstream ss;
-	ss << c_line << "\n";
-	ss << c_space << "\n";
-	ss << c_border + "  Import Failure     " + _err + string(max<int>(0, 53 - _err.size()), ' ') + "  " + c_border << "\n";
-	ss << c_space << "\n";
-	string bin = toString(_bi.number());
-	ss << c_border + ("                     Bad Block #" + string(max<int>(0, 8 - bin.size()), '0') + bin + "." + _bi.hash().abridged() + "                    ") + c_border << "\n";
-	ss << c_space << "\n";
-	ss << c_line;
-	// cwarn << "\n" + ss.str();
-}
-
-void badBlock(bytesConstRef _block, string const& _err)
-{
-	BlockHeader bi;
-	DEV_IGNORE_EXCEPTIONS(bi = BlockHeader(_block));
-	badBlockInfo(bi, _err);
 }
 
 string TransactionSkeleton::userReadable(bool _toProxy, function<pair<bool, string>(TransactionSkeleton const&)> const& _getNatSpec, function<string(Address const&)> const& _formatAddress) const

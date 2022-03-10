@@ -6,7 +6,6 @@
 #pragma once
 
 #include <lib/devcore/Exceptions.h>
-#include "Common.h"
 
 namespace dev
 {
@@ -23,7 +22,6 @@ using errinfo_target = boost::error_info<struct tag_target, h256>;
 using errinfo_seedHash = boost::error_info<struct tag_seedHash, h256>;
 using errinfo_mixHash = boost::error_info<struct tag_mixHash, h256>;
 using errinfo_ethashResult = boost::error_info<struct tag_ethashResult, std::tuple<h256, h256>>;
-using errinfo_importResult = boost::error_info<struct tag_importResult, ImportResult>;
 using BadFieldError = boost::tuple<errinfo_field, errinfo_data>;
 
 DEV_SIMPLE_EXCEPTION(OutOfGasBase);

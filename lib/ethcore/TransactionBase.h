@@ -16,8 +16,6 @@ namespace dev
 namespace eth
 {
 
-struct EVMSchedule;
-
 /// Named-boolean type to encode whether a signature be included in the serialisation process.
 enum IncludeSignature
 {
@@ -144,12 +142,6 @@ public:
     void sign(Secret const& _priv);			///< Sign the transaction.
 	
 	void signFromSigStruct(SignatureStruct const& sigStruct);
-
-    /// @returns amount of gas required for the basic payment.
-    int64_t baseGasRequired(EVMSchedule const& _es) const { return baseGasRequired(isCreation(), &m_data, _es); }
-
-    /// Get the fee associated for a transaction with the given data.
-    static int64_t baseGasRequired(bool _contractCreation, bytesConstRef _data, EVMSchedule const& _es);
 
 protected:
     /// Type of transaction.
