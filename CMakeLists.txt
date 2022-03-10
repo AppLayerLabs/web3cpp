@@ -102,25 +102,32 @@ link_directories(
   "${CMAKE_SOURCE_DIR}/build/deps/lib"
 )
 
-# Add local libs
-add_subdirectory(lib/devcore)
-add_subdirectory(lib/devcrypto)
-add_subdirectory(lib/ethcore)
-add_subdirectory(lib/ledger)
 # ===========================
 
 # Organize sources and headers
 file(GLOB WEB3CPP_HEADERS "include/web3cpp/*.h")
 file(GLOB WEB3CPP_SOURCES "src/*.cpp")
+file(GLOB DEVCORE_HEADERS "include/web3cpp/devcore/*.h")
+file(GLOB DEVCORE_SOURCES "src/devcore/*.cpp")
+file(GLOB DEVCRYPTO_HEADERS "include/web3cpp/devcrypto/*.h")
+file(GLOB DEVCRYPTO_SOURCES "src/devcrypto/*.cpp")
+file(GLOB ETHCORE_HEADERS "include/web3cpp/ethcore/*.h")
+file(GLOB ETHCORE_SOURCES "src/ethcore/*.cpp")
+file(GLOB LEDGER_HEADERS "include/web3cpp/ledger/*.h")
+file(GLOB LEDGER_SOURCES "src/ledger/*.cpp")
 
 # Declare library target
 if(BUILD_STATIC)
   add_library(${PROJECT_NAME} STATIC
-    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES} ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
+    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES} ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
+    ${LEDGER_HEADERS} ${LEDGER_SOURCES}
   )
 else()
   add_library(${PROJECT_NAME} SHARED
-    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}
+    ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES} ${DEVCORE_HEADERS} ${DEVCORE_SOURCES}
+    ${DEVCRYPTO_HEADERS} ${DEVCRYPTO_SOURCES} ${ETHCORE_HEADERS} ${ETHCORE_SOURCES}
+    ${LEDGER_HEADERS} ${LEDGER_SOURCES}
   )
 endif()
 
@@ -128,12 +135,8 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link project to dependencies and external libraries
-#target_link_libraries(${PROJECT_NAME} PRIVATE Boost nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost nlohmann_json::nlohmann_json ledger cryptopp-static libscrypt::scrypt Secp256k1 bip39 toolbox)
 # OLDLIB - REMOVE WHEN DONE
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  Boost nlohmann_json::nlohmann_json
-  devcore devcrypto ethcore ledger
-)
 
 # Set required properties
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
