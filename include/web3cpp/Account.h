@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
+#include <web3cpp/DB.h>
 #include <nlohmann/json.hpp>
+#include <boost/filesystem.hpp>
 
 using json = nlohmann::json;
 
@@ -17,6 +19,7 @@ class Account {
   std::string _address;
   std::string _derivationPath;
   bool _isLedger;
+  Database transactionDb;
 
   public:
   std::string address() { return _address; };
@@ -24,12 +27,14 @@ class Account {
   bool isLedger() { return _isLedger; };
 
   // Constructors
+  Account(boost::filesystem::path walletPath, std::string __address, std::string __derivationPath, bool __isLedger);
 
-  // New account from keyManager DB, require loading derivationPath from levelDB.
-  Account(std::string &__address);
-
-  // New generated account, or loaded directly from LedgerDB.
-  Account(std::string &__address, std::string &__derivationPath, bool &__isLedger);
+  Account (Account&& other) noexcept :
+      _address(std::move(other._address)),
+      _derivationPath(std::move(other._derivationPath)),
+      _isLedger(std::move(other._isLedger)),
+      transactionDb(std::move(other.transactionDb))
+      {}
 };
 
 #endif  // ACCOUNTS_H

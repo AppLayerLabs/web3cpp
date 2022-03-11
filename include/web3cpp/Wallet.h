@@ -10,8 +10,10 @@
 #include <nlohmann/json.hpp>
 #include <web3cpp/devcore/Common.h>
 #include <web3cpp/devcore/FixedHash.h>
+#include <web3cpp/devcore/Address.h>
 #include <web3cpp/ethcore/KeyManager.h>
 #include <web3cpp/Account.h>
+#include <web3cpp/DB.h>
 
 using json = nlohmann::json;
 
@@ -29,6 +31,8 @@ class Wallet {
     dev::h256 passSalt;
     int passIterations = 100000;
 
+    Database accountsDB;
+
     boost::filesystem::path* path;
     Utils::Provider* provider;
     dev::eth::KeyManager keyManager;
@@ -39,7 +43,8 @@ class Wallet {
     boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
 
     bool createNewWallet(std::string &password); // Should be private and only called by loadWallet if no wallet is found on the desired path.
-    
+
+    void loadAccounts();
 
   public:
     // Wallet load with passphrase, create new wallet if empty.
@@ -51,7 +56,7 @@ class Wallet {
     // Helper function that tells if a web3cpp wallet exists in a path.
     static bool walletExists(boost::filesystem::path &wallet_path);
     // Constructor.
-    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer) {};
+    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer) : provider(providerPointer), path(pathPointer), accountsDB("/wallet/accounts", boost::filesystem::path(path->string() + "/accounts/")) {};
 
     // Creates a new account.
     std::future<std::string> newAccount(std::string password);

@@ -19,7 +19,7 @@ class Database {
     leveldb::Options dbOpts;
     leveldb::Status dbStatus;
     std::string tmpValue;
-    std::mutex dbMutex;
+    std::mutex mutable dbMutex;
   public:
 
   bool cleanCloseDB() { return closeDB(); };
@@ -33,10 +33,19 @@ class Database {
   std::map<std::string, std::string> getAllPairs();
   void dropDatabase();
 
-  Database(std::string &_databaseName, boost::filesystem::path &rootPath) : databaseName(_databaseName), databasePath(rootPath.string() + databaseName) {
+  Database(std::string _databaseName, boost::filesystem::path rootPath) : databaseName(_databaseName), databasePath(rootPath.string() + databaseName) {
     this->dbOpts.create_if_missing = true;
     openDB();
   }
+
+  Database(Database&& other) noexcept :
+      databaseName(std::move(other.databaseName)),
+      databasePath(std::move(other.databasePath)),
+      db(std::move(other.db)),
+      dbOpts(std::move(other.dbOpts)),
+      dbStatus(std::move(other.dbStatus)),
+      tmpValue(std::move(other.tmpValue))
+      {}
 };
 
 #endif  // DATABASE_H
