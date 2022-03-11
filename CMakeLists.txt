@@ -81,6 +81,8 @@ include(ProjectEthash)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
+include(ProjectSnappy)
+include(ProjectLevelDB)
 find_package(Threads)
 
 # Include headers and libs
@@ -134,7 +136,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
   Boost nlohmann_json::nlohmann_json ledger cryptopp-static libscrypt::scrypt
-  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash
+  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )
 
 # Set required properties

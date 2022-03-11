@@ -11,6 +11,7 @@
 #include <web3cpp/devcore/Common.h>
 #include <web3cpp/devcore/FixedHash.h>
 #include <web3cpp/ethcore/KeyManager.h>
+#include <web3cpp/Account.h>
 
 using json = nlohmann::json;
 
@@ -32,16 +33,18 @@ class Wallet {
     Utils::Provider* provider;
     dev::eth::KeyManager keyManager;
 
+    std::vector<Account> accounts;
+
     boost::filesystem::path walletFile()    { return path->string() + "/wallet/wallet.info"; };
     boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
 
-    bool createNewWallet(std::string password); // Should be private and only called by loadWallet if no wallet is found on the desired path.
+    bool createNewWallet(std::string &password); // Should be private and only called by loadWallet if no wallet is found on the desired path.
     
 
   public:
     // Wallet load with passphrase, create new wallet if empty.
     // Return false if incorrect password
-    bool loadWallet(std::string password);
+    bool loadWallet(std::string &password);
 
     bool isLoaded() { return this->keyManager.exists(); }
 
