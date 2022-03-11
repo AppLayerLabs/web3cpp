@@ -28,7 +28,7 @@ class Account {
   // New account from keyManager DB, require loading derivationPath from levelDB.
   Account(std::string &__address);
 
-  // New generated account, or loaded directly from ledger DB, contains all information.
+  // New generated account, or loaded directly from LedgerDB.
   Account(std::string &__address, std::string &__derivationPath, bool &__isLedger);
 };
 

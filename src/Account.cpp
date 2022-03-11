@@ -9,4 +9,8 @@ Account::Account (std::string &__address) : _address(__address) {
 }
 
 
-Account::Account (std::string &__address, std::string &__derivationPath, bool &__isLedger) : _address(__address), _derivationPath(__derivationPath), _isLedger(__isLedger) {}
+Account::Account (std::string &__address, std::string &__derivationPath, bool &__isLedger) : _address(__address), _derivationPath(__derivationPath), _isLedger(__isLedger) {
+
+
+  
+}
