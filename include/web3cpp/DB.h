@@ -1,3 +1,6 @@
+#ifndef DATABASE_H
+#define DATABASE_H
+
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -35,3 +38,5 @@ class Database {
     openDB();
   }
 };
+
+#endif  // DATABASE_H
