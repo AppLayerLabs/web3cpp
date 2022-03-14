@@ -39,6 +39,18 @@ std::string Utils::randomHex(unsigned int size) {
   ).substr(0,16);
 }
 
+BigNumber Utils::toBN(std::string number) {
+  BigNumber ret;
+  std::stringstream ss;
+  if (isHex(number)) {
+    ss << std::hex << number;
+  } else {
+    ss << number;
+  }
+  ss >> ret;
+  return ret;
+}
+
 std::string Utils::sha3(std::string string) {
   return (!string.empty()) ? dev::sha3(string, false) : "";
 }
@@ -106,8 +118,33 @@ bool Utils::checkAddressChecksum(std::string address) {
   return true;
 }
 
+std::string Utils::toHex(std::string value) {
+  std::stringstream ss;
+  if (std::all_of(value.begin(), value.end(), ::isdigit)) { // Number string
+    ss << std::hex << value;
+  } else {  // Text string
+    for (int i = 0; i < value.length(); i++) {
+      ss << std::hex << (int)value[i];
+    }
+  }
+  return ss.str();
+}
+
+std::string Utils::toHex(BigNumber value) {
+  std::stringstream ss;
+  ss << std::hex << value;
+  return ss.str();
+}
+
 std::string Utils::stripHexPrefix(std::string str) {
   return (!str.empty() && isHex(str) && str.substr(0, 2) == "0x") ? str.substr(2) : str;
+}
+
+std::string Utils::hexToNumberString(std::string hex) {
+  BigNumber bn = toBN(hex);
+  std::stringstream ss;
+  ss << bn;
+  return ss.str();
 }
 
 std::string Utils::hexToUtf8(std::string hex) {

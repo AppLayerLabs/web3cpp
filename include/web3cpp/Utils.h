@@ -25,6 +25,7 @@
 #include <web3cpp/devcore/SHA3.h>
 
 using json = nlohmann::json;
+using BigNumber = dev::u256;
 
 // Module that provides utility functions.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
@@ -32,13 +33,6 @@ using json = nlohmann::json;
 // TODO:
 // - Check if we need to implement bloom filters
 //   - https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html#bloom-filters
-// - Check if we need to implement big number functions
-//   - BN(), isBN(), isBigNumber(), toBN()
-//   - Will depend on how we deal with big numbers - probably Boost will be used
-// - Check if raw hex can be used as input for some functions
-//   - isHex(), isHexStrict(), hexToNumberString(), hexToNumber(), hexToBytes()
-//   - e.g. isHex(0x1234...)
-// - Find a way to deal with mixed params (String|Number|BN|BigNumber|etc.)
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
 namespace Utils {
@@ -74,6 +68,9 @@ namespace Utils {
    * which is a 64-char string prefixed with "0x".
    */
   std::string randomHex(unsigned int size);
+
+  // Convert a number string to BigNumber. Works with DEC and HEX numbers.
+  BigNumber toBN(std::string number);
 
   /**
    * Calculates the sha3 of the input.
@@ -125,22 +122,14 @@ namespace Utils {
    * Number strings will be interpreted as numbers.
    * Text strings will be interpreted as UTF-8 strings.
    */
-  //std::string toHex(mixed);
+  std::string toHex(std::string value);
+  std::string toHex(BigNumber value);
 
   // Returns the provided string without the "0x" prefix.
   std::string stripHexPrefix(std::string str);
 
   // Returns the number representation of a given HEX value as a string.
   std::string hexToNumberString(std::string hex);
-
-  /**
-   * Returns the number representation of a given HEX value.
-   * Not useful for big numbers.
-   */
-  int hexToNumber(std::string hex);
-
-  // Returns the HEX representation of a given number value.
-  //std::string numberToHex(number);
 
   /**
    * Returns the UTF-8 string representation of a given HEX value.

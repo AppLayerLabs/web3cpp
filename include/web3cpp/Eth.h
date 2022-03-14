@@ -7,6 +7,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <web3cpp/Utils.h>
+
 using json = nlohmann::json;
 
 // Module that interacts with the blockchain and smart contracts.
@@ -109,7 +111,22 @@ class Eth {
     // optional to support.
     // For pre-EIP-1559 blocks, the gas prices are returned as rewards and
     // zeroes are returned for the base fee per gas.
-    //std::future<json> getFeeHistory(blockCount, newestBlock, rewardPercentiles);
+    std::future<json> getFeeHistory(
+      std::string blockCount, std::string newestBlock,
+      std::vector<std::string> rewardPercentiles
+    );
+    std::future<json> getFeeHistory(
+      BigNumber blockCount, std::string newestBlock,
+      std::vector<std::string> rewardPercentiles
+    );
+    std::future<json> getFeeHistory(
+      std::string blockCount, BigNumber newestBlock,
+      std::vector<std::string> rewardPercentiles
+    );
+    std::future<json> getFeeHistory(
+      BigNumber blockCount, BigNumber newestBlock,
+      std::vector<std::string> rewardPercentiles
+    );
 
     // Returns a list of accounts the node controls.
     std::future<std::vector<std::string>> getAccounts();
@@ -118,31 +135,63 @@ class Eth {
     std::future<unsigned int> getBlockNumber();
 
     // Returns the balance in Wei of an address at a given block.
-    //std::future<std::string> getBalance(std::string address, defaultBlock);
+    // TODO: default to this.defaultBlock
+    std::future<std::string> getBalance(std::string address, std::string defaultBlock = "");
+    std::future<std::string> getBalance(std::string address, BigNumber defaultBlock = -1);
 
     // Returns the value in storage at a specific position of an address.
-    //std::future<std::string> getStorageAt(std::string address, position, defaultBlock);
+    // TODO: default to this.defaultBlock
+    std::future<std::string> getStorageAt(
+      std::string address, std::string position, std::string defaultBlock = ""
+    );
+    std::future<std::string> getStorageAt(
+      std::string address, BigNumber position, std::string defaultBlock = ""
+    );
+    std::future<std::string> getStorageAt(
+      std::string address, std::string position, BigNumber defaultBlock = -1
+    );
+    std::future<std::string> getStorageAt(
+      std::string address, BigNumber position, BigNumber defaultBlock = -1
+    );
 
     // Returns the code at a specific address.
-    //std::future<std::string> getCode(std::string address, defaultBlock);
+    // TODO: default to this.defaultBlock
+    std::future<std::string> getCode(std::string address, std::string defaultBlock = "");
+    std::future<std::string> getCode(std::string address, BigNumber defaultBlock = -1);
 
     // Returns a block matching the given block number or hash.
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
-    //std::future<json> getBlock(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    // TODO: default blockHash to this.defaultBlock
+    std::future<json> getBlock(
+      std::string blockHashOrBlockNumber = "", bool returnTransactionObjects = false
+    );
+    std::future<json> getBlock(
+      BigNumber blockHashOrBlockNumber = -1, bool returnTransactionObjects = false
+    );
 
     // Returns the number of transactions in a given block.
-    //std::future<unsigned int> getBlockTransactionCount(blockHashOrBlockNumber);
+    // TODO: default blockHash to this.defaultBlock
+    std::future<unsigned int> getBlockTransactionCount(std::string blockHashOrBlockNumber = "");
+    std::future<unsigned int> getBlockTransactionCount(BigNumber blockHashOrBlockNumber = -1);
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
-    //std::future<unsigned int> getBlockUncleCount(blockHashOrBlockNumber);
+    // TODO: default blockHash to this.defaultBlock
+    std::future<unsigned int> getBlockUncleCount(std::string blockHashOrBlockNumber = "");
+    std::future<unsigned int> getBlockUncleCount(BigNumber blockHashOrBlockNumber = -1);
 
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
-    //std::future<json> getUncle(blockHashOrBlockNumber, bool returnTransactionObjects = false);
+    // TODO: default blockHash to this.defaultBlock
+    std::future<json> getUncle(
+      std::string blockHashOrBlockNumber = "", bool returnTransactionObjects = false
+    );
+    std::future<json> getUncle(
+      BigNumber blockHashOrBlockNumber = -1, bool returnTransactionObjects = false
+    );
 
     // Returns a transaction matching the given hash.
     std::future<json> getTransaction(std::string transactionHash);
@@ -154,14 +203,22 @@ class Eth {
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
     // Return structure is the same as getTransaction().
-    //std::future<json> getTransactionFromBlock(hashStringOrNumber, unsigned int indexNumber);
+    // TODO: default hashString to this.defaultBlock
+    std::future<json> getTransactionFromBlock(
+      std::string hashStringOrNumber = "", unsigned int indexNumber
+    );
+    std::future<json> getTransactionFromBlock(
+      BigNumber hashStringOrNumber = -1, unsigned int indexNumber
+    );
 
     // Returns the receipt of a transaction by transaction hash,
     // or NULL on pending/non-existant transactions.
     std::future<json> getTransactionReceipt(std::string hash);
 
     // Returns the number of transactions sent from the given address.
-    //std::future<unsigned int> getTransactionCount(std::string address, defaultBlock);
+    // TODO: default to this.defaultBlock
+    std::future<unsigned int> getTransactionCount(std::string address, std::string defaultBlock = "");
+    std::future<unsigned int> getTransactionCount(std::string address, BigNumber defaultBlock = -1);
 
     // Signs data using a specific account, which needs to be unlocked.
     // dataToSign will be converted using Utils.utf8ToHex().
@@ -177,7 +234,9 @@ class Eth {
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    //std::future<std::string> call(json callObject, defaultBlock);
+    // TODO: default to this.defaultBlock
+    std::future<std::string> call(json callObject, std::string defaultBlock = "");
+    std::future<std::string> call(json callObject, BigNumber defaultBlock = -1);
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.
@@ -217,9 +276,20 @@ class Eth {
     // Returns the account and storage values of the specified account,
     // including the Merkle-proof as described here:
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1186.md
-    //std::future<json> getProof(std::string address, storageKey, blockNumber);
+    std::future<json> getProof(
+      std::string address, std::vector<std::string> storageKey, std::string blockNumber
+    );
+    std::future<json> getProof(
+      std::string address, std::vector<BigNumber> storageKey, std::string blockNumber
+    );
+    std::future<json> getProof(
+      std::string address, std::vector<std::string> storageKey, BigNumber blockNumber
+    );
+    std::future<json> getProof(
+      std::string address, std::vector<BigNumber> storageKey, BigNumber blockNumber
+    );
 
-    // Calls to create an access list that amethod execution will access
+    // Calls to create an access list that a method execution will access
     // when executed in the VM.
     // The `from` address and `gas` MUST be specified if not already specified
     // in `options` when instantiating a parent contract object.

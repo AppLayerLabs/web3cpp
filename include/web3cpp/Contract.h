@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <web3cpp/Utils.h>
+
 // Module that abstracts a smart contract.
 
 // TODO:
@@ -14,18 +16,20 @@
 // - Implement events (once, events, events.allEvents, getPastEvents)
 // - Check if Method implementation should be this way
 // - Decide how to deal with callbacks and promievents for some functions
-// - estimateGas can handle just an unsigned int? Probably it'll need a big number
 // - Maybe force json::array in Method::arguments and Contract::options?
+// - Default to Eth.defaultBlock on both call() functions
 
 class Contract {
   public:
     class Method {
       //json arguments;  // Probably a JSON array?
-      //std::future<mixed> call(json options, defaultBlock); // from, gasPrice, gas
+      //std::future<mixed> call(json options, std::string defaultBlock = ""); // from, gasPrice, gas
+      //std::future<mixed> call(json options, BigNumber defaultBlock = -1); // from, gasPrice, gas
       //promievent send(json options); // from, gasPrice, gas, value, nonce
-      std::future<unsigned int> estimateGas(json options); // from, gas, value
+      std::future<BigNumber> estimateGas(json options); // from, gas, value
       std::string encodeABI();
-      //std::future<json> createAccessList(json options, block); // from, gas
+      std::future<json> createAccessList(json options, std::string block); // from, gas
+      std::future<json> createAccessList(json options, BigNumber block); // from, gas
     };
 
     // Constructor.

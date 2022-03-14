@@ -2,6 +2,8 @@
 
 Implementation of [Web3](https://web3js.readthedocs.io) in C++.
 
+**NOTE: this is NOT a 100% parity-complete conversion of the web3.js library. Due to the differences in structure between JS and C++, some functions or properties may not exist at all, or may be re-coded with different names.**
+
 ## Compiling
 
 ### Dependencies
@@ -19,7 +21,7 @@ Implementation of [Web3](https://web3js.readthedocs.io) in C++.
 * Clone the project: `git clone https://github.com/avme/web3cpp`
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd web3cpp && mkdir build && cd build`
-* Run `cmake ..` then `cmake --build .` inside the build folder
+* Run `cmake ..` then `cmake --build . -- -j$(nproc)` inside the build folder
   * Compiling defaults to a static build, use `-DBUILD_STATIC=OFF` to do a shared build
 
 ## Missing modules

@@ -41,7 +41,7 @@ class Wallet {
     Database accountsDB;
     std::vector<Account> accounts;
 
-    // Paths for wahhet file and secrets folder.
+    // Paths for wallet file and secrets folder.
     boost::filesystem::path walletFile()    { return path->string() + "/wallet/wallet.info"; };
     boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
 

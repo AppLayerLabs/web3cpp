@@ -64,7 +64,7 @@ class Web3 {
 
     // Extends the modules.
     // Returns the extended module.
-    //object extend(jsonObj methods);
+    //object extend(json methods);
 };
 
 #endif  // WEB3_H
