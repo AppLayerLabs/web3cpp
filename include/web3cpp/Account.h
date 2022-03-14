@@ -11,30 +11,38 @@
 
 using json = nlohmann::json;
 
-// Module that contains information about a given account, imported by the Wallet class which controls all instances of Accounts.
-// Also contains information about transactions of that specific account.
+/**
+ * Module that contains information about a given account,
+ * imported by the Wallet class which controls all instances of Accounts.
+ * Also contains information about transactions of that specific account.
+ */
 
 class Account {
   private:
-  std::string _address;
-  std::string _derivationPath;
-  bool _isLedger;
-  Database transactionDb;
+    std::string _address;
+    std::string _derivationPath;
+    bool _isLedger;
+    Database transactionDb;
 
   public:
-  std::string address() { return _address; };
-  std::string derivationPath() { return _derivationPath; };
-  bool isLedger() { return _isLedger; };
+    // Constructor.
+    Account(
+      boost::filesystem::path walletPath, std::string __address,
+      std::string __derivationPath, bool __isLedger
+    );
 
-  // Constructors
-  Account(boost::filesystem::path walletPath, std::string __address, std::string __derivationPath, bool __isLedger);
-
-  Account (Account&& other) noexcept :
+    // Copy constructor.
+    Account (Account&& other) noexcept :
       _address(std::move(other._address)),
       _derivationPath(std::move(other._derivationPath)),
       _isLedger(std::move(other._isLedger)),
       transactionDb(std::move(other.transactionDb))
-      {}
+    {}
+
+    // Getters.
+    std::string address() { return _address; };
+    std::string derivationPath() { return _derivationPath; };
+    bool isLedger() { return _isLedger; };
 };
 
 #endif  // ACCOUNTS_H

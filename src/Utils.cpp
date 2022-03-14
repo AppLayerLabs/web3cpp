@@ -40,15 +40,15 @@ std::string Utils::randomHex(unsigned int size) {
 }
 
 std::string Utils::sha3(std::string string) {
-  return "";
+  return (!string.empty()) ? dev::sha3(string, false) : "";
 }
 
 std::string Utils::keccak256(std::string string) {
-  return "";
+  return Utils::sha3(string);
 }
 
 std::string Utils::sha3Raw(std::string string) {
-  return "";
+  return dev::sha3(string, false);
 }
 
 bool Utils::isHex(std::string hex) {
@@ -112,7 +112,7 @@ std::string Utils::stripHexPrefix(std::string str) {
 
 std::string Utils::hexToUtf8(std::string hex) {
   if (!isHexStrict(hex)) {
-    return "";  // TODO: throw an error here
+    throw std::string("Error converting non-hex value to UTF-8: ") + hex;
   }
   hex = hex.substr(2);  // Remove "0x"
 
@@ -258,7 +258,7 @@ json Utils::readJSONFile(boost::filesystem::path &filePath) {
   storageLock.lock();
 
   if (!boost::filesystem::exists(filePath)) {
-    throw "Error reading json file: File does not exist";
+    throw std::string("Error reading json file: File does not exist");
   }
   try {
     boost::nowide::ifstream jsonFile(filePath.string());
@@ -289,3 +289,4 @@ void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
   storageLock.unlock();
   return;
 }
+

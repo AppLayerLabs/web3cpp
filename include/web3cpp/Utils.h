@@ -42,7 +42,6 @@ using json = nlohmann::json;
 // - Decide how to deal with units in toWei(), fromWei() and unitMap()
 
 namespace Utils {
-  std::mutex storageLock;
   // Struct that contains information about a provider.
   struct Provider {
     std::string networkName;
@@ -54,6 +53,9 @@ namespace Utils {
     std::string blockExplorerUrl;
     std::mutex m_lock;
   };
+
+  // Mutex for reading JSON files.
+  std::mutex storageLock;
 
   /**
    * Handle the web3cpp history storage directory.
@@ -77,7 +79,7 @@ namespace Utils {
    * Calculates the sha3 of the input.
    * To mimic the sha3 behaviour of Solidity use soliditySha3().
    * keccak256() is an alias of sha3().
-   * sha3Raw() returns the has value instead of NULL if an empty string
+   * sha3Raw() returns the hash value instead of empty if an empty string
    * is passed, for example.
    */
   std::string sha3(std::string string);
@@ -184,19 +186,20 @@ namespace Utils {
   std::string padRight(std::string string, unsigned int characterAmount, std::string sign = "0");
   std::string rightPad(std::string string, unsigned int characterAmount, std::string sign = "0");
 
-  // Converts a negative number into a two's complement.
-  // Returns the converted HEX string.
+  /**
+   * Converts a negative number into a two's complement.
+   * Returns the converted HEX string.
+   */
   //std::string toTwosComplement(number);
 
   /**
    * Read from/write to a JSON file, respectively.
-   * Read returns the stringified JSON with the file's contents on success,
-   * throws in case of failure.
-   * Write returns an empty string on success, throws in case of failute
+   * On success, read returns the stringified JSON with the file's contents,
+   * and write returns an empty string.
+   * On failure, both functions throw an error.
    */
   json readJSONFile(boost::filesystem::path &filePath);
   void writeJSONFile(json &obj, boost::filesystem::path &filePath);
-
 };
 
 #endif  // UTILS_H

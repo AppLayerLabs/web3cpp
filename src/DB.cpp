@@ -1,13 +1,11 @@
 #include <web3cpp/DB.h>
 
-
 bool Database::openDB() {
   this->dbMutex.lock();
-  if (!boost::filesystem::exists(databasePath));
+  if (!boost::filesystem::exists(databasePath)); {
     boost::filesystem::create_directories(databasePath);
-
+  }
   this->dbStatus = leveldb::DB::Open(this->dbOpts, databasePath.string(), &db);
-
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
     throw std::string("Error opening ") + databaseName + "database! " + this->dbStatus.ToString();
@@ -28,7 +26,11 @@ bool Database::keyExists(std::string &key) {
   this->dbMutex.lock();
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) { delete it; this->dbMutex.unlock(); return true; }
+    if (it->key().ToString() == key) {
+      delete it;
+      this->dbMutex.unlock();
+      return true;
+    }
   }
   delete it;
   this->dbMutex.unlock();
@@ -40,7 +42,8 @@ std::string Database::getKeyValue(std::string &key) {
   this->dbStatus = this->db->Get(leveldb::ReadOptions(), key, &this->tmpValue);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error reading at ") + databaseName + " database at key " + key + this->dbStatus.ToString();
+    throw std::string("Error reading at ") + databaseName + " database at key "
+      + key + this->dbStatus.ToString();
   }
   this->dbMutex.unlock();
   return this->tmpValue;
@@ -51,7 +54,8 @@ bool Database::putKeyValue(std::string &key, std::string &value) {
   this->dbStatus = this->db->Put(leveldb::WriteOptions(), key, value);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error writing at ") + databaseName + " database at key " + key + this->dbStatus.ToString();
+    throw std::string("Error writing at ") + databaseName + " database at key "
+      + key + this->dbStatus.ToString();
   }
   this->dbMutex.unlock();
   return this->dbStatus.ok();
@@ -62,7 +66,8 @@ bool Database::deleteKeyValue(std::string &key) {
   this->dbStatus = this->db->Delete(leveldb::WriteOptions(), key);
   if(!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error deleting at ") + databaseName + " database at key " + key + this->dbStatus.ToString();
+    throw std::string("Error deleting at ") + databaseName + " database at key "
+      + key + this->dbStatus.ToString();
   }
   this->dbMutex.unlock();
   return this->dbStatus.ok();
@@ -113,3 +118,4 @@ void Database::dropDatabase() {
   this->dbMutex.unlock();
   delete it;
 }
+

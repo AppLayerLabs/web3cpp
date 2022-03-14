@@ -2,8 +2,12 @@
 
 bool Wallet::createNewWallet(std::string &password) {
   // Create the paths if they don't exist yet
-  if (!boost::filesystem::exists(walletFile().parent_path())) { boost::filesystem::create_directories(walletFile().parent_path()); }
-  if (!boost::filesystem::exists(secretsFolder())) { boost::filesystem::create_directories(secretsFolder()); }
+  if (!boost::filesystem::exists(walletFile().parent_path())) {
+    boost::filesystem::create_directories(walletFile().parent_path());
+  }
+  if (!boost::filesystem::exists(secretsFolder())) {
+    boost::filesystem::create_directories(secretsFolder());
+  }
 
   // Initialize a new Wallet
   dev::eth::KeyManager w(walletFile(), secretsFolder());
@@ -16,12 +20,8 @@ bool Wallet::createNewWallet(std::string &password) {
 }
 
 bool Wallet::loadWallet(std::string &password) {
-  // Wallet does not exist, create a new one.
-  if (!boost::filesystem::exists(walletFile()))
-    createNewWallet(password);
-
+  if (!boost::filesystem::exists(walletFile())) { createNewWallet(password); }
   dev::eth::KeyManager tmpManager(walletFile(), secretsFolder());
-  
   if (tmpManager.load(password)) {
     this->keyManager = std::move(tmpManager);
     this->passSalt = dev::h256::random();
@@ -34,31 +34,29 @@ bool Wallet::loadWallet(std::string &password) {
 }
 
 bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
-  // We basically check if the wallet file and it's keys folder exists,
-  if (boost::filesystem::exists(wallet_path.string() + "/wallet/wallet.info") && boost::filesystem::exists(wallet_path.string() + "/wallet/secrets")) {
-    return true;
-  }
-  return false;
+  return (
+    boost::filesystem::exists(wallet_path.string() + "/wallet/wallet.info") &&
+    boost::filesystem::exists(wallet_path.string() + "/wallet/secrets")
+  );
 }
 
 void Wallet::loadAccounts() {
-  
   auto allAccountsFromDB = accountsDB.getAllPairs();
   for (auto accountInfoStr : allAccountsFromDB) {
     json accountJson = json::parse(accountInfoStr.second);
-
-    std::string tmpAddress = accountJson["address"].get<std::string>();    
-    std::string tmpDerivationPath = accountJson["derivationPath"].get<std::string>();    
+    std::string tmpAddress = accountJson["address"].get<std::string>();
+    std::string tmpDerivationPath = accountJson["derivationPath"].get<std::string>();
     bool tmpIsLedger = accountJson["isLedger"].get<bool>();
-
-    Account newTmpAccount(boost::filesystem::path(path->string() + "/wallet"), 
-                          accountJson["address"].get<std::string>(),
-                          accountJson["derivationPath"].get<std::string>(),
-                          accountJson["isLedger"].get<bool>());
+    Account newTmpAccount(
+      boost::filesystem::path(path->string() + "/wallet"),
+      accountJson["address"].get<std::string>(),
+      accountJson["derivationPath"].get<std::string>(),
+      accountJson["isLedger"].get<bool>()
+    );
     accounts.emplace_back(std::move(newTmpAccount));
   }
 
-  // Account sanity check! Check if all accounts found on the DB matches with accounts inside the KeyManager.
+  // Sanity check if all accounts found on DB match with accounts inside KeyManager.
   if (this->keyManager.store().keys().empty()) { return; }
   dev::AddressHash got;
   std::vector<dev::h128> keys = this->keyManager.store().keys();
@@ -80,8 +78,11 @@ void Wallet::loadAccounts() {
         }
       }
       if (!found) {
-        throw "Error loading accounts! Mismatch accounts from keyManager and local database";
+        throw std::string(
+          "Error loading accounts! Mismatch accounts from keyManager and local database"
+        );
       }
     }
   }
 }
+
