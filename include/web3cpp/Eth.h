@@ -18,35 +18,26 @@ using json = nlohmann::json;
 // - Implement the other module properties here when they're ready
 //   - Personal, Accounts, ABI, Net, Contract, Subscribe (this one is missing)
 // - Inherit the main Web3 class to access the common provider functions
-// - Implement defaultHardfork and defaultChain names for Avalanche
-// - Replace default Ethereum values for Avalanche ones(?)
 // - Decide how to deal with callbacks as parameters for (almost) all functions
-// - Decide how to deal with mixed params (Number|BigNumber|String|etc.)
-// - Check if some ints can/have to be unsigned/bignumbers/etc.
 // - Decide how to deal with "PromiEvents" to implement those functions:
 //   - sendTransaction(), sendSignedTransaction()
-// - Should defaultAccount be NULL or empty? ("undefined" does not exist in C++)
-// - Decide how to deal with big numbers for some functions and properties
-//   - defaultBlock: Number|BigNumber|string ("earliest", "latest", "pending")
-//   - getHashrate(): is just an unsigned int enough?
-// - Decide if isSyncing() should always return a JSON object (even on false)
-// - Decide if getTransactionReceipt() should always return a JSON object (even on NULL)
+// - Implement a way to get the latest block from the network (for setting defaultBlock)
 
 class Eth {
   public:
     // Default address used as the default "from" property, if no "from"
     // property is specified in functions like sendTransaction() or call().
-    std::string defaultAccount = NULL;
+    std::string defaultAccount;
 
     // Default block used for certain methods.
     // Can be overriden in some functions' last parameters.
-    //mixed defaultBlock = "latest";
+    BigNumber defaultBlock;
 
     // Default hardfork used for signing transactions locally.
-    std::string defaultHardfork;
+    std::string defaultHardfork = "fuji";
 
     // Default chain used for signing transactions locally.
-    std::string defaultChain;
+    std::string defaultChain = "mainnet";
 
     // Default common property for signing transactions locally.
     // "Common" is a JSON object.
@@ -88,9 +79,9 @@ class Eth {
     // Returns the protocol version of the node.
     std::future<std::string> getProtocolVersion();
 
-    // Checks if the node is currently syncing and returns either a
-    // JSON syncing object, or false.
-    //std::future<json|bool> isSyncing();
+    // Checks if the node is currently syncing and returns a JSON syncing object.
+    // If not syncing, returns an empty JSON object.
+    std::future<json> isSyncing();
 
     // Returns the Coinbase address to which mining rewards will go.
     std::future<std::string> getCoinbase();
@@ -99,7 +90,7 @@ class Eth {
     std::future<bool> isMining();
 
     // Returns the number of hashes per second that the node is mining with.
-    std::future<unsigned int> getHashrate();
+    std::future<BigNumber> getHashrate();
 
     // Returns the current gas price oracle in Wei (median gas price of the last few blocks).
     std::future<std::string> getGasPrice();
@@ -135,62 +126,47 @@ class Eth {
     std::future<unsigned int> getBlockNumber();
 
     // Returns the balance in Wei of an address at a given block.
-    // TODO: default to this.defaultBlock
-    std::future<std::string> getBalance(std::string address, std::string defaultBlock = "");
-    std::future<std::string> getBalance(std::string address, BigNumber defaultBlock = -1);
+    std::future<std::string> getBalance(
+      std::string address, BigNumber defaultBlock = this.defaultBlock
+    );
 
     // Returns the value in storage at a specific position of an address.
-    // TODO: default to this.defaultBlock
     std::future<std::string> getStorageAt(
-      std::string address, std::string position, std::string defaultBlock = ""
+      std::string address, std::string position, BigNumber defaultBlock = this.defaultBlock
     );
     std::future<std::string> getStorageAt(
-      std::string address, BigNumber position, std::string defaultBlock = ""
-    );
-    std::future<std::string> getStorageAt(
-      std::string address, std::string position, BigNumber defaultBlock = -1
-    );
-    std::future<std::string> getStorageAt(
-      std::string address, BigNumber position, BigNumber defaultBlock = -1
+      std::string address, BigNumber position, BigNumber defaultBlock = this.defaultBlock
     );
 
     // Returns the code at a specific address.
-    // TODO: default to this.defaultBlock
-    std::future<std::string> getCode(std::string address, std::string defaultBlock = "");
-    std::future<std::string> getCode(std::string address, BigNumber defaultBlock = -1);
+    std::future<std::string> getCode(
+      std::string address, BigNumber defaultBlock = this.defaultBlock
+    );
 
     // Returns a block matching the given block number or hash.
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
-    // TODO: default blockHash to this.defaultBlock
     std::future<json> getBlock(
-      std::string blockHashOrBlockNumber = "", bool returnTransactionObjects = false
-    );
-    std::future<json> getBlock(
-      BigNumber blockHashOrBlockNumber = -1, bool returnTransactionObjects = false
+      BigNumber blockHashOrBlockNumber = this.defaultBlock, bool returnTransactionObjects = false
     );
 
     // Returns the number of transactions in a given block.
-    // TODO: default blockHash to this.defaultBlock
-    std::future<unsigned int> getBlockTransactionCount(std::string blockHashOrBlockNumber = "");
-    std::future<unsigned int> getBlockTransactionCount(BigNumber blockHashOrBlockNumber = -1);
+    std::future<unsigned int> getBlockTransactionCount(
+      BigNumber blockHashOrBlockNumber = this.defaultBlock
+    );
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
-    // TODO: default blockHash to this.defaultBlock
-    std::future<unsigned int> getBlockUncleCount(std::string blockHashOrBlockNumber = "");
-    std::future<unsigned int> getBlockUncleCount(BigNumber blockHashOrBlockNumber = -1);
+    std::future<unsigned int> getBlockUncleCount(
+      BigNumber blockHashOrBlockNumber = this.defaultBlock
+    );
 
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
-    // TODO: default blockHash to this.defaultBlock
     std::future<json> getUncle(
-      std::string blockHashOrBlockNumber = "", bool returnTransactionObjects = false
-    );
-    std::future<json> getUncle(
-      BigNumber blockHashOrBlockNumber = -1, bool returnTransactionObjects = false
+      BigNumber blockHashOrBlockNumber = this.defaultBlock, bool returnTransactionObjects = false
     );
 
     // Returns a transaction matching the given hash.
@@ -203,22 +179,18 @@ class Eth {
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
     // Return structure is the same as getTransaction().
-    // TODO: default hashString to this.defaultBlock
     std::future<json> getTransactionFromBlock(
-      std::string hashStringOrNumber = "", unsigned int indexNumber
-    );
-    std::future<json> getTransactionFromBlock(
-      BigNumber hashStringOrNumber = -1, unsigned int indexNumber
+      BigNumber hashStringOrNumber = this.defaultBlock, unsigned int indexNumber
     );
 
     // Returns the receipt of a transaction by transaction hash,
-    // or NULL on pending/non-existant transactions.
+    // or an empty object on pending/non-existant transactions.
     std::future<json> getTransactionReceipt(std::string hash);
 
     // Returns the number of transactions sent from the given address.
-    // TODO: default to this.defaultBlock
-    std::future<unsigned int> getTransactionCount(std::string address, std::string defaultBlock = "");
-    std::future<unsigned int> getTransactionCount(std::string address, BigNumber defaultBlock = -1);
+    std::future<unsigned int> getTransactionCount(
+      std::string address, BigNumber defaultBlock = this.defaultBlock
+    );
 
     // Signs data using a specific account, which needs to be unlocked.
     // dataToSign will be converted using Utils.utf8ToHex().
@@ -234,9 +206,9 @@ class Eth {
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    // TODO: default to this.defaultBlock
-    std::future<std::string> call(json callObject, std::string defaultBlock = "");
-    std::future<std::string> call(json callObject, BigNumber defaultBlock = -1);
+    std::future<std::string> call(
+      json callObject, BigNumber defaultBlock = this.defaultBlock
+    );
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.

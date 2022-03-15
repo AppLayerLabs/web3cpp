@@ -12,19 +12,16 @@
 // TODO:
 // - Inherit Eth to have access to some properties
 //   - defaultAccount/Chain/Block/Hardfork/Common, transaction timeouts, handleRevert, etc.
-// - Decide how to deal with "options" (it's a JSON object but should also be a subclass?)
 // - Implement events (once, events, events.allEvents, getPastEvents)
 // - Check if Method implementation should be this way
 // - Decide how to deal with callbacks and promievents for some functions
-// - Maybe force json::array in Method::arguments and Contract::options?
-// - Default to Eth.defaultBlock on both call() functions
+// - Deal with chain/hardfork/common in Options (on Eth they're strings/objects, not numbers)
 
 class Contract {
   public:
     class Method {
-      //json arguments;  // Probably a JSON array?
-      //std::future<mixed> call(json options, std::string defaultBlock = ""); // from, gasPrice, gas
-      //std::future<mixed> call(json options, BigNumber defaultBlock = -1); // from, gasPrice, gas
+      json arguments;  // JSON array
+      //std::future<mixed> call(json options, BigNumber defaultBlock = Eth.defaultBlock); // from, gasPrice, gas
       //promievent send(json options); // from, gasPrice, gas, value, nonce
       std::future<BigNumber> estimateGas(json options); // from, gas, value
       std::string encodeABI();
@@ -32,11 +29,27 @@ class Contract {
       std::future<json> createAccessList(json options, BigNumber block); // from, gas
     };
 
+    class Options {
+      std::string address;  // "to" address
+      json jsonInterface; // JSON array
+      std::string data;
+      std::string from;
+      std::string gasPrice;
+      BigNumber gas;
+      bool handleRevert;
+      unsigned int transactionBlockTimeout;
+      unsigned int transactionConfirmationBlocks;
+      unsigned int transactionPollingTimeout;
+      //number chain;
+      //number hardfork;
+      //number common;
+    };
+
     // Constructor.
     Contract(json jsonInterface, std::string address, json options = NULL);
 
-    // Array of options.
-    json options;
+    // Object with options for the contract.
+    Options options;
 
     // Methods from the contract.
     std::vector<Method> methods;

@@ -11,12 +11,10 @@
 // Main/Umbrella class that houses all modules.
 
 // TODO:
-// - Decide how to implement the objects:
-//   - modules, utils
-// - Understand why BatchRequest() is a *class*
-// - Understand how will extend()... extend a C++ class on the spot
-// - Maybe merge all constructors into one using optional params?
-// - Check if "providers" should really be a Utils::Provider array
+// - Decide how to implement the objects: modules, utils
+// - Perhaps study how std::function works to answer the following questions:
+//  - Why is BatchRequest() a *class*?
+//  - How will extend()... extend a C++ class on the spot?
 
 class Web3 {
   private:
@@ -24,11 +22,10 @@ class Web3 {
     Utils::Provider defaultProvider;
 
   public:
-    // Constructors (default, custom Provider, custom path, or both).
-    Web3();
-    Web3(Utils::Provider provider);
-    Web3(boost::filesystem::path path);
-    Web3(Utils::Provider provider, boost::filesystem::path path);
+    // Constructor and overloads.
+    Web3(Utils::Provider *provider = NULL, boost::filesystem::path *path = NULL);
+    Web3(Utils::Provider provider) : Web3(&provider, NULL) {}
+    Web3(boost::filesystem::path path): Web3(NULL, &path) {}
 
     // Object with the classes of all major sub modules,
     // to be able to instantiate them manually.

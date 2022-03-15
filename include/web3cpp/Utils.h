@@ -30,11 +30,6 @@ using BigNumber = dev::u256;
 // Module that provides utility functions.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
 
-// TODO:
-// - Check if we need to implement bloom filters
-//   - https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html#bloom-filters
-// - Decide how to deal with units in toWei(), fromWei() and unitMap()
-
 namespace Utils {
   // Struct that contains information about a provider.
   struct Provider {
@@ -61,6 +56,17 @@ namespace Utils {
   boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
   #endif
   boost::filesystem::path getDefaultDataDir();
+
+  /**
+   * Bloom filter functions.
+   * See https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html#functions
+   */
+  bool isBloom(std::string bloom);
+  bool isUserAddressInBloom(std::string bloom, std::string address);
+  bool isContractAddressInBloom(std::string bloom, std::string contractAddress);
+  bool isTopic(std::string topic);
+  bool isTopicInBloom(std::string bloom, std::string topic);
+  bool isInBloom(std::string bloom, std::string value);
 
   /**
    * Generates a cryptographically strong pseudo-random HEX string from a given byte size.
