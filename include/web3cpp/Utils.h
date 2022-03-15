@@ -32,6 +32,8 @@ using BigNumber = dev::u256;
 
 namespace Utils {
   // Struct that contains information about a provider.
+
+  std::mutex ProviderLock;
   struct Provider {
     std::string networkName;
     std::string rpcUrl;
@@ -40,7 +42,17 @@ namespace Utils {
     uint64_t chainID;
     std::string currencySymbol;
     std::string blockExplorerUrl;
-    std::mutex m_lock;
+
+    Provider() {
+      // Default to AVAX.
+      networkName = "Avalanche Mainnet";
+      rpcUrl = "https://api.avax.network/";
+      rpcTarget = "/ext/bc/C/rpc";
+      rpcPort = 443;
+      chainID = 43114;
+      currencySymbol = "AVAX";
+      blockExplorerUrl = "";
+    }
   };
 
   // Mutex for reading JSON files.
