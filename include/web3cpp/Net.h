@@ -3,23 +3,36 @@
 
 #include <future>
 #include <string>
+#include <cstdlib>
+#include <iostream>
+#include <string>
 
-// Module that interacts with a node's network properties.
-// https://web3js.readthedocs.io/en/v1.7.0/web3-net.html
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
 
-// TODO:
-// - Decide what to do with callbacks for all functions
+#include <web3cpp/Utils.h>
+#include <web3cpp/root_certificates.h>
 
-class Net {
-  public:
-    // Gets the current network ID.
-    std::future<unsigned int> getId();
 
-    // Checks if the node is listening to peers.
-    std::future<bool> isListening();
+namespace Net {
 
-    // Get the number of peers connected to.
-    std::future<unsigned int> getPeerCount();
-};
+  enum RequestTypes {
+    POST,
+    GET
+  };
+
+  std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
+
+  std::future<std::string> customHTTPRequest(std::string reqBody, 
+                                             std::string host, 
+                                             std::string port, 
+                                             std::string target, 
+                                             std::string requestType, 
+                                             std::string contentType);
+
+} 
 
 #endif  // NET_H
