@@ -73,11 +73,15 @@ class Wallet {
     // Check if a wallet is loaded.
     bool isLoaded() { return this->keyManager.exists(); }
 
+    // Check if password matches with hashed PW.
+    bool checkPassword(std::string &password);
+
     // Check if the wallet file and its keys folder exists in a given path.
     static bool walletExists(boost::filesystem::path &wallet_path);
 
     // Creates a new account.
-    std::future<std::string> newAccount(std::string password);
+    // Uses BIP39 seed stored in json file, throws in case of error.
+    bool createNewAccount(std::string derivationPath, std::string &password);
 
     /**
      * Signs a data string as an "Ethereum Signed Message".

@@ -116,3 +116,45 @@ void Wallet::loadAccounts() {
   }
 }
 
+bool Wallet::createNewAccount(std::string derivationPath, std::string &password) {
+  if(!checkPassword(password))
+    return false;
+
+  try {
+  // Load the phrase from JSON.
+    std::string seedPhrase;
+    {
+      Cipher cipher("aes-256-cbc", "sha256");
+      boost::filesystem::path tmpPath = seedPhraseFile();
+      json seedJson = Utils::readJSONFile(tmpPath);
+      std::string encryptedPhrase = seedJson["seed"].get<std::string>();
+      std::string salt = seedJson["salt"].get<std::string>();
+      // Replace spaces with newlines, cipher only accepts newlines since it's base64
+      boost::replace_all(encryptedPhrase, " ", "\n");
+      seedPhrase = cipher.decrypt(encryptedPhrase, password, salt);
+    }
+
+    // Derive the account.
+    bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivationPath);
+    dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
+    // Check if duplicated.
+    std::string address = std::string("0x") + k.address().hex();
+    for (auto &account : accounts) {
+      if (address == account.address()) {
+        throw "Account already exists in wallet";
+      }
+    }
+
+    this->keyManager.import(k.secret(), "default", password, "");
+  } catch (const std::exception &e) {
+    throw std::string("Error when creating new account: ") + e.what();
+  }
+  return true;
+}
+
+bool Wallet::checkPassword(std::string &password) {
+  auto inputPassword = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
+  return (inputPassword.ref().toString() == passHash.ref().toString());
+}
+
+

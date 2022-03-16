@@ -157,7 +157,6 @@ namespace Net {
       } catch (std::exception const& e) {
         throw std::string("Error while doing HTTP Custom Request: ") + e.what(); 
       }
-
       return result;
     });
   }
