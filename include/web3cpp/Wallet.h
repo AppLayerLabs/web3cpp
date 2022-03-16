@@ -7,13 +7,17 @@
 
 #include "Utils.h"
 
+#include <boost/algorithm/string/replace.hpp>
 #include <nlohmann/json.hpp>
+
 #include <web3cpp/devcore/Common.h>
 #include <web3cpp/devcore/FixedHash.h>
 #include <web3cpp/devcore/Address.h>
 #include <web3cpp/ethcore/KeyManager.h>
 #include <web3cpp/Account.h>
 #include <web3cpp/DB.h>
+#include <web3cpp/Cipher.h>
+#include <web3cpp/Bip39.h>
 
 using json = nlohmann::json;
 
@@ -42,8 +46,9 @@ class Wallet {
     std::vector<Account> accounts;
 
     // Paths for wallet file and secrets folder.
-    boost::filesystem::path walletFile()    { return path->string() + "/wallet/wallet.info"; };
-    boost::filesystem::path secretsFolder() { return path->string() + "/wallet/secrets"; };
+    boost::filesystem::path walletFile()     { return path->string() + "/wallet/wallet.info"; };
+    boost::filesystem::path secretsFolder()  { return path->string() + "/wallet/secrets"; };
+    boost::filesystem::path seedPhraseFile() { return path->string() + "/wallet/seed"; };
 
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string &password);

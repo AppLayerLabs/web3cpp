@@ -13,6 +13,36 @@ bool Wallet::createNewWallet(std::string &password) {
   dev::eth::KeyManager w(walletFile(), secretsFolder());
   try {
     w.create(password);
+    // Create the first account using BIP39, and store the seedphrase.
+    auto seedPhrase = BIP39::createNewMnemonic();
+
+    // Initialize the seed json and cipher, then create the salt.
+    // Use exactly as many bytes for the cipher as needed.
+    json seedJson;
+    Cipher cipher("aes-256-cbc", "sha256");
+    unsigned char saltBytes[CIPHER_SALT_BYTES] = {0};
+    RAND_bytes(saltBytes, CIPHER_SALT_BYTES);
+    
+    std::string salt = dev::toHex(
+      dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
+    ).substr(0, CIPHER_SALT_BYTES);
+
+    std::string encryptedPhrase;
+
+    encryptedPhrase = cipher.encrypt(seedPhrase.raw, password, salt);
+    // Replace newlines with space, when saving to JSON newlines will break it
+    boost::replace_all(encryptedPhrase, "\n", " ");
+    seedJson["seed"] = encryptedPhrase;
+    seedJson["salt"] = salt;
+
+    boost::filesystem::path tmpPath = seedPhraseFile();
+    Utils::writeJSONFile(seedJson, tmpPath);
+
+    // Create default account.
+    bip3x::HDKey rootKey = BIP39::createKey(seedPhrase.raw, "m/44'/60'/0'/0");
+    dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
+    this->keyManager.import(k.secret(), "default", password, "");
+
     return true;
   } catch (dev::Exception const& _e) {
     throw std::string("Failed to create a new wallet: ") + _e.what();
