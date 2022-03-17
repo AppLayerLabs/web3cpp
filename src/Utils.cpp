@@ -147,6 +147,13 @@ std::string Utils::hexToNumberString(std::string hex) {
   return ss.str();
 }
 
+BigNumber Utils::hexToBigNumber(std::string hex) {
+  BigNumber ret;
+  if (hex.substr(0,2) == "0x") { hex = hex.substr(2); } // Remove "0x"
+  // ret = boost::lexical_cast<HexTo<BigNumber>>(hex):
+  return ret;
+}
+
 std::string Utils::hexToUtf8(std::string hex) {
   if (!isHexStrict(hex)) {
     throw std::string("Error converting non-hex value to UTF-8: ") + hex;

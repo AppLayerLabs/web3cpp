@@ -27,6 +27,21 @@
 using json = nlohmann::json;
 using BigNumber = dev::u256;
 
+/**
+ * Conversion template for usage with boost::lexical_cast.
+ * Rounds number to nearest multiple.
+ * e.g. boost::lexical_cast<HexTo<int>>(var);
+ */
+template <typename ElemT>
+struct HexTo {
+  ElemT value;
+  operator ElemT() const { return value; }
+  friend std::istream& operator>>(std::istream& in, HexTo& out) {
+    in >> std::hex >> out.value;
+    return in;
+  }
+};
+
 // Module that provides utility functions.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
 
@@ -148,6 +163,9 @@ namespace Utils {
 
   // Returns the number representation of a given HEX value as a string.
   std::string hexToNumberString(std::string hex);
+
+  // Returns the number representation of a given HEX value as a BigNumber.
+  BigNumber hexToBigNumber(std::string hex);
 
   /**
    * Returns the UTF-8 string representation of a given HEX value.

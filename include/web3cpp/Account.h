@@ -6,6 +6,8 @@
 #include <vector>
 
 #include <web3cpp/DB.h>
+#include <web3cpp/Net.h>
+#include <web3cpp/Utils.h>
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
 
@@ -19,6 +21,7 @@ using json = nlohmann::json;
 
 class Account {
   private:
+    Utils::Provider *provider;
     std::string _address;
     std::string _derivationPath;
     bool _isLedger;
@@ -28,7 +31,7 @@ class Account {
     // Constructor.
     Account(
       boost::filesystem::path walletPath, std::string __address,
-      std::string __derivationPath, bool __isLedger
+      std::string __derivationPath, bool __isLedger, Utils::Provider *_provider
     );
 
     // Copy constructor.
@@ -36,12 +39,17 @@ class Account {
       _address(std::move(other._address)),
       _derivationPath(std::move(other._derivationPath)),
       _isLedger(std::move(other._isLedger)),
-      transactionDb(std::move(other.transactionDb))
+      transactionDb(std::move(other.transactionDb)),
+      provider(std::move(other.provider))
     {}
 
     // Getters.
     std::string address() { return _address; };
     std::string derivationPath() { return _derivationPath; };
+
+    // Network related requests.
+
+    std::future<BigNumber> balance();
     bool isLedger() { return _isLedger; };
 };
 

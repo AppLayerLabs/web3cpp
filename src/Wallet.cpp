@@ -81,7 +81,8 @@ void Wallet::loadAccounts() {
       boost::filesystem::path(path->string() + "/wallet"),
       accountJson["address"].get<std::string>(),
       accountJson["derivationPath"].get<std::string>(),
-      accountJson["isLedger"].get<bool>()
+      accountJson["isLedger"].get<bool>(),
+      provider
     );
     accounts.emplace_back(std::move(newTmpAccount));
   }
