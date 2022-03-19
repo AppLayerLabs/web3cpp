@@ -158,4 +158,29 @@ bool Wallet::checkPassword(std::string &password) {
   return (inputPassword.ref().toString() == passHash.ref().toString());
 }
 
+dev::eth::TransactionSkeleton Wallet::buildTransaction(std::string from,
+                                                  std::string to,
+                                                  BigNumber value,
+                                                  BigNumber gasLimit,
+                                                  BigNumber gasPrice,
+                                                  std::string dataHex,
+                                                  int nonce,
+                                                  bool creation
+                                                  ) {
+  dev::eth::TransactionSkeleton ret;
 
+  try {
+    ret.creation = creation;
+    ret.from = dev::eth::toAddress(from);
+    ret.to = dev::eth::toAddress(to);
+    ret.value = value;
+    if(!dataHex.empty()) { ret.data = dev::fromHex(dataHex); }
+    ret.nonce = nonce;
+    ret.gas = gasLimit;
+    ret.gasPrice = gasPrice;
+    ret.chainId = this->provider->chainID;              
+  } catch (const std::exception &e) {
+    throw std::string("buildTransaction error: ") + e.what();
+  }
+  return ret;
+}

@@ -14,6 +14,7 @@
 #include <web3cpp/devcore/FixedHash.h>
 #include <web3cpp/devcore/Address.h>
 #include <web3cpp/ethcore/KeyManager.h>
+#include <web3cpp/ethcore/TransactionBase.h>
 #include <web3cpp/Account.h>
 #include <web3cpp/DB.h>
 #include <web3cpp/Cipher.h>
@@ -82,6 +83,26 @@ class Wallet {
     // Creates a new account.
     // Uses BIP39 seed stored in json file, throws in case of error.
     bool createNewAccount(std::string derivationPath, std::string &password);
+
+    /**
+     * Build a transaction from user data.
+     * Coin transactions would have a blank dataHex and the "to" address
+     * being the destination address.
+     * Token transactions would have a filled dataHex, 0 txValue and
+     * the "to" address being the token contract's address.
+     * Returns a skeleton filled with data for the transaction, which has to be signed.
+     */
+
+    dev::eth::TransactionSkeleton buildTransaction(std::string from,
+                                              std::string to,
+                                              BigNumber value,
+                                              BigNumber gasLimit,
+                                              BigNumber gasPrice,
+                                              std::string dataHex,
+                                              int nonce,
+                                              bool creation = false // Is TX creating a contract?
+                                              );
+
 
     /**
      * Signs a data string as an "Ethereum Signed Message".

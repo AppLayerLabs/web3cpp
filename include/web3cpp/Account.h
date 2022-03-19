@@ -8,6 +8,7 @@
 #include <web3cpp/DB.h>
 #include <web3cpp/Net.h>
 #include <web3cpp/Utils.h>
+#include <web3cpp/RPC.h>
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
 
@@ -24,8 +25,11 @@ class Account {
     Utils::Provider *provider;
     std::string _address;
     std::string _derivationPath;
+    uint64_t _nonce;
     bool _isLedger;
     Database transactionDb;
+    std::atomic<bool> ready;
+    mutable std::mutex accountLock;
 
   public:
     // Constructor.
@@ -39,6 +43,7 @@ class Account {
       _address(std::move(other._address)),
       _derivationPath(std::move(other._derivationPath)),
       _isLedger(std::move(other._isLedger)),
+      _nonce(std::move(other._nonce)),
       transactionDb(std::move(other.transactionDb)),
       provider(std::move(other.provider))
     {}
@@ -46,6 +51,7 @@ class Account {
     // Getters.
     std::string address() { return _address; };
     std::string derivationPath() { return _derivationPath; };
+    uint64_t nonce() { return _nonce; };
 
     // Network related requests.
 
