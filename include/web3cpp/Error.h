@@ -24,6 +24,12 @@ class Error {
     bool operator==(uint64_t errorCode) const {
       return this->code == errorCode;
     }
+    bool operator!=(uint64_t errorCode) const {
+      return this->code != errorCode;
+    }
+    bool operator!() const {
+      return this->code != 0;
+    }
 };
 
 #endif // ERROR_H
