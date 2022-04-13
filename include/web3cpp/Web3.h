@@ -7,6 +7,7 @@
 
 #include "Utils.h"
 #include "Wallet.h"
+#include "Error.h"
 
 // Main/Umbrella class that houses all modules.
 
