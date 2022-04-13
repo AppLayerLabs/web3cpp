@@ -111,15 +111,15 @@ public:
 
 	/// @returns the default path for the managed directory.
 	static boost::filesystem::path defaultPath() { return getDataDir("web3") / boost::filesystem::path("keys"); }
+	/// Encrypts @a _v with a key derived from @a _pass or the empty string on error.
+	static std::string encrypt(bytesConstRef _v, std::string const& _pass, KDF _kdf = KDF::Scrypt);
+	/// Decrypts @a _v with a key derived from @a _pass or the empty byte array on error.
+	static bytesSec decrypt(std::string const& _v, std::string const& _pass);
 
 private:
 	/// Loads all keys in the given directory.
 	void load(boost::filesystem::path const& _keysPath);
 	void load() { load(m_path); }
-	/// Encrypts @a _v with a key derived from @a _pass or the empty string on error.
-	static std::string encrypt(bytesConstRef _v, std::string const& _pass, KDF _kdf = KDF::Scrypt);
-	/// Decrypts @a _v with a key derived from @a _pass or the empty byte array on error.
-	static bytesSec decrypt(std::string const& _v, std::string const& _pass);
 	/// @returns the key given the @a _address.
 	std::pair<h128 const, EncryptedKey> const* key(Address const& _address) const;
 	std::pair<h128 const, EncryptedKey>* key(Address const& _address);

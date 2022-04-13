@@ -10,6 +10,9 @@ class Error {
   private:
     const std::map<uint64_t,std::string> codeMap {
       {0, "No error"},
+      {1, "Incorrect Password"},
+      {2, "Forbidden Account Name"},
+      {3, "Account Name Exists"},
       {999, "Unknown Error"}
     };
     uint64_t code;

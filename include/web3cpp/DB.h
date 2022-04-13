@@ -42,10 +42,10 @@ class Database {
     // Functions.
     bool cleanCloseDB() { return closeDB(); };
     bool isDBOpen() { return (this->db != NULL); }
-    bool keyExists(std::string &key);
-    std::string getKeyValue(std::string &key);
-    bool putKeyValue(std::string &key, std::string &value);
-    bool deleteKeyValue(std::string &key);
+    bool keyExists(std::string const &key);
+    std::string getKeyValue(std::string const &key);
+    bool putKeyValue(std::string const &key, std::string const &value);
+    bool deleteKeyValue(std::string const &key);
     std::vector<std::string> getAllKeys();
     std::vector<std::string> getAllValues();
     std::map<std::string, std::string> getAllPairs();

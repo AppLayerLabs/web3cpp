@@ -1,18 +1,27 @@
 #include <web3cpp/Wallet.h>
 
-bool Wallet::createNewWallet(std::string &password) {
+bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Create the paths if they don't exist yet
-  if (!boost::filesystem::exists(walletFile().parent_path())) {
-    boost::filesystem::create_directories(walletFile().parent_path());
+  if (!boost::filesystem::exists(walletFolder())) {
+    boost::filesystem::create_directories(walletFolder());
   }
   if (!boost::filesystem::exists(secretsFolder())) {
     boost::filesystem::create_directories(secretsFolder());
   }
 
   // Initialize a new Wallet
-  dev::eth::KeyManager w(walletFile(), secretsFolder());
+  auto salt = dev::h256::random().asBytes();
+  auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, salt, 262144, 16));
+  json walletInfo = {
+    {"salt", dev::toHex(salt)},
+    {"key", key.makeInsecure().hex()},
+    {"iterations", 262144}
+  };
+
+  walletDB.putKeyValue("walletInfo", walletInfo.dump());
+
+  // Create a new account and insert into database
   try {
-    w.create(password);
     // Create the first account using BIP39, and store the seedphrase.
     auto seedPhrase = BIP39::createNewMnemonic();
 
@@ -41,37 +50,79 @@ bool Wallet::createNewWallet(std::string &password) {
     // Create default account.
     bip3x::HDKey rootKey = BIP39::createKey(seedPhrase.raw, "m/44'/60'/0'/0");
     dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
-    this->keyManager.import(k.secret(), "default", password, "");
 
     return true;
+    this->importPrivKey(k.secret(), password, "default", "m/44'/60'/0'/0",error);
   } catch (dev::Exception const& _e) {
     throw std::string("Failed to create a new wallet: ") + _e.what();
   }
 }
 
-bool Wallet::loadWallet(std::string &password) {
-  if (!boost::filesystem::exists(walletFile())) { createNewWallet(password); }
-  dev::eth::KeyManager tmpManager(walletFile(), secretsFolder());
-  if (tmpManager.load(password)) {
-    this->keyManager = std::move(tmpManager);
+bool Wallet::importPrivKey(dev::Secret const &secret, 
+                           std::string const &password, 
+                           std::string const &name, 
+                           std::string const &derivationPath,
+                           Error &error) {
+  // Check if wallet already exists inside the database, do not allow specific names
+  if (name == "walletInfo") {
+    error.setErrorCode(2); // Forbidden Account Name.
+    return false;
+  }
+
+  if (walletDB.getKeyValue(name) != "") {
+    error.setErrorCode(3); // Account Name Exists.
+    return false;
+  }
+
+  // Check if password is correct
+  json walletInfo = json::parse(walletDB.getKeyValue("walletInfo"));
+  auto originalKey = dev::fromHex(walletInfo["key"]);
+  dev::SecureFixedHash<16> oldKey(originalKey);
+  auto originalSalt = dev::fromHex(walletInfo["salt"]);
+  auto originalIterations = walletInfo["iterations"];
+  auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, originalSalt, originalIterations, 16));
+  if (key != oldKey) {
+    error.setErrorCode(1); // Incorrect Password.
+    return false;
+  }
+  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
+  encryptedKey["address"] = "0x" + dev::toHex(dev::toAddress(secret));
+  encryptedKey["derivationPath"] = derivationPath;
+  encryptedKey["isLedger"] = false;
+  walletDB.putKeyValue(name, encryptedKey.dump());
+  return true;
+}
+
+bool Wallet::loadWallet(std::string const &password, Error &error) {
+  if (!boost::filesystem::exists(walletFolder())) { createNewWallet(password, error); }
+  // Check if password is correct
+  json walletInfo = json::parse(walletDB.getKeyValue("walletInfo"));
+  auto originalKey = dev::fromHex(walletInfo["key"]);
+  dev::SecureFixedHash<16> oldKey(originalKey);
+  auto originalSalt = dev::fromHex(walletInfo["salt"]);
+  auto originalIterations = walletInfo["iterations"];
+  auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, originalSalt, originalIterations, 16));
+  if (key == oldKey) {
     this->passSalt = dev::h256::random();
     this->passHash = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
     this->loadAccounts();
+    _isLoaded = true;
     return true;
   } else {
+    error.setErrorCode(1); // Incorrect Password.
     return false;
   }
 }
 
 bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
   return (
-    boost::filesystem::exists(wallet_path.string() + "/wallet/wallet.info") &&
+    boost::filesystem::exists(wallet_path.string() + "/wallet") &&
     boost::filesystem::exists(wallet_path.string() + "/wallet/secrets")
   );
 }
 
 void Wallet::loadAccounts() {
-  auto allAccountsFromDB = accountsDB.getAllPairs();
+  auto allAccountsFromDB = walletDB.getAllPairs();
   for (auto accountInfoStr : allAccountsFromDB) {
     json accountJson = json::parse(accountInfoStr.second);
     std::string tmpAddress = accountJson["address"].get<std::string>();
@@ -79,6 +130,7 @@ void Wallet::loadAccounts() {
     bool tmpIsLedger = accountJson["isLedger"].get<bool>();
     Account newTmpAccount(
       boost::filesystem::path(path->string() + "/wallet"),
+      accountInfoStr.first,
       accountJson["address"].get<std::string>(),
       accountJson["derivationPath"].get<std::string>(),
       accountJson["isLedger"].get<bool>(),
@@ -86,41 +138,13 @@ void Wallet::loadAccounts() {
     );
     accounts.emplace_back(std::move(newTmpAccount));
   }
-
-  // Sanity check if all accounts found on DB match with accounts inside KeyManager.
-  if (this->keyManager.store().keys().empty()) { return; }
-  dev::AddressHash got;
-  std::vector<dev::h128> keys = this->keyManager.store().keys();
-  for (auto const& u : keys) {
-    if (dev::Address a = this->keyManager.address(u)) {
-      bool found = false;
-      got.insert(a);
-      std::string address = "0x" + boost::lexical_cast<std::string>(a);
-      for (auto &c : address) {
-        std::tolower(c);
-      }
-      for (uint64_t i = 0; i < accounts.size(); ++i) {
-        std::string accAddr = accounts[i].address();
-        for (auto &c : accAddr) {
-          std::tolower(c);
-        }
-        if (accAddr == address) {
-          found = true;
-        }
-      }
-      if (!found) {
-        throw std::string(
-          "Error loading accounts! Mismatch accounts from keyManager and local database"
-        );
-      }
-    }
-  }
 }
 
-bool Wallet::createNewAccount(std::string derivationPath, std::string &password) {
-  if(!checkPassword(password))
+bool Wallet::createNewAccount(std::string derivationPath, std::string &password, Error &error) {
+  if(!checkPassword(password)) {
+    error.setErrorCode(1); // Incorrect Password.
     return false;
-
+  }
   try {
   // Load the phrase from JSON.
     std::string seedPhrase;
@@ -138,15 +162,8 @@ bool Wallet::createNewAccount(std::string derivationPath, std::string &password)
     // Derive the account.
     bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivationPath);
     dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
-    // Check if duplicated.
-    std::string address = std::string("0x") + k.address().hex();
-    for (auto &account : accounts) {
-      if (address == account.address()) {
-        throw "Account already exists in wallet";
-      }
-    }
 
-    this->keyManager.import(k.secret(), "default", password, "");
+    this->importPrivKey(k.secret(), password, "default", derivationPath, error);
   } catch (const std::exception &e) {
     throw std::string("Error when creating new account: ") + e.what();
   }
