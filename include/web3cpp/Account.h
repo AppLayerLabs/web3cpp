@@ -24,6 +24,7 @@ class Account {
   private:
     Utils::Provider *provider;
     std::string _address;
+    std::string _name;
     std::string _derivationPath;
     uint64_t _nonce;
     bool _isLedger;
@@ -34,13 +35,14 @@ class Account {
   public:
     // Constructor.
     Account(
-      boost::filesystem::path walletPath, std::string __address,
+      boost::filesystem::path walletPath, std::string name, std::string __address,
       std::string __derivationPath, bool __isLedger, Utils::Provider *_provider
     );
 
     // Copy constructor.
     Account (Account&& other) noexcept :
       _address(std::move(other._address)),
+      _name(std::move(other._name)),
       _derivationPath(std::move(other._derivationPath)),
       _isLedger(std::move(other._isLedger)),
       _nonce(std::move(other._nonce)),

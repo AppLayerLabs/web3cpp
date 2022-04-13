@@ -15,6 +15,7 @@
 #include <web3cpp/devcore/Address.h>
 #include <web3cpp/ethcore/KeyManager.h>
 #include <web3cpp/ethcore/TransactionBase.h>
+#include <web3cpp/Error.h>
 #include <web3cpp/Account.h>
 #include <web3cpp/DB.h>
 #include <web3cpp/Cipher.h>
@@ -40,19 +41,27 @@ class Wallet {
     // Wallet path, provider and key manager,
     boost::filesystem::path* path;
     Utils::Provider* provider;
-    dev::eth::KeyManager keyManager;
+
+    bool _isLoaded;
 
     // Account database and list.
-    Database accountsDB;
+    Database walletDB;
     std::vector<Account> accounts;
 
     // Paths for wallet file and secrets folder.
-    boost::filesystem::path walletFile()     { return path->string() + "/wallet/wallet.info"; };
+    boost::filesystem::path walletFolder()     { return path->string() + "/wallet"; };
     boost::filesystem::path secretsFolder()  { return path->string() + "/wallet/secrets"; };
     boost::filesystem::path seedPhraseFile() { return path->string() + "/wallet/seed"; };
 
     // Called by loadWallet() if no wallet is found on the desired path.
-    bool createNewWallet(std::string &password);
+    bool createNewWallet(std::string const &password, Error &error);
+
+    // Import a given private key into the wallet database.
+    bool importPrivKey(dev::Secret const &secret, 
+                       std::string const &password, 
+                       std::string const &name, 
+                       std::string const &derivationPath, 
+                       Error &error);
 
     // Called by loadWallet() when a wallet is successfully loaded.
     void loadAccounts();
@@ -61,7 +70,7 @@ class Wallet {
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer)
       : provider(providerPointer), path(pathPointer),
-        accountsDB("/wallet/accounts", boost::filesystem::path(path->string() + "/accounts/"))
+        walletDB("/wallet/accounts", boost::filesystem::path(path->string() + "/accounts/"))
     {};
 
     /**
@@ -69,10 +78,10 @@ class Wallet {
      * Creates a new wallet if no wallet exists.
      * Returns true on success, false if password is incorrect..
      */
-    bool loadWallet(std::string &password);
+    bool loadWallet(std::string const &password, Error &error);
 
     // Check if a wallet is loaded.
-    bool isLoaded() { return this->keyManager.exists(); }
+    bool isLoaded() { return this->_isLoaded; }
 
     // Check if password matches with hashed PW.
     bool checkPassword(std::string &password);
@@ -82,7 +91,7 @@ class Wallet {
 
     // Creates a new account.
     // Uses BIP39 seed stored in json file, throws in case of error.
-    bool createNewAccount(std::string derivationPath, std::string &password);
+    bool createNewAccount(std::string derivationPath, std::string &password, Error &error);
 
     /**
      * Build a transaction from user data.
