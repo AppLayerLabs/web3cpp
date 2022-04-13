@@ -47,8 +47,6 @@ struct HexTo {
 
 namespace Utils {
   // Struct that contains information about a provider.
-
-  std::mutex ProviderLock;
   struct Provider {
     std::string networkName;
     std::string rpcUrl;
@@ -70,7 +68,8 @@ namespace Utils {
     }
   };
 
-  // Mutex for reading JSON files.
+  // Mutexes for Provider and reading JSON files.
+  std::mutex ProviderLock;
   std::mutex storageLock;
 
   /**

@@ -27,11 +27,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_STATIC ON CACHE BOOL "Build library as static, turn off to build as shared")
+set(BUILD_TESTS ON CACHE BOOL "Build helper unit testing program")
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
 message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
 message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
 message("Using PIC: ${CMAKE_POSITION_INDEPENDENT_CODE}")
 message("Building as static: ${BUILD_STATIC}")
+message("Building tests: ${BUILD_TESTS}")
 
 # Fetch and set up external libraries
 # TODO: add options to set boost path
@@ -134,15 +136,22 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link project to dependencies and external libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
   Boost nlohmann_json::nlohmann_json ledger cryptopp-static libscrypt::scrypt
   Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )
 
+# Build helper test program
+if(BUILD_TESTS)
+  add_executable(${PROJECT_NAME}-tests tests/Tests.h tests/Tests.cpp)
+  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
+endif()
+
 # Set required properties
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "src/Web3.h")
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "include/web3cpp/Web3.h")
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(${PROJECT_NAME} PROPERTIES LANGUAGE CXX)
 
