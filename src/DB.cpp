@@ -22,7 +22,7 @@ bool Database::closeDB() {
   return true;
 }
 
-bool Database::keyExists(std::string &key) {
+bool Database::keyExists(std::string const &key) {
   this->dbMutex.lock();
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
@@ -37,19 +37,18 @@ bool Database::keyExists(std::string &key) {
   return false;
 }
 
-std::string Database::getKeyValue(std::string &key) {
+std::string Database::getKeyValue(std::string const &key) {
   this->dbMutex.lock();
   this->dbStatus = this->db->Get(leveldb::ReadOptions(), key, &this->tmpValue);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error reading at ") + databaseName + " database at key "
-      + key + this->dbStatus.ToString();
+    return "";
   }
   this->dbMutex.unlock();
   return this->tmpValue;
 }
 
-bool Database::putKeyValue(std::string &key, std::string &value) {
+bool Database::putKeyValue(std::string const &key, std::string const &value) {
   this->dbMutex.lock();
   this->dbStatus = this->db->Put(leveldb::WriteOptions(), key, value);
   if (!this->dbStatus.ok()) {
@@ -61,7 +60,7 @@ bool Database::putKeyValue(std::string &key, std::string &value) {
   return this->dbStatus.ok();
 }
 
-bool Database::deleteKeyValue(std::string &key) {
+bool Database::deleteKeyValue(std::string const &key) {
   this->dbMutex.lock();
   this->dbStatus = this->db->Delete(leveldb::WriteOptions(), key);
   if(!this->dbStatus.ok()) {
