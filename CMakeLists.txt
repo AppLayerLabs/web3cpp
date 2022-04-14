@@ -37,6 +37,7 @@ message("Building tests: ${BUILD_TESTS}")
 
 # Fetch and set up external libraries
 # TODO: add options to set boost path and openssl non-system-wise
+set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost CONFIG REQUIRED filesystem system thread)
@@ -138,9 +139,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} nlohmann_json::nlohmann_json
-  cryptopp-static libscrypt::scrypt Secp256k1 bip39 toolbox
-  ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
+  ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ssl crypto
+  nlohmann_json::nlohmann_json cryptopp-static libscrypt::scrypt
+  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )
 
 # Build helper test program
