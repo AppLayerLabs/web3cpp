@@ -2,13 +2,13 @@
 
 Web3::Web3(Utils::Provider *provider, boost::filesystem::path *path) : wallet(&defaultProvider, &defaultPath) {
   boost::nowide::nowide_filesystem();
-  Utils::ProviderLock.lock();
+  defaultProvider.ProviderLock.lock();
   if (provider == NULL) {
     defaultProvider = Utils::Provider();
   } {
     defaultProvider = *provider;
   }
-  Utils::ProviderLock.unlock();
+  defaultProvider.ProviderLock.unlock();
   defaultPath = (path == NULL) ? Utils::getDefaultDataDir() : *path;
 }
 

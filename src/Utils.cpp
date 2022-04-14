@@ -1,5 +1,7 @@
 #include <web3cpp/Utils.h>
 
+std::mutex storageLock;
+
 #ifdef __MINGW32__
 boost::filesystem::path Utils::GetSpecialFolderPath(int nFolder, bool fCreate) {
   WCHAR pszPath[MAX_PATH] = L"";

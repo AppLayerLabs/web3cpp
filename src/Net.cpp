@@ -10,11 +10,11 @@ namespace Net {
       namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
       namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
       // Lock mutex and get information from it.
-      Utils::ProviderLock.lock();
+      provider->ProviderLock.lock();
       std::string url = provider->rpcUrl;
       std::string target = provider->rpcTarget;
       std::string port = boost::lexical_cast<std::string>(provider->rpcPort);
-      Utils::ProviderLock.unlock();
+      provider->ProviderLock.unlock();
 
       try {
         // Create context and load certificates into it
