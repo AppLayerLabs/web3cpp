@@ -37,9 +37,10 @@ class Tests {
 
     // The tests themselves - each test is a function of its own
     void generateAccount(std::string derivPath, std::string &password) {
+      Error error;
       std::cout << "* Running test: " << __func__ << std::endl;
-      if (!web3.wallet.createNewAccount(derivPath, password)) {
-        failed("Could not create account"); return;
+      if (!web3.wallet.createNewAccount(derivPath, password, error)) {
+        failed(std::string("Could not create account") + error.what()); return;
       }
       std::string acc = web3.wallet.getAccounts().get().at(0);
       if (!Utils::isAddress(acc)) {

@@ -7,10 +7,10 @@ Account::Account(
   _isLedger(__isLedger), transactionDb(__address, walletPath.string() + "/transactions"), provider(_provider)
 {
   // TODO: Load transaction data.
-  
+  Error error;
 
 
-  auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::GET, RPC::eth_getTransactionCount(_address).dump(0));
+  auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::GET, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
   json nonceJson = json::parse(nonceRequest.get());
   _nonce = boost::lexical_cast<HexTo<uint64_t>>(nonceJson["result"].get<std::string>());
 }
