@@ -22,7 +22,13 @@ Implementation of [Web3](https://web3js.readthedocs.io) in C++.
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd web3cpp && mkdir build && cd build`
 * Run `cmake ..` then `cmake --build . -- -j$(nproc)` inside the build folder
-  * Compiling defaults to a static build, use `-DBUILD_STATIC=OFF` to do a shared build
+
+### CMake parameters
+
+For use with `cmake -D<param> ..`:
+
+* `BUILD_STATIC` (default **ON**) - compiles the library as static
+* `BUILD_TESTS` (default **ON**) - compiles an extra program that tests the library
 
 ## Missing modules
 
