@@ -147,9 +147,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 if(BUILD_TESTS)
   add_executable(${PROJECT_NAME}-tests tests/Tests.h tests/Tests.cpp)
   target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(${PROJECT_NAME}-tests PUBLIC
-    ${Boost_LIBRARIES} ${PROJECT_NAME}
-  )
+  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
 endif()
 
 # Set required properties
