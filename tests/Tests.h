@@ -1,3 +1,6 @@
+#ifndef TEST_H
+#define TEST_H
+
 #include <future>
 #include <iostream>
 #include <string>
@@ -47,3 +50,5 @@ class Tests {
       passed(); return;
     }
 };
+
+#endif // TEST_H

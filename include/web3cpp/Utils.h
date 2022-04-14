@@ -55,6 +55,7 @@ namespace Utils {
     uint64_t chainID;
     std::string currencySymbol;
     std::string blockExplorerUrl;
+    std::mutex mutable ProviderLock;
 
     Provider() {
       // Default to AVAX.
@@ -66,11 +67,20 @@ namespace Utils {
       currencySymbol = "AVAX";
       blockExplorerUrl = "";
     }
+
+    Provider& operator=(Provider const &prev) {
+    networkName = prev.networkName;
+    rpcUrl = prev.rpcUrl;
+    rpcTarget = prev.rpcTarget;
+    rpcPort = prev.rpcPort;
+    chainID = prev.chainID;
+    currencySymbol = prev.currencySymbol;
+    blockExplorerUrl = prev.blockExplorerUrl;
+    return *this;
+    }
   };
 
   // Mutexes for Provider and reading JSON files.
-  std::mutex ProviderLock;
-  std::mutex storageLock;
 
   /**
    * Handle the web3cpp history storage directory.
