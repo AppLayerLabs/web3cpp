@@ -9,11 +9,11 @@
 #include <windows.h>
 #endif
 
-#include <web3cpp/buildinfo.h>
+//#include <web3cpp/buildinfo.h>
 
 namespace dev
 {
-char const* Version = web3cpp_get_buildinfo()->project_version;
+//char const* Version = web3cpp_get_buildinfo()->project_version;
 bytes const NullBytes;
 std::string const EmptyString;
 

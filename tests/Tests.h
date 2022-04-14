@@ -1,5 +1,5 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef TESTS_H
+#define TESTS_H
 
 #include <future>
 #include <iostream>
@@ -51,4 +51,4 @@ class Tests {
     }
 };
 
-#endif // TEST_H
+#endif // TESTS_H
