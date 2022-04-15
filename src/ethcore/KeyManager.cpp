@@ -1,21 +1,10 @@
 // Aleth: Ethereum C++ client, tools and libraries.
 // Copyright 2015-2019 Aleth Authors.
 // Licensed under the GNU General Public License, Version 3.
-
-
 #include <web3cpp/ethcore/KeyManager.h>
-#include <thread>
-#include <mutex>
-#include <boost/filesystem.hpp>
-#include <lib/json_spirit/JsonSpiritHeaders.h>
-#include <web3cpp/devcore/Guards.h>
-#include <web3cpp/devcore/RLP.h>
-#include <web3cpp/devcore/SHA3.h>
 
 using namespace dev;
 using namespace eth;
-namespace js = json_spirit;
-namespace fs = boost::filesystem;
 
 KeyManager::KeyManager(fs::path const& _keysFile, fs::path const& _secretsPath):
 	m_keysFile(_keysFile), m_store(_secretsPath)
@@ -222,32 +211,27 @@ void KeyManager::kill(Address const& _a)
 
 KeyPair KeyManager::presaleSecret(std::string const& _json, std::function<std::string(bool)> const& _password)
 {
-	js::mValue val;
-	json_spirit::read_string(_json, val);
-	auto obj = val.get_obj();
+	json obj = json::parse(_json);
 	std::string p = _password(true);
-	if (obj["encseed"].type() == js::str_type)
-	{
-		auto encseed = fromHex(obj["encseed"].get_str());
-		while (true)
-		{
+  if (obj["encseed"].is_string()) {
+		auto encseed = fromHex(obj["encseed"].get<std::string>());
+		while (true) {
 			KeyPair k = KeyPair::fromEncryptedSeed(&encseed, p);
-			if (obj["ethaddr"].type() == js::str_type)
-			{
-				Address a(obj["ethaddr"].get_str());
+			if (obj["ethaddr"].is_string()) {
+				Address a(obj["ethaddr"].get<std::string>());
 				Address b = k.address();
-				if (a != b)
-				{
-					if ((p = _password(false)).empty())
+				if (a != b) {
+					if ((p = _password(false)).empty()) {
 						BOOST_THROW_EXCEPTION(PasswordUnknown());
+          }
 					continue;
 				}
 			}
 			return k;
 		}
-	}
-	else
-		BOOST_THROW_EXCEPTION(Exception() << errinfo_comment("encseed type is not js::str_type"));
+	} else {
+		BOOST_THROW_EXCEPTION(Exception() << errinfo_comment("encseed type is not string"));
+  }
 }
 
 Addresses KeyManager::accounts() const

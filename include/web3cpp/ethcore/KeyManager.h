@@ -1,17 +1,25 @@
 // Aleth: Ethereum C++ client, tools and libraries.
 // Copyright 2015-2019 Aleth Authors.
 // Licensed under the GNU General Public License, Version 3.
-
-
 #pragma once
 
 #include <functional>
 #include <mutex>
-#include <web3cpp/devcore/FileSystem.h>
-#include <web3cpp/devcore/CommonData.h>
-#include <web3cpp/devcrypto/SecretStore.h>
+#include <thread>
 
 #include <boost/filesystem.hpp>
+
+#include <nlohmann/json.hpp>
+
+#include <web3cpp/devcore/CommonData.h>
+#include <web3cpp/devcore/FileSystem.h>
+#include <web3cpp/devcore/Guards.h>
+#include <web3cpp/devcore/RLP.h>
+#include <web3cpp/devcore/SHA3.h>
+#include <web3cpp/devcrypto/SecretStore.h>
+
+using json = nlohmann::json;
+namespace fs = boost::filesystem;
 
 // Boost 1.73 deprecated Bind placeholder declarations on global namespace.
 // Defining this macro retains current behaviour.
