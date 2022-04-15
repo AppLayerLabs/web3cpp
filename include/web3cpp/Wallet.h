@@ -39,7 +39,7 @@ class Wallet {
     int passIterations = 100000;
 
     // Wallet path, provider and key manager,
-    boost::filesystem::path* path;
+    boost::filesystem::path path;
     Utils::Provider* provider;
 
     bool _isLoaded;
@@ -49,9 +49,10 @@ class Wallet {
     std::vector<Account> accounts;
 
     // Paths for wallet file and secrets folder.
-    boost::filesystem::path walletFolder()     { return path->string() + "/wallet"; };
-    boost::filesystem::path secretsFolder()  { return path->string() + "/wallet/secrets"; };
-    boost::filesystem::path seedPhraseFile() { return path->string() + "/wallet/seed"; };
+    boost::filesystem::path walletExistsPath() { return path.string() + "/wallet.info"; };
+    boost::filesystem::path walletFolder()     { return path.string() + "/wallet"; };
+    boost::filesystem::path accountsFolder()   { return path.string() + "/wallet/accounts"; };
+    boost::filesystem::path seedPhraseFile()   { return path.string() + "/wallet/seed"; };
 
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string const &password, Error &error);
@@ -68,9 +69,9 @@ class Wallet {
 
   public:
     // Constructor.
-    Wallet(Utils::Provider *providerPointer, boost::filesystem::path *pathPointer)
-      : provider(providerPointer), path(pathPointer),
-        walletDB("/wallet/accounts", boost::filesystem::path(path->string() + "/accounts/"))
+    Wallet(Utils::Provider *providerPointer, boost::filesystem::path _path)
+      : provider(providerPointer), path(_path),
+        walletDB("accounts", walletFolder())
     {};
 
     /**

@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+
 #include <algorithm>
 #include <sstream>
 #include <string>

@@ -5,9 +5,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Utils.h"
-#include "Wallet.h"
-#include "Error.h"
+#include <web3cpp/Utils.h>
+#include <web3cpp/Wallet.h>
+#include <web3cpp/Error.h>
+
 
 // Main/Umbrella class that houses all modules.
 

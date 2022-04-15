@@ -39,14 +39,12 @@ class Tests {
     void generateAccount(std::string derivPath, std::string &password) {
       Error error;
       std::cout << "* Running test: " << __func__ << std::endl;
+      if (!web3.wallet.loadWallet(password, error)) {
+        failed(std::string("Could not load wallet") + error.what()); return;
+      }
+
       if (!web3.wallet.createNewAccount(derivPath, password, error)) {
         failed(std::string("Could not create account") + error.what()); return;
-      }
-      std::string acc = web3.wallet.getAccounts().get().at(0);
-      if (!Utils::isAddress(acc)) {
-        failed("Account is invalid");
-        std::cout << "Output: " << acc << std::endl;
-        return;
       }
       passed(); return;
     }

@@ -2,11 +2,15 @@
 
 bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Create the paths if they don't exist yet
+
+  if (!boost::filesystem::exists(walletExistsPath())) {
+    boost::filesystem::create_directories(walletExistsPath());
+  }
   if (!boost::filesystem::exists(walletFolder())) {
     boost::filesystem::create_directories(walletFolder());
   }
-  if (!boost::filesystem::exists(secretsFolder())) {
-    boost::filesystem::create_directories(secretsFolder());
+  if (!boost::filesystem::exists(accountsFolder())) {
+    boost::filesystem::create_directories(accountsFolder());
   }
 
   // Initialize a new Wallet
@@ -28,21 +32,7 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
     // Initialize the seed json and cipher, then create the salt.
     // Use exactly as many bytes for the cipher as needed.
     json seedJson;
-    Cipher cipher("aes-256-cbc", "sha256");
-    unsigned char saltBytes[CIPHER_SALT_BYTES] = {0};
-    RAND_bytes(saltBytes, CIPHER_SALT_BYTES);
-    
-    std::string salt = dev::toHex(
-      dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-    ).substr(0, CIPHER_SALT_BYTES);
-
-    std::string encryptedPhrase;
-
-    encryptedPhrase = cipher.encrypt(seedPhrase.raw, password, salt);
-    // Replace newlines with space, when saving to JSON newlines will break it
-    boost::replace_all(encryptedPhrase, "\n", " ");
-    seedJson["seed"] = encryptedPhrase;
-    seedJson["salt"] = salt;
+    seedJson = json::parse(cipher::encrypt(seedPhrase.raw, password, error));
 
     boost::filesystem::path tmpPath = seedPhraseFile();
     Utils::writeJSONFile(seedJson, tmpPath);
@@ -51,8 +41,8 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
     bip3x::HDKey rootKey = BIP39::createKey(seedPhrase.raw, "m/44'/60'/0'/0");
     dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
 
-    return true;
     this->importPrivKey(k.secret(), password, "default", "m/44'/60'/0'/0",error);
+    return true;
   } catch (dev::Exception const& _e) {
     throw std::string("Failed to create a new wallet: ") + _e.what();
   }
@@ -94,7 +84,7 @@ bool Wallet::importPrivKey(dev::Secret const &secret,
 }
 
 bool Wallet::loadWallet(std::string const &password, Error &error) {
-  if (!boost::filesystem::exists(walletFolder())) { createNewWallet(password, error); }
+  if (!boost::filesystem::exists(walletExistsPath())) { createNewWallet(password, error); }
   // Check if password is correct
   json walletInfo = json::parse(walletDB.getKeyValue("walletInfo"));
   auto originalKey = dev::fromHex(walletInfo["key"]);
@@ -128,8 +118,11 @@ void Wallet::loadAccounts() {
     std::string tmpAddress = accountJson["address"].get<std::string>();
     std::string tmpDerivationPath = accountJson["derivationPath"].get<std::string>();
     bool tmpIsLedger = accountJson["isLedger"].get<bool>();
+
+    std::cout << accountJson.dump(2) << std::endl;
+
     Account newTmpAccount(
-      boost::filesystem::path(path->string() + "/wallet"),
+      boost::filesystem::path(path.string() + "/wallet"),
       accountInfoStr.first,
       accountJson["address"].get<std::string>(),
       accountJson["derivationPath"].get<std::string>(),
@@ -149,14 +142,10 @@ bool Wallet::createNewAccount(std::string derivationPath, std::string &password,
   // Load the phrase from JSON.
     std::string seedPhrase;
     {
-      Cipher cipher("aes-256-cbc", "sha256");
       boost::filesystem::path tmpPath = seedPhraseFile();
       json seedJson = Utils::readJSONFile(tmpPath);
-      std::string encryptedPhrase = seedJson["seed"].get<std::string>();
-      std::string salt = seedJson["salt"].get<std::string>();
-      // Replace spaces with newlines, cipher only accepts newlines since it's base64
-      boost::replace_all(encryptedPhrase, " ", "\n");
-      seedPhrase = cipher.decrypt(encryptedPhrase, password, salt);
+      auto decrypt = dev::SecretStore::decrypt(seedJson.dump(), password);
+      seedPhrase = decrypt.ref().toString();
     }
 
     // Derive the account.

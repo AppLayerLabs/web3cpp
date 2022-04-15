@@ -20,6 +20,9 @@
 #pragma warning(disable:3682) //call through incomplete class
 #endif
 
+
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+
 #include <map>
 #include <unordered_map>
 #include <vector>

@@ -10,8 +10,12 @@
 #include <web3cpp/devcore/FileSystem.h>
 #include <web3cpp/devcore/CommonIO.h>
 #include "Common.h"
+#include <lib/json_spirit/JsonSpiritHeaders.h>
 
 #include <boost/filesystem.hpp>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+namespace js = json_spirit;
 
 // Boost 1.73 deprecated Bind placeholder declarations on global namespace.
 // Defining this macro retains current behaviour.
@@ -34,6 +38,11 @@ enum class KDF {
  * @note that most of the functions here affect the filesystem and throw exceptions on failure,
  * and they also throw exceptions upon rare malfunction in the cryptographic functions.
  */
+
+// Export special functions.
+bytesSec deriveNewKey(std::string const& _pass, KDF _kdf, json &jsonObj);
+bytesSec deriveNewKey(std::string const& _pass, KDF _kdf, js::mObject& o_ret);
+
 class SecretStore
 {
 public:

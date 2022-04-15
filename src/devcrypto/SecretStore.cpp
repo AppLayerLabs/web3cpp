@@ -11,10 +11,8 @@
 #include <web3cpp/devcore/Guards.h>
 #include <web3cpp/devcore/SHA3.h>
 #include <web3cpp/devcore/FileSystem.h>
-#include <lib/json_spirit/JsonSpiritHeaders.h>
 #include <web3cpp/devcrypto/Exceptions.h>
 using namespace dev;
-namespace js = json_spirit;
 namespace fs = boost::filesystem;
 
 static const int c_keyFileVersion = 3;
@@ -283,7 +281,7 @@ bool SecretStore::recode(h128 const& _uuid, std::string const& _newPass, std:: f
 	return true;
 }
 
-static bytesSec deriveNewKey(std::string const& _pass, KDF _kdf, js::mObject& o_ret)
+bytesSec dev::deriveNewKey(std::string const& _pass, KDF _kdf, js::mObject& o_ret)
 {
 	unsigned dklen = 32;
 	unsigned iterations = 1 << 18;
@@ -314,6 +312,42 @@ static bytesSec deriveNewKey(std::string const& _pass, KDF _kdf, js::mObject& o_
 			params["salt"] = toHex(salt);
 			params["dklen"] = int(dklen);
 			o_ret["kdfparams"] = params;
+		}
+		return pbkdf2(_pass, salt, iterations, dklen);
+	}
+}
+
+bytesSec dev::deriveNewKey(std::string const& _pass, KDF _kdf, json& jsonObj)
+{
+	unsigned dklen = 32;
+	unsigned iterations = 1 << 18;
+	bytes salt = h256::random().asBytes();
+	if (_kdf == KDF::Scrypt)
+	{
+		unsigned p = 1;
+		unsigned r = 8;
+		jsonObj["kdf"] = "scrypt";
+		{
+			json params;
+			params["n"] = int64_t(iterations);
+			params["r"] = int(r);
+			params["p"] = int(p);
+			params["dklen"] = int(dklen);
+			params["salt"] = toHex(salt);
+			jsonObj["kdfparams"] = params;
+		}
+		return scrypt(_pass, salt, iterations, r, p, dklen);
+	}
+	else
+	{
+		jsonObj["kdf"] = "pbkdf2";
+		{
+			json params;
+			params["prf"] = "hmac-sha256";
+			params["c"] = int(iterations);
+			params["salt"] = toHex(salt);
+			params["dklen"] = int(dklen);
+			jsonObj["kdfparams"] = params;
 		}
 		return pbkdf2(_pass, salt, iterations, dklen);
 	}

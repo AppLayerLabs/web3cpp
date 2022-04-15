@@ -16,6 +16,8 @@ class Error {
       {4, "Invalid Hex Data"},
       {5, "Invalid Address"},
       {6, "Invalid Hash Length"},
+      {7, "Crypto Exception: Key derivation failed."}, 
+      {8, "Key encryption failed."},
       {999, "Unknown Error"},
     };
     uint64_t code;

@@ -1,6 +1,6 @@
 #include <web3cpp/RPC.h>
 
-json _buildJSON(std::string method, json params) {
+json RPC::_buildJSON(std::string method, json params) {
   return {
     {"jsonrpc", "2.0"}, {"method", method}, {"params", params}, {"id", 1}
   };

@@ -24,7 +24,7 @@ class Database {
   public:
     // Constructor.
     Database(std::string _databaseName, boost::filesystem::path rootPath)
-    : databaseName(_databaseName), databasePath(rootPath.string() + databaseName) {
+    : databaseName(_databaseName), databasePath(rootPath.string() + "/" + databaseName) {
       this->dbOpts.create_if_missing = true;
       openDB();
     }
