@@ -140,7 +140,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ssl crypto
+  ${Boost_LIBRARIES} ssl crypto
   nlohmann_json::nlohmann_json cryptopp-static libscrypt::scrypt
   Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )

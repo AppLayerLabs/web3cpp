@@ -10,7 +10,7 @@ Account::Account(
   Error error;
 
 
-  auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::GET, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
+  auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::POST, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
   std::cout << nonceRequest << std::endl;
   json nonceJson = json::parse(nonceRequest);
   _nonce = boost::lexical_cast<HexTo<uint64_t>>(nonceJson["result"].get<std::string>());
