@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7cceb2c..630f262 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,13 +59,13 @@ write_basic_package_version_file(
+     COMPATIBILITY AnyNewerVersion)
+ 
+ install(FILES
+-            "netutilsConfig.cmake"
++            "certifyConfig.cmake"
+             "${CMAKE_BINARY_DIR}/certifyConfigVersion.cmake"
+         DESTINATION lib/cmake/certify)
+ 
+ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+         DESTINATION include
+-        FILES_MATCHING PATTERN "*.hpp")
++        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.ipp")
+ 
+ install(TARGETS core
+         EXPORT certifyTargets
+diff --git a/certifyConfig.cmake b/certifyConfig.cmake
+index 272dd90..87313e8 100644
+--- a/certifyConfig.cmake
++++ b/certifyConfig.cmake
+@@ -1,6 +1,7 @@
+ include(CMakeFindDependencyMacro)
+ 
+-find_dependency(Boost COMPONENTS system)
++find_dependency(Boost COMPONENTS system filesystem date_time)
++find_dependency(OpenSSL)
+ find_dependency(Threads)
+ 
+-include("${CMAKE_CURRENT_LIST_DIR}/certify-Targets.cmake")
++include("${CMAKE_CURRENT_LIST_DIR}/certifyTargets.cmake")
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index c1cda26..03be79c 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -11,5 +11,9 @@ function (certify_verify_add_test test_file)
+              COMMAND ${target_name})
+ endfunction(certify_verify_add_test)
+ 
++certify_verify_add_test(extensions.cpp)
+ certify_verify_add_test(https_verification_success.cpp)
+ certify_verify_add_test(https_verification_fail.cpp)
++certify_verify_add_test(crl_set_parser.cpp)
++certify_verify_add_test(detail_spki_digest.cpp)
++certify_verify_add_test(status_cache.cpp)
+\ No newline at end of file

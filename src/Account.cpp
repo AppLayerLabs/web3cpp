@@ -11,7 +11,8 @@ Account::Account(
 
 
   auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::GET, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
-  json nonceJson = json::parse(nonceRequest.get());
+  std::cout << nonceRequest << std::endl;
+  json nonceJson = json::parse(nonceRequest);
   _nonce = boost::lexical_cast<HexTo<uint64_t>>(nonceJson["result"].get<std::string>());
 }
 
@@ -26,7 +27,7 @@ std::future<BigNumber> Account::balance() {
     request["params"].push_back("latest");
     
     auto balanceRequestStr = Net::HTTPRequest(provider, Net::RequestTypes::GET, request.dump(0));
-    json balanceRequest = json::parse(balanceRequestStr.get());
+    json balanceRequest = json::parse(balanceRequestStr);
     BigNumber balance = Utils::hexToBigNumber(balanceRequest["result"].get<std::string>());
     return ret;
   });

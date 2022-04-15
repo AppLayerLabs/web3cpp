@@ -62,7 +62,7 @@ namespace Utils {
     Provider() {
       // Default to AVAX.
       networkName = "Avalanche Mainnet";
-      rpcUrl = "https://api.avax.network/";
+      rpcUrl = "api.avax.network";
       rpcTarget = "/ext/bc/C/rpc";
       rpcPort = 443;
       chainID = 43114;

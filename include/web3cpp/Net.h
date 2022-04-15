@@ -15,6 +15,7 @@
 
 #include <web3cpp/Utils.h>
 #include <web3cpp/root_certificates.h>
+#include <web3cpp/Error.h>
 
 
 namespace Net {
@@ -24,8 +25,8 @@ namespace Net {
     GET
   };
 
-  std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
-
+  //std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
+  std::string HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
   std::future<std::string> customHTTPRequest(std::string reqBody, 
                                              std::string host, 
                                              std::string port, 

@@ -123,8 +123,8 @@ void Wallet::loadAccounts() {
 
     Account newTmpAccount(
       boost::filesystem::path(path.string() + "/wallet"),
-      accountInfoStr.first,
       accountJson["address"].get<std::string>(),
+      accountInfoStr.first,
       accountJson["derivationPath"].get<std::string>(),
       accountJson["isLedger"].get<bool>(),
       provider

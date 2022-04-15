@@ -87,6 +87,7 @@ include(ProjectToolbox)
 include(ProjectBip3x)
 include(ProjectSnappy)
 include(ProjectLevelDB)
+include(ProjectBoostCertify)
 find_package(Threads)
 
 # Include headers and libs
