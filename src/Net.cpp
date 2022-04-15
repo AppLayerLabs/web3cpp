@@ -1,10 +1,13 @@
 #include <web3cpp/Net.h>
 
+#include <boost/certify/extensions.hpp>
+#include <boost/certify/https_verification.hpp>
 
 
 namespace Net {
-  std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
-    return std::async([=]{
+  //std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
+    std::string HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
+    //return std::async([=]{
       std::string result = "";
       using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
       namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
@@ -16,26 +19,31 @@ namespace Net {
       std::string port = boost::lexical_cast<std::string>(provider->rpcPort);
       provider->ProviderLock.unlock();
 
+
+      std::cout << "url: " << url << std::endl;
+      std::cout << "target: " << target << std::endl;
+      std::cout << "port: " << port << std::endl;
+      std::cout << "reqBody: " << reqBody << std::endl;
+      std::cout << "try catch block " << std::endl;
       try {
         // Create context and load certificates into it
+        boost::system::error_code ec;
         boost::asio::io_context ioc;
         ssl::context ctx{ssl::context::sslv23_client};
-        load_root_certificates(ctx);
+        ctx.set_verify_mode(ssl::context::verify_peer |
+                            ssl::context::verify_fail_if_no_peer_cert);
+        ctx.set_default_verify_paths();
+        boost::certify::enable_native_https_server_verification(ctx);
 
         tcp::resolver resolver{ioc};
         ssl::stream<tcp::socket> stream{ioc, ctx};
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
-        if (!SSL_set_tlsext_host_name(stream.native_handle(), url.c_str())) {
-          boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
-          throw boost::system::system_error{ec};
-        }
+        boost::certify::sni_hostname(stream, url, ec);
         auto const results = resolver.resolve(url, port);
-
         // Connect and Handshake
         boost::asio::connect(stream.next_layer(), results.begin(), results.end());
         stream.handshake(ssl::stream_base::client);
-
         // Set up an HTTP POST/GET request message
         http::request<http::string_body> req{(requestType == RequestTypes::POST) ? http::verb::post : http::verb::get, target, 11};
         if (requestType == RequestTypes::GET) {
@@ -63,27 +71,30 @@ namespace Net {
         // Receive the HTTP response
         http::read(stream, buffer, res);
         //std::cout << res.base().result() << std::endl;
-
         // Write only the body answer to output
         std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
         result = body;
         //Utils::logToDebug("API Result ID " + RequestID + " : " + result);
         //std::cout << "REQUEST RESULT: \n" << result << std::endl; // Uncomment for debugging
 
-        boost::system::error_code ec;
         stream.shutdown(ec);
 
         // SSL Connections return stream_truncated when closed.
         // For that reason, we need to treat this as an error.
         if (ec == boost::asio::error::eof || boost::asio::ssl::error::stream_truncated)
           ec.assign(0, ec.category());
-        if (ec)
+        if (ec) {
+          std::cout << "2 throwed " << boost::system::system_error{ec}.what() << std::endl;
           throw boost::system::system_error{ec};
+        }
       } catch (std::exception const& e) {
+        std::cout << "3 throwed " << e.what() << std::endl;
         throw std::string("HTTP Request error: ") + e.what();
       }
+
+      std::cout << "Return: " << result << std::endl;
       return result;
-    });
+    //});
   }
 
   std::future<std::string> customHttpRequest(std::string reqBody, std::string host, std::string port, std::string target, std::string requestType, std::string contentType) {

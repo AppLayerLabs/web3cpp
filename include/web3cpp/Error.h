@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 
 // Class for handling error codes.
 
@@ -23,6 +24,7 @@ class Error {
     uint64_t code;
     std::string message;
     bool isSet = false;
+    std::mutex lock;
 
   public:
     void setErrorCode(uint64_t errorCode);
