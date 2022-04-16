@@ -8,8 +8,6 @@ Account::Account(
 {
   // TODO: Load transaction data.
   Error error;
-
-
   auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::POST, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
   std::cout << nonceRequest << std::endl;
   json nonceJson = json::parse(nonceRequest);
@@ -25,7 +23,6 @@ std::future<BigNumber> Account::balance() {
     request["params"] = json::array();
     request["params"].push_back(this->address());
     request["params"].push_back("latest");
-    
     auto balanceRequestStr = Net::HTTPRequest(provider, Net::RequestTypes::GET, request.dump(0));
     json balanceRequest = json::parse(balanceRequestStr);
     BigNumber balance = Utils::hexToBigNumber(balanceRequest["result"].get<std::string>());

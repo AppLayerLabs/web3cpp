@@ -91,8 +91,11 @@ class Wallet {
     static bool walletExists(boost::filesystem::path &wallet_path);
 
     // Creates a new account.
-    // Uses BIP39 seed stored in json file, throws in case of error.
-    bool createNewAccount(std::string derivationPath, std::string &password, Error &error);
+    // If no custom seed is passed, uses BIP39 seed stored in json file.
+    // Throws in case of error.
+    bool createNewAccount(
+      std::string derivPath, std::string &password, Error &error, std::string seed = ""
+    );
 
     /**
      * Build a transaction from user data.

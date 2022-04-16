@@ -6,7 +6,7 @@
 
 namespace Net {
   //std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
-    std::string HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
+  std::string HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody) {
     //return std::async([=]{
       std::string result = "";
       using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
@@ -18,13 +18,11 @@ namespace Net {
       std::string target = provider->rpcTarget;
       std::string port = boost::lexical_cast<std::string>(provider->rpcPort);
       provider->ProviderLock.unlock();
-
-
-      std::cout << "url: " << url << std::endl;
-      std::cout << "target: " << target << std::endl;
-      std::cout << "port: " << port << std::endl;
-      std::cout << "reqBody: " << reqBody << std::endl;
-      std::cout << "try catch block " << std::endl;
+      // Uncomment to see request details
+      //std::cout << "url: " << url << std::endl;
+      //std::cout << "target: " << target << std::endl;
+      //std::cout << "port: " << port << std::endl;
+      //std::cout << "reqBody: " << reqBody << std::endl;
       try {
         // Create context and load certificates into it
         boost::system::error_code ec;
@@ -92,7 +90,7 @@ namespace Net {
         throw std::string("HTTP Request error: ") + e.what();
       }
 
-      std::cout << "Return: " << result << std::endl;
+      //std::cout << "Return: " << result << std::endl;
       return result;
     //});
   }
