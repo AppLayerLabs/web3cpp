@@ -54,12 +54,12 @@ bool Wallet::importPrivKey(
 ) {
   // Check if wallet already exists inside the database, do not allow specific names
   if (name == "walletInfo") {
-    error.setErrorCode(2); // Forbidden Account Name.
+    error.setCode(2); // Forbidden Account Name.
     return false;
   }
 
   if (walletDB.getKeyValue(name) != "") {
-    error.setErrorCode(3); // Account Name Exists.
+    error.setCode(3); // Account Name Exists.
     return false;
   }
 
@@ -71,7 +71,7 @@ bool Wallet::importPrivKey(
   auto originalIterations = walletInfo["iterations"];
   auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, originalSalt, originalIterations, 16));
   if (key != oldKey) {
-    error.setErrorCode(1); // Incorrect Password.
+    error.setCode(1); // Incorrect Password.
     return false;
   }
   json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
@@ -98,7 +98,7 @@ bool Wallet::loadWallet(std::string const &password, Error &error) {
     _isLoaded = true;
     return true;
   } else {
-    error.setErrorCode(1); // Incorrect Password.
+    error.setCode(1); // Incorrect Password.
     return false;
   }
 }
@@ -135,7 +135,7 @@ bool Wallet::createNewAccount(
   std::string derivPath, std::string &password, Error &error, std::string seed
 ) {
   if(!checkPassword(password)) {
-    error.setErrorCode(1); // Incorrect Password
+    error.setCode(1); // Incorrect Password
     return false;
   }
   try {

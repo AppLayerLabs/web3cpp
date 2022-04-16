@@ -29,7 +29,8 @@ class Error {
     std::mutex lock;
 
   public:
-    void setErrorCode(uint64_t errorCode);
+    void setCode(uint64_t errorCode);
+    uint64_t getCode();
     std::string what();
 
     // Operators

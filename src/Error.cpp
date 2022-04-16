@@ -1,6 +1,6 @@
 #include <web3cpp/Error.h>
 
-void Error::setErrorCode(uint64_t errorCode) {
+void Error::setCode(uint64_t errorCode) {
   this->lock.lock();
   if (isSet) { throw "Error already set"; };
   auto match = codeMap.find(errorCode);
@@ -16,10 +16,17 @@ void Error::setErrorCode(uint64_t errorCode) {
   this->lock.unlock();
 }
 
+uint64_t Error::getCode() {
+  this->lock.lock();
+  uint64_t ret = this->code;
+  this->lock.unlock();
+  return ret;
+}
+
 std::string Error::what() {
   this->lock.lock();
   std::string ret = this->message;
-  this->lock.lock();
+  this->lock.unlock();
   return ret;
 }
 

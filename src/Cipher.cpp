@@ -6,7 +6,7 @@ std::string cipher::encrypt(std::string const& plainText, std::string const& pas
   json ret;
   dev::bytesSec derivedKey = dev::deriveNewKey(password, _kdf, ret);
   if (derivedKey.empty()) {
-    error.setErrorCode(7); // Key derivation failed
+    error.setCode(7); // Key derivation failed
     return "";
   }
 
@@ -23,7 +23,7 @@ std::string cipher::encrypt(std::string const& plainText, std::string const& pas
   dev::bytesConstRef _v(plainText);
   dev::bytes cipherText = encryptSymNoAuth(key, iv, _v);
   if (cipherText.empty()) {
-    error.setErrorCode(8); // Key encryption failed.
+    error.setCode(8); // Key encryption failed.
     return "";
   }
   ret["ciphertext"] = dev::toHex(cipherText);

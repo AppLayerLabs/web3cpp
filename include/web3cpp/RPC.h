@@ -17,10 +17,13 @@
 // Every JSON object returned defaults to an id of "1".
 // See the docs at https://eth.wiki/json-rpc/API
 
-// TODO: streamline sanity checks into their own functions
-
 namespace RPC {
   json _buildJSON(std::string method, json params = json::array());
+  bool _checkHexData(std::string hex, bool strict = true);
+  bool _checkHexLength(std::string hex, int length);
+  bool _checkAddress(std::string add);
+  bool _checkDefaultBlock(std::string defaultBlock);
+  bool _checkNumber(std::string num);
 
   json web3_clientVersion();
   json web3_sha3(std::string data, Error &err);
