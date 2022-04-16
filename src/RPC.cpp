@@ -68,21 +68,21 @@ json RPC::eth_getBalance(std::string address, std::string defaultBlock, Error &e
     err.setErrorCode(5); // Invalid Address
     return json::object();
   }
-  // TODO: defaultBlock sanity check
+  if (
+    defaultBlock != "latest" || defaultBlock != "earliest" || defaultBlock != "pending"
+    || !std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+  ) {
+    err.setErrorCode(9); // Invalid Block Number
+    return json::object();
+  }
   err.setErrorCode(0); // No error
   return _buildJSON("eth_getBalance", {address, defaultBlock});
 }
 
 json RPC::eth_getBalance(std::string address, BigNumber defaultBlock, Error &err) {
-  if (!Utils::isAddress(address)) {
-    err.setErrorCode(5); // Invalid Address
-    return json::object();
-  }
-  // TODO: defaultBlock sanity check
   std::stringstream ss;
   ss << defaultBlock;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getBalance", {address, ss.str()});
+  return eth_getBalance(address, ss.str(), err);
 }
 
 json RPC::eth_getStorageAt(std::string address, std::string position, std::string defaultBlock, Error &err) {
@@ -94,25 +94,21 @@ json RPC::eth_getStorageAt(std::string address, std::string position, std::strin
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: defaultBlock sanity check
+  if (
+    defaultBlock != "latest" || defaultBlock != "earliest" || defaultBlock != "pending"
+    || !std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+  ) {
+    err.setErrorCode(9); // Invalid Block Number
+    return json::object();
+  }
   err.setErrorCode(0); // No error
   return _buildJSON("eth_getStorageAt", {address, position, defaultBlock});
 }
 
 json RPC::eth_getStorageAt(std::string address, std::string position, BigNumber defaultBlock, Error &err) {
-  if (!Utils::isAddress(address)) {
-    err.setErrorCode(5); // Invalid Address
-    return json::object();
-  }
-  if (!Utils::isHexStrict(position)) {
-    err.setErrorCode(4); // Invalid Hex Data
-    return json::object();
-  }
-  // TODO: defaultBlock sanity check
   std::stringstream ss;
   ss << defaultBlock;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getStorageAt", {address, position, ss.str()});
+  return eth_getStorageAt(address, position, ss.str(), err);
 }
 
 json RPC::eth_getTransactionCount(std::string address, std::string defaultBlock, Error &err) {
@@ -120,21 +116,21 @@ json RPC::eth_getTransactionCount(std::string address, std::string defaultBlock,
     err.setErrorCode(5); // Invalid Address
     return json::object();
   }
-  // TODO: defaultBlock sanity check
+  if (
+    defaultBlock != "latest" || defaultBlock != "earliest" || defaultBlock != "pending"
+    || !std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+  ) {
+    err.setErrorCode(9); // Invalid Block Number
+    return json::object();
+  }
   err.setErrorCode(0); // No error
   return _buildJSON("eth_getTransactionCount", {address, defaultBlock});
 }
 
 json RPC::eth_getTransactionCount(std::string address, BigNumber defaultBlock, Error &err) {
-  if (!Utils::isAddress(address)) {
-    err.setErrorCode(5); // Invalid Address
-    return json::object();
-  }
-  // TODO: defaultBlock sanity check
   std::stringstream ss;
   ss << defaultBlock;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getTransactionCount", {address, ss.str()});
+  return eth_getTransactionCount(address, ss.str(), err);
 }
 
 json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
@@ -194,21 +190,21 @@ json RPC::eth_getCode(std::string address, std::string defaultBlock, Error &err)
     err.setErrorCode(5); // Invalid Address
     return json::object();
   }
-  // TODO: defaultBlock sanity check
+  if (
+    defaultBlock != "latest" || defaultBlock != "earliest" || defaultBlock != "pending"
+    || !std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+  ) {
+    err.setErrorCode(9); // Invalid Block Number
+    return json::object();
+  }
   err.setErrorCode(0); // No error
   return _buildJSON("eth_getCode", {address, defaultBlock});
 }
 
 json RPC::eth_getCode(std::string address, BigNumber defaultBlock, Error &err) {
-  if (!Utils::isAddress(address)) {
-    err.setErrorCode(5); // Invalid Address
-    return json::object();
-  }
-  // TODO: defaultBlock sanity check
   std::stringstream ss;
   ss << defaultBlock;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getCode", {address, ss.str()});
+  return eth_getCode(address, ss.str(), err);
 }
 
 json RPC::eth_sign(std::string address, std::string data, Error &err) {
@@ -243,18 +239,22 @@ json RPC::eth_sendRawTransaction(std::string signedTxData, Error &err) {
   return _buildJSON("eth_sendRawTransaction", {signedTxData});
 }
 
-json RPC::eth_call(json callObject, std::string defaultBlock) {
+json RPC::eth_call(json callObject, std::string defaultBlock, Error &err) {
   // TODO: callObject sanity check (there's a lot)
-  // TODO: defaultBlock sanity check
+  if (
+    defaultBlock != "latest" || defaultBlock != "earliest" || defaultBlock != "pending"
+    || !std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+  ) {
+    err.setErrorCode(9); // Invalid Block Number
+    return json::object();
+  }
   return _buildJSON("eth_call", {callObject, defaultBlock});
 }
 
-json RPC::eth_call(json callObject, BigNumber defaultBlock) {
-  // TODO: callObject sanity check (there's a lot)
-  // TODO: defaultBlock sanity check
+json RPC::eth_call(json callObject, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
-  return _buildJSON("eth_call", {callObject, ss.str()});
+  return eth_call(callObject, ss.str(), err);
 }
 
 json RPC::eth_estimateGas(json callObject) {

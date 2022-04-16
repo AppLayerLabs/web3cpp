@@ -2,23 +2,24 @@
 #define ERROR_H
 
 #include <map>
-#include <string>
 #include <mutex>
+#include <string>
 
 // Class for handling error codes.
 
 class Error {
   private:
     const std::map<uint64_t,std::string> codeMap {
-      {0, "No error"},
+      {0, "No Error"},
       {1, "Incorrect Password"},
       {2, "Forbidden Account Name"},
       {3, "Account Name Exists"},
       {4, "Invalid Hex Data"},
       {5, "Invalid Address"},
       {6, "Invalid Hash Length"},
-      {7, "Crypto Exception: Key derivation failed."}, 
-      {8, "Key encryption failed."},
+      {7, "Key Derivation Failed"},
+      {8, "Key Encryption Failed"},
+      {9, "Invalid Block Number"},
       {999, "Unknown Error"},
     };
     uint64_t code;

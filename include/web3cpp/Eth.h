@@ -31,7 +31,7 @@ class Eth {
 
     // Default block used for certain methods.
     // Can be overriden in some functions' last parameters.
-    BigNumber defaultBlock;
+    std::string defaultBlock = "latest";
 
     // Default hardfork used for signing transactions locally.
     std::string defaultHardfork = "fuji";

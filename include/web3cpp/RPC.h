@@ -1,6 +1,8 @@
 #ifndef RPC_H
 #define RPC_H
 
+#include <algorithm>
+#include <cctype>
 #include <string>
 #include <sstream>
 
@@ -14,6 +16,8 @@
 // error codes and return empty JSON objects if those checks fail.
 // Every JSON object returned defaults to an id of "1".
 // See the docs at https://eth.wiki/json-rpc/API
+
+// TODO: streamline sanity checks into their own functions
 
 namespace RPC {
   json _buildJSON(std::string method, json params = json::array());
@@ -51,8 +55,8 @@ namespace RPC {
   json eth_signTransaction(json transactionObject);
   json eth_sendTransaction(json transactionObject);
   json eth_sendRawTransaction(std::string signedTxData, Error &err);
-  json eth_call(json callObject, std::string defaultBlock);
-  json eth_call(json callObject, BigNumber defaultBlock);
+  json eth_call(json callObject, std::string defaultBlock, Error &err);
+  json eth_call(json callObject, BigNumber defaultBlock, Error &err);
   json eth_estimateGas(json callObject);
   json eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err);
   json eth_getBlockByNumber(std::string number, bool returnTransactionObjects);
