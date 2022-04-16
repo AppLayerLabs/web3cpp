@@ -20,6 +20,7 @@ class Error {
       {7, "Key Derivation Failed"},
       {8, "Key Encryption Failed"},
       {9, "Invalid Block Number"},
+      {10, "Invalid Number"},
       {999, "Unknown Error"},
     };
     uint64_t code;

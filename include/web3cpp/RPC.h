@@ -44,11 +44,11 @@ namespace RPC {
   json eth_getTransactionCount(std::string address, std::string defaultBlock, Error &err);
   json eth_getTransactionCount(std::string address, BigNumber defaultBlock, Error &err);
   json eth_getBlockTransactionCountByHash(std::string hash, Error &err);
-  json eth_getBlockTransactionCountByNumber(std::string number);
-  json eth_getBlockTransactionCountByNumber(BigNumber number);
+  json eth_getBlockTransactionCountByNumber(std::string number, Error &err);
+  json eth_getBlockTransactionCountByNumber(BigNumber number, Error &err);
   json eth_getUncleCountByBlockHash(std::string hash, Error &err);
-  json eth_getUncleCountByBlockNumber(std::string number);
-  json eth_getUncleCountByBlockNumber(BigNumber number);
+  json eth_getUncleCountByBlockNumber(std::string number, Error &err);
+  json eth_getUncleCountByBlockNumber(BigNumber number, Error &err);
   json eth_getCode(std::string address, std::string defaultBlock, Error &err);
   json eth_getCode(std::string address, BigNumber defaultBlock, Error &err);
   json eth_sign(std::string address, std::string data, Error &err);
@@ -59,8 +59,8 @@ namespace RPC {
   json eth_call(json callObject, BigNumber defaultBlock, Error &err);
   json eth_estimateGas(json callObject);
   json eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err);
-  json eth_getBlockByNumber(std::string number, bool returnTransactionObjects);
-  json eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects);
+  json eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err);
+  json eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, Error &err);
   json eth_getTransactionByHash(std::string hash, Error &err);
   json eth_getTransactionByBlockHashAndIndex(std::string hash, std::string index, Error &err);
   json eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err);

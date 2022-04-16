@@ -1,9 +1,7 @@
 #include <web3cpp/RPC.h>
 
 json RPC::_buildJSON(std::string method, json params) {
-  return {
-    {"jsonrpc", "2.0"}, {"method", method}, {"params", params}, {"id", 1}
-  };
+  return {{"jsonrpc", "2.0"}, {"method", method}, {"params", params}, {"id", 1}};
 }
 
 json RPC::web3_clientVersion() {
@@ -138,7 +136,6 @@ json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -147,16 +144,19 @@ json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
   return _buildJSON("eth_getBlockTransactionCountByHash", {hash});
 }
 
-json RPC::eth_getBlockTransactionCountByNumber(std::string number) {
-  // TODO: number sanity check
+json RPC::eth_getBlockTransactionCountByNumber(std::string number, Error &err) {
+  if (!std::all_of(number.begin(), number.end(), ::isdigit)) {
+    err.setErrorCode(10); // Invalid Number
+    return json::object();
+  }
+  err.setErrorCode(0); // No error
   return _buildJSON("eth_getBlockTransactionCountByNumber", {number});
 }
 
-json RPC::eth_getBlockTransactionCountByNumber(BigNumber number) {
-  // TODO: number sanity check
+json RPC::eth_getBlockTransactionCountByNumber(BigNumber number, Error &err) {
   std::stringstream ss;
   ss << number;
-  return _buildJSON("eth_getBlockTransactionCountByNumber", {ss.str()});
+  return eth_getBlockTransactionCountByNumber(ss.str(), err);
 }
 
 json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
@@ -164,7 +164,6 @@ json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -173,16 +172,19 @@ json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
   return _buildJSON("eth_getUncleCountByBlockHash", {hash});
 }
 
-json RPC::eth_getUncleCountByBlockNumber(std::string number) {
-  // TODO: number sanity check
+json RPC::eth_getUncleCountByBlockNumber(std::string number, Error &err) {
+  if (!std::all_of(number.begin(), number.end(), ::isdigit)) {
+    err.setErrorCode(10); // Invalid Number
+    return json::object();
+  }
+  err.setErrorCode(0); // No error
   return _buildJSON("eth_getUncleCountByBlockNumber", {number});
 }
 
-json RPC::eth_getUncleCountByBlockNumber(BigNumber number) {
-  // TODO: number sanity check
+json RPC::eth_getUncleCountByBlockNumber(BigNumber number, Error &err) {
   std::stringstream ss;
   ss << number;
-  return _buildJSON("eth_getUncleCountByBlockNumber", {ss.str()});
+  return eth_getUncleCountByBlockNumber(ss.str(), err);
 }
 
 json RPC::eth_getCode(std::string address, std::string defaultBlock, Error &err) {
@@ -248,6 +250,7 @@ json RPC::eth_call(json callObject, std::string defaultBlock, Error &err) {
     err.setErrorCode(9); // Invalid Block Number
     return json::object();
   }
+  err.setErrorCode(0); // No error
   return _buildJSON("eth_call", {callObject, defaultBlock});
 }
 
@@ -266,7 +269,6 @@ json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Er
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -275,16 +277,19 @@ json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Er
   return _buildJSON("eth_getBlockByHash", {hash, returnTransactionObjects});
 }
 
-json RPC::eth_getBlockByNumber(std::string number, bool returnTransactionObjects) {
-  // TODO: number sanity check
+json RPC::eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err) {
+  if (!std::all_of(number.begin(), number.end(), ::isdigit)) {
+    err.setErrorCode(10); // Invalid Number
+    return json::object();
+  }
+  err.setErrorCode(0); // No error
   return _buildJSON("eth_getBlockByNumber", {number, returnTransactionObjects});
 }
 
-json RPC::eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects) {
-  // TODO: number sanity check
+json RPC::eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, Error &err) {
   std::stringstream ss;
   ss << number;
-  return _buildJSON("eth_getBlockByNumber", {ss.str(), returnTransactionObjects});
+  return eth_getBlockByNumber(ss.str(), returnTransactionObjects, err);
 }
 
 json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
@@ -292,7 +297,6 @@ json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -306,7 +310,6 @@ json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string in
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -320,24 +323,22 @@ json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string in
 }
 
 json RPC::eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
-  // TODO: number sanity check
+  if (!std::all_of(number.begin(), number.end(), ::isdigit)) {
+    err.setErrorCode(10); // Invalid Number
+    return json::object();
+  }
   if (!Utils::isHexStrict(index)) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
+  err.setErrorCode(0); // No error
   return _buildJSON("eth_getTransactionByBlockNumberAndIndex", {number, index});
 }
 
 json RPC::eth_getTransactionByBlockNumberAndIndex(BigNumber number, std::string index, Error &err) {
-  // TODO: number sanity check
-  if (!Utils::isHexStrict(index)) {
-    err.setErrorCode(4); // Invalid Hex Data
-    return json::object();
-  }
   std::stringstream ss;
   ss << number;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getTransactionByBlockNumberAndIndex", {ss.str(), index});
+  return eth_getTransactionByBlockNumberAndIndex(ss.str(), index, err);
 }
 
 json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
@@ -345,7 +346,6 @@ json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -359,7 +359,6 @@ json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, E
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if block hash always has 32 bytes
   if (hash.length() != 66) { // "0x" + 32 hex bytes (64 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
@@ -373,7 +372,10 @@ json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, E
 }
 
 json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
-  // TODO: number sanity check
+  if (!std::all_of(number.begin(), number.end(), ::isdigit)) {
+    err.setErrorCode(10); // Invalid Number
+    return json::object();
+  }
   if (!Utils::isHexStrict(index)) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
@@ -383,15 +385,9 @@ json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string inde
 }
 
 json RPC::eth_getUncleByBlockNumberAndIndex(BigNumber number, std::string index, Error &err) {
-  // TODO: number sanity check
-  if (!Utils::isHexStrict(index)) {
-    err.setErrorCode(4); // Invalid Hex Data
-    return json::object();
-  }
   std::stringstream ss;
   ss << number;
-  err.setErrorCode(0); // No error
-  return _buildJSON("eth_getUncleByBlockNumberAndIndex", {ss.str(), index});
+  return eth_getUncleByBlockNumberAndIndex(ss.str(), index, err);
 }
 
 json RPC::eth_getCompilers() {
@@ -467,7 +463,6 @@ json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string dig
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if byte size of all params are correct
   // nonce: "0x" + 8 hex bytes (16 chars)
   // powHash: "0x" + 32 hex bytes (64 chars)
   // digest: "0x" + 32 hex bytes (64 chars)
@@ -484,10 +479,9 @@ json RPC::eth_submitHashrate(std::string hashrate, std::string id, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check if byte size of all params are correct
   // hashrate: "0x" + 32 hex bytes (64 chars)
   // id: "0x" + 32 hex bytes (64 chars)
-  if (hashrate.length() != 66 || id.length() != 66) { //
+  if (hashrate.length() != 66 || id.length() != 66) {
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
   }
@@ -542,9 +536,7 @@ json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
     err.setErrorCode(4); // Invalid Hex Data
     return json::object();
   }
-  // TODO: check identity address length (docs say 60 hex bytes but example adds
-  // up to 130 chars, not 120)
-  if (identityAddress.length() != 132) { // "0x" + 60 hex bytes (120 chars)
+  if (identityAddress.length() != 132) { // "0x" + 65 hex bytes (130 chars)
     err.setErrorCode(6); // Invalid Hash Length
     return json::object();
   }
