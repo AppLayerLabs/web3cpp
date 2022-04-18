@@ -21,6 +21,11 @@ class Error {
       {8, "Key Encryption Failed"},
       {9, "Invalid Block Number"},
       {10, "Invalid Number"},
+      {11, "Transaction Sign Error"},
+      {12, "Transaction Send Error"},
+      {13, "Key Derivation Invalid Length"},
+      {14, "Key Decryption MAC Mismatch"},
+      {15, "Key Decryption Failed"},
       {999, "Unknown Error"},
     };
     uint64_t code;

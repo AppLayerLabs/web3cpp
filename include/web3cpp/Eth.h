@@ -1,8 +1,9 @@
 #ifndef ETH_H
 #define ETH_H
 
-#include <string>
 #include <future>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -126,20 +127,20 @@ class Eth {
 
     // Returns the balance in Wei of an address at a given block.
     std::future<std::string> getBalance(
-      std::string address, BigNumber defaultBlock = this.defaultBlock
+      std::string address, std::string defaultBlock = this.defaultBlock
     );
 
     // Returns the value in storage at a specific position of an address.
     std::future<std::string> getStorageAt(
-      std::string address, std::string position, BigNumber defaultBlock = this.defaultBlock
+      std::string address, std::string position, std::string defaultBlock = this.defaultBlock
     );
     std::future<std::string> getStorageAt(
-      std::string address, BigNumber position, BigNumber defaultBlock = this.defaultBlock
+      std::string address, BigNumber position, std::string defaultBlock = this.defaultBlock
     );
 
     // Returns the code at a specific address.
     std::future<std::string> getCode(
-      std::string address, BigNumber defaultBlock = this.defaultBlock
+      std::string address, std::string defaultBlock = this.defaultBlock
     );
 
     // Returns a block matching the given block number or hash.
@@ -147,25 +148,27 @@ class Eth {
     // all transactions as objects.
     // If false, will only contain transaction hashes.
     std::future<json> getBlock(
-      BigNumber blockHashOrBlockNumber = this.defaultBlock, bool returnTransactionObjects = false
+      std::string blockHashOrBlockNumber = this.defaultBlock,
+      bool returnTransactionObjects = false
     );
 
     // Returns the number of transactions in a given block.
     std::future<unsigned int> getBlockTransactionCount(
-      BigNumber blockHashOrBlockNumber = this.defaultBlock
+      std::string blockHashOrBlockNumber = this.defaultBlock
     );
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
     std::future<unsigned int> getBlockUncleCount(
-      BigNumber blockHashOrBlockNumber = this.defaultBlock
+      std::string blockHashOrBlockNumber = this.defaultBlock
     );
 
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
     std::future<json> getUncle(
-      BigNumber blockHashOrBlockNumber = this.defaultBlock, bool returnTransactionObjects = false
+      std::string blockHashOrBlockNumber = this.defaultBlock,
+      bool returnTransactionObjects = false
     );
 
     // Returns a transaction matching the given hash.
@@ -179,7 +182,8 @@ class Eth {
     // transaction's index position.
     // Return structure is the same as getTransaction().
     std::future<json> getTransactionFromBlock(
-      BigNumber hashStringOrNumber = this.defaultBlock, unsigned int indexNumber
+      std::string hashStringOrNumber = this.defaultBlock,
+      unsigned int indexNumber
     );
 
     // Returns the receipt of a transaction by transaction hash,
@@ -199,14 +203,14 @@ class Eth {
 
     // Signs a transaction with a given address, which needs to be unlocked.
     // transactionObject is the same as sendTransaction().
-    std::future<json> signTransaction(json transactionObject, std::string address);
+    std::future<json> signTransaction(json txObj, std::string address);
 
     // Executes a message call transaction, which is directly executed in the
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
     std::future<std::string> call(
-      json callObject, BigNumber defaultBlock = this.defaultBlock
+      json callObject, std::string defaultBlock = this.defaultBlock
     );
 
     // Executes a message call or transaction and returns the amount of gas used.
@@ -252,12 +256,6 @@ class Eth {
     );
     std::future<json> getProof(
       std::string address, std::vector<BigNumber> storageKey, std::string blockNumber
-    );
-    std::future<json> getProof(
-      std::string address, std::vector<std::string> storageKey, BigNumber blockNumber
-    );
-    std::future<json> getProof(
-      std::string address, std::vector<BigNumber> storageKey, BigNumber blockNumber
     );
 
     // Calls to create an access list that a method execution will access

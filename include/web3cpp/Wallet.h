@@ -102,41 +102,53 @@ class Wallet {
      * being the destination address.
      * Token transactions would have a filled dataHex, 0 txValue and
      * the "to" address being the token contract's address.
+     * "creation" sets whether the transaction is creating a contract.
      * Returns a skeleton filled with data for the transaction, which has to be signed.
      */
-
-    dev::eth::TransactionSkeleton buildTransaction(std::string from,
-                                              std::string to,
-                                              BigNumber value,
-                                              BigNumber gasLimit,
-                                              BigNumber gasPrice,
-                                              std::string dataHex,
-                                              int nonce,
-                                              bool creation = false // Is TX creating a contract?
-                                              );
-
+    dev::eth::TransactionSkeleton buildTransaction(
+      std::string from, std::string to, BigNumber value,
+      BigNumber gasLimit, BigNumber gasPrice, std::string dataHex,
+      int nonce, bool creation = false
+    );
 
     /**
-     * Signs a data string as an "Ethereum Signed Message".
+     * Signs a data string as an "Ethereum Signed Message" (EIP-712 compliant).
      * Usable with ecRecover().
      * dataToSign will be converted to hex using Utils.utf8ToHex().
      */
-    std::future<std::string> sign(std::string dataToSign, std::string address, std::string password);
+    std::string sign(
+      std::string dataToSign, std::string address, std::string password, Error &err
+    );
 
     /**
      * Recovers the account that signed the data.
      * dataThatWasSigned will be converted to hex using Utils.utf8ToHex().
      */
-    std::future<std::string> ecRecover(std::string dataThatWasSigned, std::string signature);
+    std::future<std::string> ecRecover(
+      std::string dataThatWasSigned, std::string signature
+    );
 
-    // Signs a transaction. "from" account needs to be unlocked.
-    std::future<json> signTransaction(json transaction, std::string password);
+    /**
+     * Signs a transaction. "from" account needs to be unlocked.
+     * Returns the signed transaction hash, or an empty string on failure.
+     */
+    std::string signTransaction(
+      dev::eth::TransactionSkeleton txObj, std::string password, Error &err
+    );
 
-    // Sends a transaction over the management API.
-    std::future<std::string> sendTransaction(json transactionOptions, std::string password);
+    /**
+     * Sends a transaction over the management API.
+     * Returns a JSON containing the send results, or an empty JSON
+     * object on failure.
+     */
+    std::future<json> sendTransaction(
+      std::string txHash, std::string password, Error &err
+    );
 
     // Unlocks a specific account for a given number of seconds.
-    void unlockAccount(std::string address, std::string password, unsigned int unlockDuration);
+    void unlockAccount(
+      std::string address, std::string password, unsigned int unlockDuration
+    );
 
     // Locks a specific account.
     std::future<bool> lockAccount(std::string address);
@@ -156,7 +168,9 @@ class Wallet {
      * privateKey is a hex string without the "0x".
      * Returns the address of the new account.
      */
-    std::future<std::string> importRawKey(std::string privateKey, std::string password);
+    std::future<std::string> importRawKey(
+      std::string privateKey, std::string password
+    );
 };
 
 #endif  // WALLET_H
