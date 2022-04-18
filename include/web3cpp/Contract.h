@@ -15,7 +15,6 @@
 // - Implement events (once, events, events.allEvents, getPastEvents)
 // - Check if Method implementation should be this way
 // - Decide how to deal with callbacks and promievents for some functions
-// - Deal with chain/hardfork/common in Options (on Eth they're strings/objects, not numbers)
 
 class Contract {
   public:
@@ -40,9 +39,9 @@ class Contract {
       unsigned int transactionBlockTimeout;
       unsigned int transactionConfirmationBlocks;
       unsigned int transactionPollingTimeout;
-      //number chain;
-      //number hardfork;
-      //number common;
+      std::string chain;
+      std::string hardfork;
+      std::string common;
     };
 
     // Constructor.

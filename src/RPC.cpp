@@ -87,8 +87,10 @@ json RPC::eth_blockNumber() {
 
 json RPC::eth_getBalance(std::string address, std::string defaultBlock, Error &err) {
   int errCode = 0;
-  if (!_checkAddress(address)) errCode = 5; // Invalid Address
-  if (!_checkDefaultBlock(defaultBlock)) errCode = 9; // Invalid Block Number
+  [&](){
+    if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
+    if (!_checkDefaultBlock(defaultBlock)) { errCode = 9; return; } // Invalid Block Number
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBalance", {address, defaultBlock});
@@ -102,9 +104,11 @@ json RPC::eth_getBalance(std::string address, BigNumber defaultBlock, Error &err
 
 json RPC::eth_getStorageAt(std::string address, std::string position, std::string defaultBlock, Error &err) {
   int errCode = 0;
-  if (!_checkAddress(address)) errCode = 5; // Invalid Address
-  if (!_checkHexData(position)) errCode = 4; // Invalid Hex Data
-  if (!_checkDefaultBlock(defaultBlock)) errCode = 9; // Invalid Block Number
+  [&](){
+    if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
+    if (!_checkHexData(position)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkDefaultBlock(defaultBlock)) { errCode = 9; return; } // Invalid Block Number
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getStorageAt", {address, position, defaultBlock});
@@ -118,8 +122,10 @@ json RPC::eth_getStorageAt(std::string address, std::string position, BigNumber 
 
 json RPC::eth_getTransactionCount(std::string address, std::string defaultBlock, Error &err) {
   int errCode = 0;
-  if (!_checkAddress(address)) errCode = 5; // Invalid Address
-  if (!_checkDefaultBlock(defaultBlock)) errCode = 9; // Invalid Block Number
+  [&](){
+    if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
+    if (!_checkDefaultBlock(defaultBlock)) { errCode = 9; return; } // Invalid Block Number
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getTransactionCount", {address, defaultBlock});
@@ -132,19 +138,19 @@ json RPC::eth_getTransactionCount(std::string address, BigNumber defaultBlock, E
 }
 
 json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockTransactionCountByHash", {hash});
 }
 
 json RPC::eth_getBlockTransactionCountByNumber(std::string number, Error &err) {
-  int errCode = 0;
-  if (!_checkNumber(number)) errCode = 10; // Invalid Number
-  err.setCode(errCode);
+  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockTransactionCountByNumber", {number});
 }
@@ -156,19 +162,19 @@ json RPC::eth_getBlockTransactionCountByNumber(BigNumber number, Error &err) {
 }
 
 json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleCountByBlockHash", {hash});
 }
 
 json RPC::eth_getUncleCountByBlockNumber(std::string number, Error &err) {
-  int errCode = 0;
-  if (!_checkNumber(number)) errCode = 10; // Invalid Number
-  err.setCode(errCode);
+  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleCountByBlockNumber", {number});
 }
@@ -181,8 +187,10 @@ json RPC::eth_getUncleCountByBlockNumber(BigNumber number, Error &err) {
 
 json RPC::eth_getCode(std::string address, std::string defaultBlock, Error &err) {
   int errCode = 0;
-  if (!_checkAddress(address)) errCode = 5; // Invalid Address
-  if (!_checkDefaultBlock(defaultBlock)) errCode = 9; // Invalid Block Number
+  [&](){
+    if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
+    if (!_checkDefaultBlock(defaultBlock)) { errCode = 9; return; } // Invalid Block Number
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getCode", {address, defaultBlock});
@@ -196,35 +204,76 @@ json RPC::eth_getCode(std::string address, BigNumber defaultBlock, Error &err) {
 
 json RPC::eth_sign(std::string address, std::string data, Error &err) {
   int errCode = 0;
-  if (!_checkAddress(address)) errCode = 5; // Invalid Address
-  if (!_checkHexData(data)) errCode = 4; // Invalid Hex Data
+  [&](){
+    if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
+    if (!_checkHexData(data)) { errCode = 4; return; } // Invalid Hex Data
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_sign", {data});
 }
 
-json RPC::eth_signTransaction(json transactionObject) {
-  // TODO: transactionObject sanity check (there's a lot)
-  return _buildJSON("eth_signTransaction", {transactionObject});
+json RPC::eth_signTransaction(json txObj, Error &err) {
+  int errCode = 0;
+  [&](){
+    if (
+      !_checkAddress(txObj["from"]) ||
+      (txObj.count("to") && !_checkAddress(txObj["to"]))
+    ) { errCode = 5; return; } // Invalid Address
+    if (
+      !_checkHexData(txObj["data"]) ||
+      (txObj.count("gas") && !_checkHexData(txObj["gas"])) ||
+      (txObj.count("gasPrice") && !_checkHexData(txObj["gasPrice"])) ||
+      (txObj.count("value") && !_checkHexData(txObj["value"])) ||
+      (txObj.count("nonce") && !_checkHexData(txObj["nonce"]))
+    ) { errCode = 4; return; } // Invalid Hex Data
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("eth_signTransaction", {txObj});
 }
 
-json RPC::eth_sendTransaction(json transactionObject) {
-  // TODO: transactionObject sanity check (there's a lot)
-  return _buildJSON("eth_sendTransaction", {transactionObject});
+json RPC::eth_sendTransaction(json txObj, Error &err) {
+  int errCode = 0;
+  [&](){
+    if (
+      !_checkAddress(txObj["from"]) ||
+      (txObj.count("to") && !_checkAddress(txObj["to"]))
+    ) { errCode = 5; return; } // Invalid Address
+    if (
+      !_checkHexData(txObj["data"]) ||
+      (txObj.count("gas") && !_checkHexData(txObj["gas"])) ||
+      (txObj.count("gasPrice") && !_checkHexData(txObj["gasPrice"])) ||
+      (txObj.count("value") && !_checkHexData(txObj["value"])) ||
+      (txObj.count("nonce") && !_checkHexData(txObj["nonce"]))
+    ) { errCode = 4; return; } // Invalid Hex Data
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("eth_sendTransaction", {txObj});
 }
 
 json RPC::eth_sendRawTransaction(std::string signedTxData, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(signedTxData)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(signedTxData)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_sendRawTransaction", {signedTxData});
 }
 
 json RPC::eth_call(json callObject, std::string defaultBlock, Error &err) {
   int errCode = 0;
-  // TODO: callObject sanity check (there's a lot)
-  if (!_checkDefaultBlock(defaultBlock)) errCode = 9; // Invalid Block Number
+  [&](){
+    if (
+      !_checkAddress(callObject["from"]) ||
+      (callObject.count("to") && !_checkAddress(callObject["to"]))
+    ) { errCode = 5; return; } // Invalid Address
+    if (
+      !_checkHexData(callObject["data"]) ||
+      (callObject.count("gas") && !_checkHexData(callObject["gas"])) ||
+      (callObject.count("gasPrice") && !_checkHexData(callObject["gasPrice"])) ||
+      (callObject.count("value") && !_checkHexData(callObject["value"]))
+    ) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkDefaultBlock(defaultBlock)) { errCode = 9; return; } // Invalid Block Number
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_call", {callObject, defaultBlock});
@@ -236,24 +285,39 @@ json RPC::eth_call(json callObject, BigNumber defaultBlock, Error &err) {
   return eth_call(callObject, ss.str(), err);
 }
 
-json RPC::eth_estimateGas(json callObject) {
-  return _buildJSON("eth_estimateGas", {callObject});
+json RPC::eth_estimateGas(json callObject, Error &err) {
+  int errCode = 0;
+  [&](){
+    if (
+      !_checkAddress(callObject["from"]) ||
+      (callObject.count("to") && !_checkAddress(callObject["to"]))
+    ) { errCode = 5; return; } // Invalid Address
+    if (
+      !_checkHexData(callObject["data"]) ||
+      (callObject.count("gas") && !_checkHexData(callObject["gas"])) ||
+      (callObject.count("gasPrice") && !_checkHexData(callObject["gasPrice"])) ||
+      (callObject.count("value") && !_checkHexData(callObject["value"]))
+    ) { errCode = 4; return; } // Invalid Hex Data
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("eth_estimateGas", {callObject});
 }
 
 json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockByHash", {hash, returnTransactionObjects});
 }
 
 json RPC::eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err) {
-  int errCode = 0;
-  if (!_checkNumber(number)) errCode = 10; // Invalid Number
-  err.setCode(errCode);
+  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockByNumber", {number, returnTransactionObjects});
 }
@@ -265,20 +329,24 @@ json RPC::eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, 
 }
 
 json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getTransactionByHash", {hash});
 }
 
 json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash) || !_checkHexData(index)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getTransactionByBlockHashAndIndex", {hash, index});
@@ -286,8 +354,10 @@ json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string in
 
 json RPC::eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
   int errCode = 0;
-  if (!_checkNumber(number)) errCode = 10; // Invalid Number
-  if (!_checkHexData(index)) errCode = 4; // Invalid Hex Data
+  [&](){
+    if (!_checkNumber(number)) { errCode = 10; return; } // Invalid Number
+    if (!_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getTransactionByBlockNumberAndIndex", {number, index});
@@ -300,20 +370,24 @@ json RPC::eth_getTransactionByBlockNumberAndIndex(BigNumber number, std::string 
 }
 
 json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getTransactionReceipt", {hash});
 }
 
 json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
-  // hash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hash) || !_checkHexData(index)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hash, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hash: "0x" + 32 hex bytes (64 chars)
+    if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleByBlockHashAndIndex", {hash, index});
@@ -321,8 +395,10 @@ json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, E
 
 json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
   int errCode = 0;
-  if (!_checkNumber(number)) errCode = 10; // Invalid Number
-  if (!_checkHexData(index)) errCode = 4; // Invalid Hex Data
+  [&](){
+    if (!_checkNumber(number)) { errCode = 10; return; } // Invalid Number
+    if (!_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleByBlockNumberAndIndex", {number, index});
@@ -367,25 +443,19 @@ json RPC::eth_newPendingTransactionFilter() {
 }
 
 json RPC::eth_uninstallFilter(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_uninstallFilter", {filterId});
 }
 
 json RPC::eth_getFilterChanges(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getFilterChanges", {filterId});
 }
 
 json RPC::eth_getFilterLogs(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getFilterLogs", {filterId});
 }
@@ -400,25 +470,35 @@ json RPC::eth_getWork() {
 }
 
 json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string digest, Error &err) {
-  // nonce: "0x" + 8 hex bytes (16 chars)
-  // powHash: "0x" + 32 hex bytes (64 chars)
-  // digest: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(nonce) || !_checkHexData(powHash) || !_checkHexData(digest))
-    errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(nonce, 18) || !_checkHexLength(powHash, 66) || !_checkHexLength(nonce, 66))
-    errCode = 6; // Invalid Hash Length
+  [&](){
+    // nonce: "0x" + 8 hex bytes (16 chars)
+    // powHash: "0x" + 32 hex bytes (64 chars)
+    // digest: "0x" + 32 hex bytes (64 chars)
+    if (
+      !_checkHexData(nonce) || !_checkHexData(powHash) || !_checkHexData(digest)
+    ) { errCode = 4; return; } // Invalid Hex Data
+    if (
+      !_checkHexLength(nonce, 18) || !_checkHexLength(powHash, 66) || !_checkHexLength(nonce, 66)
+    ) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_submitWork", {nonce, powHash, digest});
 }
 
 json RPC::eth_submitHashrate(std::string hashrate, std::string id, Error &err) {
-  // hashrate: "0x" + 32 hex bytes (64 chars)
-  // id: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
-  if (!_checkHexData(hashrate) || !_checkHexData(id)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(hashrate, 66) || !_checkHexLength(id, 66)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // hashrate: "0x" + 32 hex bytes (64 chars)
+    // id: "0x" + 32 hex bytes (64 chars)
+    if (
+      !_checkHexData(hashrate) || !_checkHexData(id)
+    ) { errCode = 4; return; } // Invalid Hex Data
+    if (
+      !_checkHexLength(hashrate, 66) || !_checkHexLength(id, 66)
+    ) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_submitHashrate", {hashrate, id});
@@ -433,9 +513,7 @@ json RPC::db_getString(std::string dbName, std::string key) {
 }
 
 json RPC::db_putHex(std::string dbName, std::string key, std::string value, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(value)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(value)) ? 4 : 0); // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("db_putHex", {dbName, key, value});
 }
@@ -466,10 +544,12 @@ json RPC::shh_newGroup() {
 }
 
 json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
-  // identityAddress: "0x" + 65 hex bytes (130 chars)
   int errCode = 0;
-  if (!_checkHexData(identityAddress)) errCode = 4; // Invalid Hex Data
-  if (!_checkHexLength(identityAddress, 132)) errCode = 6; // Invalid Hash Length
+  [&](){
+    // identityAddress: "0x" + 65 hex bytes (130 chars)
+    if (!_checkHexData(identityAddress)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexLength(identityAddress, 132)) { errCode = 6; return; } // Invalid Hash Length
+  }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("shh_addToGroup", {identityAddress});
@@ -481,25 +561,19 @@ json RPC::shh_newFilter(json filterOptions) {
 }
 
 json RPC::shh_uninstallFilter(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("shh_uninstallFilter", {filterId});
 }
 
 json RPC::shh_getFilterChanges(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("shh_getFilterChanges", {filterId});
 }
 
 json RPC::shh_getMessages(std::string filterId, Error &err) {
-  int errCode = 0;
-  if (!_checkHexData(filterId)) errCode = 4; // Invalid Hex Data
-  err.setCode(errCode);
+  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("shh_getMessages", {filterId});
 }

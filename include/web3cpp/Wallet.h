@@ -58,11 +58,10 @@ class Wallet {
     bool createNewWallet(std::string const &password, Error &error);
 
     // Import a given private key into the wallet database.
-    bool importPrivKey(dev::Secret const &secret, 
-                       std::string const &password, 
-                       std::string const &name, 
-                       std::string const &derivationPath, 
-                       Error &error);
+    bool importPrivKey(
+      dev::Secret const &secret, std::string const &password,
+      std::string const &name, std::string const &derivationPath, Error &error
+    );
 
     // Called by loadWallet() when a wallet is successfully loaded.
     void loadAccounts();

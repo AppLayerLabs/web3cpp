@@ -21,7 +21,6 @@ using json = nlohmann::json;
 // - Decide how to deal with callbacks as parameters for (almost) all functions
 // - Decide how to deal with "PromiEvents" to implement those functions:
 //   - sendTransaction(), sendSignedTransaction()
-// - Implement a way to get the latest block from the network (for setting defaultBlock)
 
 class Eth {
   public:

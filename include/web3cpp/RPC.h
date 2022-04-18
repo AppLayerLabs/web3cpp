@@ -55,12 +55,12 @@ namespace RPC {
   json eth_getCode(std::string address, std::string defaultBlock, Error &err);
   json eth_getCode(std::string address, BigNumber defaultBlock, Error &err);
   json eth_sign(std::string address, std::string data, Error &err);
-  json eth_signTransaction(json transactionObject);
-  json eth_sendTransaction(json transactionObject);
+  json eth_signTransaction(json txObj, Error &err);
+  json eth_sendTransaction(json txObj, Error &err);
   json eth_sendRawTransaction(std::string signedTxData, Error &err);
   json eth_call(json callObject, std::string defaultBlock, Error &err);
   json eth_call(json callObject, BigNumber defaultBlock, Error &err);
-  json eth_estimateGas(json callObject);
+  json eth_estimateGas(json callObject, Error &err);
   json eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err);
   json eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err);
   json eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, Error &err);
