@@ -40,7 +40,7 @@ message("Building tests: ${BUILD_TESTS}")
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost)
+find_package(Boost CONFIG REQUIRED filesystem system thread)
 find_package(OpenSSL REQUIRED)
 message("Fetching nlohmann/json...")
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
@@ -76,6 +76,7 @@ endif()
 
 # Add Hunter packages
 hunter_add_package(cryptopp)
+find_package(cryptopp CONFIG REQUIRED)
 hunter_add_package(libscrypt)
 find_package(libscrypt CONFIG REQUIRED)
 
