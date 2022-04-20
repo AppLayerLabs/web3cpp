@@ -127,48 +127,44 @@ class Eth {
 
     // Returns the balance in Wei of an address at a given block.
     std::future<std::string> getBalance(
-      std::string address, std::string defaultBlock = this.defaultBlock
+      std::string address, std::string defaultBlock
     );
 
     // Returns the value in storage at a specific position of an address.
     std::future<std::string> getStorageAt(
-      std::string address, std::string position, std::string defaultBlock = this.defaultBlock
+      std::string address, std::string position, std::string defaultBlock
     );
     std::future<std::string> getStorageAt(
-      std::string address, BigNumber position, std::string defaultBlock = this.defaultBlock
+      std::string address, BigNumber position, std::string defaultBlock
     );
 
     // Returns the code at a specific address.
-    std::future<std::string> getCode(
-      std::string address, std::string defaultBlock = this.defaultBlock
-    );
+    std::future<std::string> getCode(std::string address, std::string defaultBlock);
 
     // Returns a block matching the given block number or hash.
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
     std::future<json> getBlock(
-      std::string blockHashOrBlockNumber = this.defaultBlock,
-      bool returnTransactionObjects = false
+      std::string blockHashOrBlockNumber, bool returnTransactionObjects = false
     );
 
     // Returns the number of transactions in a given block.
     std::future<unsigned int> getBlockTransactionCount(
-      std::string blockHashOrBlockNumber = this.defaultBlock
+      std::string blockHashOrBlockNumber
     );
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
     std::future<unsigned int> getBlockUncleCount(
-      std::string blockHashOrBlockNumber = this.defaultBlock
+      std::string blockHashOrBlockNumber
     );
 
     // Returns a block's uncle by a given uncle index position.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
     std::future<json> getUncle(
-      std::string blockHashOrBlockNumber = this.defaultBlock,
-      bool returnTransactionObjects = false
+      std::string blockHashOrBlockNumber, bool returnTransactionObjects = false
     );
 
     // Returns a transaction matching the given hash.
@@ -182,8 +178,7 @@ class Eth {
     // transaction's index position.
     // Return structure is the same as getTransaction().
     std::future<json> getTransactionFromBlock(
-      std::string hashStringOrNumber = this.defaultBlock,
-      unsigned int indexNumber
+      std::string hashStringOrNumber, unsigned int indexNumber
     );
 
     // Returns the receipt of a transaction by transaction hash,
@@ -192,7 +187,7 @@ class Eth {
 
     // Returns the number of transactions sent from the given address.
     std::future<unsigned int> getTransactionCount(
-      std::string address, BigNumber defaultBlock = this.defaultBlock
+      std::string address, std::string defaultBlock
     );
 
     // Signs data using a specific account, which needs to be unlocked.
@@ -209,9 +204,7 @@ class Eth {
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    std::future<std::string> call(
-      json callObject, std::string defaultBlock = this.defaultBlock
-    );
+    std::future<std::string> call(json callObject, std::string defaultBlock);
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.

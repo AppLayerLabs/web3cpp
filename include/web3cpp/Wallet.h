@@ -38,9 +38,10 @@ class Wallet {
     dev::h256 passSalt;
     int passIterations = 100000;
 
-    // Wallet path, provider and key manager,
+    // Wallet path, provider and info database.
     boost::filesystem::path path;
     Utils::Provider* provider;
+    Database infoDB;
 
     bool _isLoaded;
 
@@ -70,6 +71,7 @@ class Wallet {
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path _path)
       : provider(providerPointer), path(_path),
+        infoDB("walletInfo", walletFolder()),
         walletDB("accounts", walletFolder())
     {};
 
@@ -91,9 +93,11 @@ class Wallet {
 
     // Creates a new account.
     // If no custom seed is passed, uses BIP39 seed stored in json file.
-    // Throws in case of error.
-    bool createNewAccount(
-      std::string derivPath, std::string &password, Error &error, std::string seed = ""
+    // Returns the checksum address of the newly created Account,
+    // or an empty string on failure.
+    std::string createNewAccount(
+      std::string derivPath, std::string &password, std::string name,
+      Error &error, std::string seed = ""
     );
 
     /**
@@ -161,7 +165,7 @@ class Wallet {
      * Results are the same as Eth.getAccounts(), except that function
      * calls the RPC method `eth_accounts`.
      */
-    std::future<std::vector<std::string>> getAccounts();
+    std::vector<Account> getAccounts();
 
     /**
      * Imports a given private key into the keystore, encrypting it with the password.

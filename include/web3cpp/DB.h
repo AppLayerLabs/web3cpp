@@ -1,6 +1,6 @@
 #ifndef DATABASE_H
 #define DATABASE_H
-
+#include <iostream>
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -30,14 +30,17 @@ class Database {
     }
 
     // Copy constructor.
-    Database(Database&& other) noexcept :
-      databaseName(std::move(other.databaseName)),
-      databasePath(std::move(other.databasePath)),
-      db(std::move(other.db)),
-      dbOpts(std::move(other.dbOpts)),
-      dbStatus(std::move(other.dbStatus)),
-      tmpValue(std::move(other.tmpValue))
+    Database(Database& other) noexcept :
+      databaseName(other.databaseName),
+      databasePath(other.databasePath),
+      db(other.db),
+      dbOpts(other.dbOpts),
+      dbStatus(other.dbStatus),
+      tmpValue(other.tmpValue)
     {}
+
+    // Destructor.
+    ~Database() { closeDB(); }
 
     // Functions.
     bool cleanCloseDB() { return closeDB(); };

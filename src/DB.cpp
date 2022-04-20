@@ -5,18 +5,19 @@ bool Database::openDB() {
   if (!boost::filesystem::exists(databasePath)); {
     boost::filesystem::create_directories(databasePath);
   }
-  this->dbStatus = leveldb::DB::Open(this->dbOpts, databasePath.string(), &db);
+  this->dbStatus = leveldb::DB::Open(this->dbOpts, databasePath.string(), &this->db);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error opening ") + databaseName + "database! " + this->dbStatus.ToString();
+    std::cout << std::string("Error opening ") << databaseName
+      << " database! " << this->dbStatus.ToString() << std::endl;
+    return false;
   }
   this->dbMutex.unlock();
-  return this->dbStatus.ok();
+  return true;
 }
 
 bool Database::closeDB() {
   this->dbMutex.lock();
-  delete this->db;
   this->db = NULL;
   this->dbMutex.unlock();
   return true;

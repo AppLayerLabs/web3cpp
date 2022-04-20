@@ -22,13 +22,13 @@ using json = nlohmann::json;
 
 class Account {
   private:
-    Utils::Provider *provider;
     std::string _address;
     std::string _name;
     std::string _derivationPath;
     uint64_t _nonce;
     bool _isLedger;
     Database transactionDb;
+    Utils::Provider *provider;
     std::atomic<bool> ready;
     mutable std::mutex accountLock;
 
@@ -40,23 +40,23 @@ class Account {
     );
 
     // Copy constructor.
-    Account (Account&& other) noexcept :
-      _address(std::move(other._address)),
-      _name(std::move(other._name)),
-      _derivationPath(std::move(other._derivationPath)),
-      _isLedger(std::move(other._isLedger)),
-      _nonce(std::move(other._nonce)),
-      transactionDb(std::move(other.transactionDb)),
-      provider(std::move(other.provider))
+    Account(Account& other) noexcept :
+      _address(other._address),
+      _name(other._name),
+      _derivationPath(other._derivationPath),
+      _isLedger(other._isLedger),
+      _nonce(other._nonce),
+      transactionDb(other.transactionDb),
+      provider(other.provider)
     {}
 
     // Getters.
     std::string address() { return _address; };
+    std::string name() { return _name; }
     std::string derivationPath() { return _derivationPath; };
     uint64_t nonce() { return _nonce; };
 
     // Network related requests.
-
     std::future<BigNumber> balance();
     bool isLedger() { return _isLedger; };
 };

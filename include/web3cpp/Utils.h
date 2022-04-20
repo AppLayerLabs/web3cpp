@@ -71,18 +71,16 @@ namespace Utils {
     }
 
     Provider& operator=(Provider const &prev) {
-    networkName = prev.networkName;
-    rpcUrl = prev.rpcUrl;
-    rpcTarget = prev.rpcTarget;
-    rpcPort = prev.rpcPort;
-    chainID = prev.chainID;
-    currencySymbol = prev.currencySymbol;
-    blockExplorerUrl = prev.blockExplorerUrl;
-    return *this;
+      networkName = prev.networkName;
+      rpcUrl = prev.rpcUrl;
+      rpcTarget = prev.rpcTarget;
+      rpcPort = prev.rpcPort;
+      chainID = prev.chainID;
+      currencySymbol = prev.currencySymbol;
+      blockExplorerUrl = prev.blockExplorerUrl;
+      return *this;
     }
   };
-
-  // Mutexes for Provider and reading JSON files.
 
   /**
    * Handle the web3cpp history storage directory.

@@ -67,9 +67,7 @@ std::future<unsigned int> Eth::getBlockNumber() {
   return {}; // TODO
 }
 
-std::future<std::string> Eth::getBalance(
-  std::string address, std::string defaultBlock
-) {
+std::future<std::string> Eth::getBalance(std::string address, std::string defaultBlock) {
   return {}; // TODO
 }
 
@@ -129,7 +127,9 @@ std::future<json> Eth::getTransactionReceipt(std::string hash) {
   return {}; // TODO
 }
 
-std::future<unsigned int> Eth::getTransactionCount(std::string address, std::string defaultBlock) {
+std::future<unsigned int> Eth::getTransactionCount(
+  std::string address, std::string defaultBlock
+) {
   return {}; // TODO
 }
 

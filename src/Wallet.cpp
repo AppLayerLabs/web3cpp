@@ -20,7 +20,7 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
     {"key", key.makeInsecure().hex()},
     {"iterations", 262144}
   };
-  walletDB.putKeyValue("walletInfo", walletInfo.dump());
+  infoDB.putKeyValue("walletInfo", walletInfo.dump());
 
   // Create a new account and insert into database
   try {
@@ -48,12 +48,13 @@ bool Wallet::importPrivKey(
   dev::Secret const &secret, std::string const &password,
   std::string const &name, std::string const &derivationPath, Error &error
 ) {
+  // TODO: fix this so names don't matter
   // Check if wallet already exists inside the database, do not allow specific names
   if (name == "walletInfo") { error.setCode(2); return false; } // Forbidden Account Name
   if (walletDB.getKeyValue(name) != "") { error.setCode(3); return false; } // Account Name Exists
 
   // Check if password is correct
-  json walletInfo = json::parse(walletDB.getKeyValue("walletInfo"));
+  json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
   auto originalKey = dev::fromHex(walletInfo["key"]);
   dev::SecureFixedHash<16> oldKey(originalKey);
   auto originalSalt = dev::fromHex(walletInfo["salt"]);
@@ -72,12 +73,14 @@ bool Wallet::importPrivKey(
 
 void Wallet::loadAccounts() {
   accounts.clear();
-  auto allAccountsFromDB = walletDB.getAllPairs();
-  for (auto accountInfoStr : allAccountsFromDB) {
+  std::map<std::string, std::string> allAccountsFromDB = walletDB.getAllPairs();
+  //std::cout << "There are " << allAccountsFromDB.size() << " accounts" << std::endl;
+  for (std::pair<std::string, std::string> accountInfoStr : allAccountsFromDB) {
     json accountJson = json::parse(accountInfoStr.second);
     std::string tmpAddress = accountJson["address"].get<std::string>();
     std::string tmpDerivationPath = accountJson["derivationPath"].get<std::string>();
     bool tmpIsLedger = accountJson["isLedger"].get<bool>();
+    //std::cout << tmpAddress << std::endl;
     //std::cout << accountJson.dump(2) << std::endl;  // Uncomment to see account details as JSON
     Account newTmpAccount(
       boost::filesystem::path(path.string() + "/wallet"),
@@ -87,14 +90,14 @@ void Wallet::loadAccounts() {
       accountJson["isLedger"].get<bool>(),
       provider
     );
-    accounts.emplace_back(std::move(newTmpAccount));
+    accounts.emplace_back(newTmpAccount);
   }
 }
 
 bool Wallet::loadWallet(std::string const &password, Error &error) {
   if (!boost::filesystem::exists(walletExistsPath())) { createNewWallet(password, error); }
   // Check if password is correct
-  json walletInfo = json::parse(walletDB.getKeyValue("walletInfo"));
+  json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
   auto originalKey = dev::fromHex(walletInfo["key"]);
   dev::SecureFixedHash<16> oldKey(originalKey);
   auto originalSalt = dev::fromHex(walletInfo["salt"]);
@@ -124,32 +127,41 @@ bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
   );
 }
 
-bool Wallet::createNewAccount(
-  std::string derivPath, std::string &password, Error &error, std::string seed
+std::string Wallet::createNewAccount(
+  std::string derivPath, std::string &password, std::string name,
+  Error &error, std::string seed
 ) {
-  if (!checkPassword(password)) { error.setCode(1); return false; } // Incorrect Password
-  try {
-    std::string seedPhrase;
-    if (seed.empty()) {
-      // Load the phrase from JSON
-      boost::filesystem::path tmpPath = seedPhraseFile();
-      json seedJson = Utils::readJSONFile(tmpPath);
-      auto decrypt = dev::SecretStore::decrypt(seedJson.dump(), password);
-      seedPhrase = decrypt.ref().toString();
-    } else {
-      // Use the custom phrase
-      seedPhrase = seed;
-    }
+  if (!checkPassword(password)) { error.setCode(1); return ""; } // Incorrect Password
 
-    // Derive and import the account.
-    bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivPath);
-    dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
-    this->importPrivKey(k.secret(), password, "default", derivPath, error);
-    this->loadAccounts();
-  } catch (const std::exception &e) {
-    throw std::string("Error when creating new account: ") + e.what();
+  // Get the seed phrase.
+  std::string seedPhrase;
+  if (seed.empty()) {
+    // Load the phrase from JSON.
+    boost::filesystem::path tmpPath = seedPhraseFile();
+    json seedJson = Utils::readJSONFile(tmpPath);
+    auto decrypt = dev::SecretStore::decrypt(seedJson.dump(), password);
+    seedPhrase = decrypt.ref().toString();
+  } else {
+    // Use the custom phrase.
+    seedPhrase = seed;
   }
-  return true;
+
+  // Derive and import the account.
+  bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivPath);
+  dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
+  if (!this->importPrivKey(k.secret(), password, name, derivPath, error)) {
+    error.setCode(3);  // Account Name Exists
+    return "";
+  }
+  this->loadAccounts();
+  std::string ret;
+  for (Account acc : this->accounts) {
+    if (acc.name() == name) {
+      ret == Utils::toChecksumAddress(acc.address()); break;
+    }
+  }
+  error.setCode(0); // No Error
+  return ret;
 }
 
 dev::eth::TransactionSkeleton Wallet::buildTransaction(
@@ -241,14 +253,8 @@ std::future<bool> Wallet::lockAccount(std::string address) {
   return {}; // TODO
 }
 
-std::future<std::vector<std::string>> Wallet::getAccounts() {
-  return std::async([=]{
-    std::vector<std::string> ret;
-    for (int i = 0; i < accounts.size(); i++) {
-      ret.push_back(accounts[i].address());
-    }
-    return ret;
-  });
+std::vector<Account> Wallet::getAccounts() {
+  return this->accounts;
 }
 
 std::future<std::string> Wallet::importRawKey(
