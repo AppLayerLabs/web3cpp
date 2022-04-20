@@ -4,7 +4,7 @@ Account::Account(
   boost::filesystem::path walletPath, std::string __address, std::string __name,
   std::string __derivationPath, bool __isLedger, Utils::Provider *_provider
 ) : _address(__address), _name(__name), _derivationPath(__derivationPath),
-  _isLedger(__isLedger), transactionDb(__address, walletPath.string() + "/transactions"), provider(_provider)
+  _isLedger(__isLedger), provider(_provider)
 {
   // TODO: Load transaction data.
   Error error;

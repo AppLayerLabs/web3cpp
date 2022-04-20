@@ -1,8 +1,9 @@
 #include <web3cpp/Error.h>
 
+// TODO: something else instead of throwing here
 void Error::setCode(uint64_t errorCode) {
   this->lock.lock();
-  if (isSet) { throw "Error already set"; };
+  if (isSet) { std::cout << "Error already set"; throw; };
   auto match = codeMap.find(errorCode);
   if (match != codeMap.end()) {
     code = match->first;

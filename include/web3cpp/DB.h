@@ -1,5 +1,6 @@
 #ifndef DATABASE_H
 #define DATABASE_H
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,40 +12,34 @@ using json = nlohmann::json;
 
 class Database {
   private:
-    std::string databaseName;
-    boost::filesystem::path databasePath;
-    bool openDB();
-    bool closeDB();
+    std::string name;
+    boost::filesystem::path path;
     leveldb::DB* db;
     leveldb::Options dbOpts;
     leveldb::Status dbStatus;
     std::string tmpValue;
     std::mutex mutable dbMutex;
+    bool openDB();
+    bool closeDB();
 
   public:
     // Constructor.
-    Database(std::string _databaseName, boost::filesystem::path rootPath)
-    : databaseName(_databaseName), databasePath(rootPath.string() + "/" + databaseName) {
+    Database(std::string _name, boost::filesystem::path rootPath)
+    : name(_name), path(rootPath.string() + "/" + name) {
       this->dbOpts.create_if_missing = true;
       openDB();
     }
 
     // Copy constructor.
     Database(Database& other) noexcept :
-      databaseName(other.databaseName),
-      databasePath(other.databasePath),
-      db(other.db),
-      dbOpts(other.dbOpts),
-      dbStatus(other.dbStatus),
-      tmpValue(other.tmpValue)
+      name(other.name), path(other.path), db(other.db),
+      dbOpts(other.dbOpts), dbStatus(other.dbStatus), tmpValue(other.tmpValue)
     {}
 
     // Destructor.
     ~Database() { closeDB(); }
 
     // Functions.
-    bool cleanCloseDB() { return closeDB(); };
-    bool isDBOpen() { return (this->db != NULL); }
     bool keyExists(std::string const &key);
     std::string getKeyValue(std::string const &key);
     bool putKeyValue(std::string const &key, std::string const &value);

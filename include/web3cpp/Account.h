@@ -27,12 +27,14 @@ class Account {
     std::string _derivationPath;
     uint64_t _nonce;
     bool _isLedger;
-    Database transactionDb;
     Utils::Provider *provider;
     std::atomic<bool> ready;
     mutable std::mutex accountLock;
 
   public:
+    // Empty constructor.
+    Account(){}
+
     // Constructor.
     Account(
       boost::filesystem::path walletPath, std::string name, std::string __address,
@@ -46,7 +48,6 @@ class Account {
       _derivationPath(other._derivationPath),
       _isLedger(other._isLedger),
       _nonce(other._nonce),
-      transactionDb(other.transactionDb),
       provider(other.provider)
     {}
 

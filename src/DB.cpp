@@ -2,13 +2,13 @@
 
 bool Database::openDB() {
   this->dbMutex.lock();
-  if (!boost::filesystem::exists(databasePath)); {
-    boost::filesystem::create_directories(databasePath);
+  if (!boost::filesystem::exists(this->path)); {
+    boost::filesystem::create_directories(this->path);
   }
-  this->dbStatus = leveldb::DB::Open(this->dbOpts, databasePath.string(), &this->db);
+  this->dbStatus = leveldb::DB::Open(this->dbOpts, this->path.string(), &this->db);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    std::cout << std::string("Error opening ") << databaseName
+    std::cout << std::string("Error opening ") << this->name
       << " database! " << this->dbStatus.ToString() << std::endl;
     return false;
   }
@@ -54,7 +54,7 @@ bool Database::putKeyValue(std::string const &key, std::string const &value) {
   this->dbStatus = this->db->Put(leveldb::WriteOptions(), key, value);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error writing at ") + databaseName + " database at key "
+    throw std::string("Error writing at ") + this->name + " database at key "
       + key + this->dbStatus.ToString();
   }
   this->dbMutex.unlock();
@@ -66,7 +66,7 @@ bool Database::deleteKeyValue(std::string const &key) {
   this->dbStatus = this->db->Delete(leveldb::WriteOptions(), key);
   if(!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error deleting at ") + databaseName + " database at key "
+    throw std::string("Error deleting at ") + this->name + " database at key "
       + key + this->dbStatus.ToString();
   }
   this->dbMutex.unlock();

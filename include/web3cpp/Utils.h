@@ -148,9 +148,13 @@ namespace Utils {
   bool isAddress(std::string address);
 
   /**
-   * Converts an upper or lowercase address to a checksum address.
+   * Converts an address to its all-lowercase, all-uppercase and
+   * checksum version, respectively.
+   * "0x" is automatically added at the beginning of the string.
    * Adapted from https://github.com/ethereum/EIPs/issues/55
    */
+  std::string toLowercaseAddress(std::string address);
+  std::string toUppercaseAddress(std::string address);
   std::string toChecksumAddress(std::string address);
 
   /**

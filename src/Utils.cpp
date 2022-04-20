@@ -89,19 +89,33 @@ bool Utils::isAddress(std::string address) {
   }
 }
 
+std::string Utils::toLowercaseAddress(std::string address) {
+  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  std::string ret = address;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+  return "0x" + ret;
+}
+
+std::string Utils::toUppercaseAddress(std::string address) {
+  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  std::string ret = address;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+  return "0x" + ret;
+}
+
 std::string Utils::toChecksumAddress(std::string address) {
   // Address has to be hashed as all lower-case and without the "0x" part
   std::string add = address;
   std::transform(add.begin(), add.end(), add.begin(), ::tolower);
   if (add.substr(0, 2) == "0x") { add = add.substr(2); }
   std::string hash = dev::toHex(dev::sha3(add));
-  std::string ret = "0x";
+  std::string ret;
   for (int i = 0; i < add.length(); i++) {
     // If ith character hash is 8 to f then make it uppercase
     ret += (std::stoi(hash.substr(i, 1), nullptr, 16) > 7)
       ? std::toupper(add[i]) : std::tolower(add[i]);
   }
-  return ret;
+  return "0x" + ret;
 }
 
 bool Utils::checkAddressChecksum(std::string address) {

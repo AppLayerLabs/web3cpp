@@ -38,41 +38,39 @@ class Wallet {
     dev::h256 passSalt;
     int passIterations = 100000;
 
-    // Wallet path, provider and info database.
+    // Wallet path, provider, Account list and internal databases.
     boost::filesystem::path path;
     Utils::Provider* provider;
     Database infoDB;
+    Database accountDB;
+    Database transactionDB;
 
     bool _isLoaded;
 
-    // Account database and list.
-    Database walletDB;
-    std::vector<Account> accounts;
-
     // Paths for wallet file and secrets folder.
-    boost::filesystem::path walletExistsPath() { return path.string() + "/wallet.info"; };
-    boost::filesystem::path walletFolder()     { return path.string() + "/wallet"; };
-    boost::filesystem::path accountsFolder()   { return path.string() + "/wallet/accounts"; };
-    boost::filesystem::path seedPhraseFile()   { return path.string() + "/wallet/seed"; };
+    boost::filesystem::path walletExistsPath()   { return path.string() + "/wallet.info"; };
+    boost::filesystem::path walletFolder()       { return path.string() + "/wallet"; };
+    boost::filesystem::path accountsFolder()     { return path.string() + "/wallet/accounts"; };
+    boost::filesystem::path seedPhraseFile()     { return path.string() + "/wallet/seed"; };
+    boost::filesystem::path transactionsFolder() { return path.string() + "/transactions"; }
 
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string const &password, Error &error);
 
     // Import a given private key into the wallet database.
+    // Always stores address as lowercase.
     bool importPrivKey(
       dev::Secret const &secret, std::string const &password,
       std::string const &name, std::string const &derivationPath, Error &error
     );
-
-    // Called by loadWallet() when a wallet is successfully loaded.
-    void loadAccounts();
 
   public:
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path _path)
       : provider(providerPointer), path(_path),
         infoDB("walletInfo", walletFolder()),
-        walletDB("accounts", walletFolder())
+        accountDB("accounts", walletFolder()),
+        transactionDB("transactions", walletFolder())
     {};
 
     /**
@@ -85,20 +83,30 @@ class Wallet {
     // Check if a wallet is loaded.
     bool isLoaded() { return this->_isLoaded; }
 
-    // Check if password matches with hashed PW.
+    // Check if the given password matches with the wallet's.
     bool checkPassword(std::string &password);
 
     // Check if the wallet file and its keys folder exists in a given path.
     static bool walletExists(boost::filesystem::path &wallet_path);
 
-    // Creates a new account.
-    // If no custom seed is passed, uses BIP39 seed stored in json file.
-    // Returns the checksum address of the newly created Account,
-    // or an empty string on failure.
-    std::string createNewAccount(
+    /**
+     * Creates a new account.
+     * Always stores address as lowercase.
+     * If no custom seed is passed, uses BIP39 seed stored in json file.
+     * Returns the checksum address of the newly created Account,
+     * or an empty string on failure.
+     */
+    std::string createAccount(
       std::string derivPath, std::string &password, std::string name,
       Error &error, std::string seed = ""
     );
+
+    /**
+     * Deletes a previously created account.
+     * Converts input to lowercase before attempting to delete.
+     * Returns true on success, false on failure.
+     */
+    bool deleteAccount(std::string address);
 
     /**
      * Build a transaction from user data.
@@ -157,15 +165,12 @@ class Wallet {
     // Locks a specific account.
     std::future<bool> lockAccount(std::string address);
 
-    /**
-     * Returns a list of accounts the node controls by using the provider
-     * and calling the RPC method `personal_listAccounts`.
-     * Using Accounts.create() will not add accounts into this list.
-     * For that use Personal.newAccount().
-     * Results are the same as Eth.getAccounts(), except that function
-     * calls the RPC method `eth_accounts`.
-     */
-    std::vector<Account> getAccounts();
+    // Returns a list of addresses controlled by the node, and the
+    // details for a specific address, respectively.
+    // If no address is found, getAccountDetails() returns an empty
+    // Account object.
+    std::vector<std::string> getAccounts();
+    Account getAccountDetails(std::string address);
 
     /**
      * Imports a given private key into the keystore, encrypting it with the password.

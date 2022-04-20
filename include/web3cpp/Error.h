@@ -1,6 +1,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include <iostream>
 #include <map>
 #include <mutex>
 #include <string>
@@ -12,8 +13,8 @@ class Error {
     const std::map<uint64_t,std::string> codeMap {
       {0, "No Error"},
       {1, "Incorrect Password"},
-      {2, "Forbidden Account Name"},
-      {3, "Account Name Exists"},
+      {2, "Database Insert Failed"},
+      {3, "Account Exists"},
       {4, "Invalid Hex Data"},
       {5, "Invalid Address"},
       {6, "Invalid Hash Length"},

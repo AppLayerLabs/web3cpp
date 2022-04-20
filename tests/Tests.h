@@ -57,6 +57,8 @@ class Tests {
 
     /**
      * Test for valid Account generation.
+     * Addresses are automatically converted to lowercase during testing.
+     * Created test Account is automatically deleted at the end of the test.
      * Required inputs:
      * - A derivation path
      * - A seedphrase to use for generating the address
@@ -74,24 +76,28 @@ class Tests {
       std::string derivPath, std::string seed, std::string name, std::string example
     ) {
       Error error;
-      std::cout << "* Running test: " << __func__ << std::endl
+      example = Utils::toLowercaseAddress(example);
+      std::cout << "* Test: " << __func__ << std::endl
         << "* Derivation path: " << derivPath << std::endl
         << "* Seed: " << seed << std::endl
         << "* Name: " << name << std::endl
-        << "* Example: " << example << std::endl;
-      std::string result = web3.wallet.createNewAccount(
+        << "* Example: " << example << std::endl
+        << "* Running..." << std::endl;
+      std::string result = Utils::toLowercaseAddress(web3.wallet.createAccount(
         derivPath, this->password, name, error, seed
-      );
-      if (result.empty()) {
-        failed(std::string("Could not create account: ") + error.what()); return;
-      }
-      if (result != Utils::toChecksumAddress(example)) {
-        failed("Accounts don't match");
-        std::cout << "Expected output: " << example << std::endl;
-        std::cout << "Actual output: " << result << std::endl;
+      ));
+      if (result == "0x") {
+        failed(std::string("Could not create account: ") + error.what());
         return;
       }
-      passed(); return;
+      std::cout << "* Output: " << result << std::endl;
+      if (result == example) {
+        passed();
+      } else {
+        failed("Accounts don't match");
+      }
+      std::cout << web3.wallet.deleteAccount(result) << std::endl;
+      return;
     }
 };
 
