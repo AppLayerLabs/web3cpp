@@ -32,6 +32,66 @@ index 272dd90..87313e8 100644
  
 -include("${CMAKE_CURRENT_LIST_DIR}/certify-Targets.cmake")
 +include("${CMAKE_CURRENT_LIST_DIR}/certifyTargets.cmake")
+diff --git a/include/boost/certify/crlset_parser.hpp b/include/boost/certify/crlset_parser.hpp
+index 7174944..29ab461 100644
+--- a/include/boost/certify/crlset_parser.hpp
++++ b/include/boost/certify/crlset_parser.hpp
+@@ -4,6 +4,7 @@
+ #include <boost/asio/buffer.hpp>
+ #include <boost/endian/arithmetic.hpp>
+ #include <boost/system/system_error.hpp>
++#include <cstdint>
+ 
+ namespace boost
+ {
+diff --git a/include/boost/certify/detail/keystore_windows.ipp b/include/boost/certify/detail/keystore_windows.ipp
+index efcc697..625ef00 100644
+--- a/include/boost/certify/detail/keystore_windows.ipp
++++ b/include/boost/certify/detail/keystore_windows.ipp
+@@ -6,6 +6,7 @@
+ 
+ #include <sstream>
+ #include <wincrypt.h>
++#include <cstdint>
+ 
+ namespace boost
+ {
+diff --git a/include/boost/certify/detail/spki_blacklist.hpp b/include/boost/certify/detail/spki_blacklist.hpp
+index 7833d80..2f456e9 100644
+--- a/include/boost/certify/detail/spki_blacklist.hpp
++++ b/include/boost/certify/detail/spki_blacklist.hpp
+@@ -2,6 +2,7 @@
+ #define BOOST_CERTIFY_DETAIL_SPKI_BLACKLIST_HPP
+ 
+ #include <array>
++#include <cstdint>
+ 
+ namespace boost
+ {
+diff --git a/include/boost/certify/detail/spki_digest.hpp b/include/boost/certify/detail/spki_digest.hpp
+index d9e4ba9..5f937c2 100644
+--- a/include/boost/certify/detail/spki_digest.hpp
++++ b/include/boost/certify/detail/spki_digest.hpp
+@@ -5,6 +5,7 @@
+ #include <boost/make_unique.hpp>
+ #include <cassert>
+ #include <openssl/x509.h>
++#include <cstdint>
+ 
+ namespace boost
+ {
+diff --git a/include/boost/certify/impl/crlset_parser.ipp b/include/boost/certify/impl/crlset_parser.ipp
+index d41fb7f..853894e 100644
+--- a/include/boost/certify/impl/crlset_parser.ipp
++++ b/include/boost/certify/impl/crlset_parser.ipp
+@@ -2,6 +2,7 @@
+ #define BOOST_CERTIFY_IMPL_CRLSET_PARSER_IPP
+ 
+ #include <boost/certify/crlset_parser.hpp>
++#include <cstdint>
+ 
+ namespace boost
+ {
 diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
 index c1cda26..03be79c 100644
 --- a/tests/CMakeLists.txt
@@ -47,3 +107,15 @@ index c1cda26..03be79c 100644
 +certify_verify_add_test(detail_spki_digest.cpp)
 +certify_verify_add_test(status_cache.cpp)
 \ No newline at end of file
+diff --git a/tests/crl_set_parser.cpp b/tests/crl_set_parser.cpp
+index 4e5b221..8f29a27 100644
+--- a/tests/crl_set_parser.cpp
++++ b/tests/crl_set_parser.cpp
+@@ -5,6 +5,7 @@
+ #include <iomanip>
+ #include <iterator>
+ #include <numeric>
++#include <cstdint>
+ 
+ const std::uint8_t array[46] = {
+   0x02, 0x00, 0x7b, 0x7d, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
