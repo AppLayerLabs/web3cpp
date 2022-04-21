@@ -28,7 +28,7 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Use exactly as many bytes for the cipher as needed.
   auto seedPhrase = BIP39::createNewMnemonic();
   json seedJson;
-  seedJson = json::parse(cipher::encrypt(seedPhrase.raw, password, error));
+  seedJson = json::parse(Cipher::encrypt(seedPhrase.raw, password, error));
   boost::filesystem::path tmpPath = seedPhraseFile();
   Utils::writeJSONFile(seedJson, tmpPath);
 
@@ -163,8 +163,8 @@ dev::eth::TransactionSkeleton Wallet::buildTransaction(
   dev::eth::TransactionSkeleton ret;
   try {
     ret.creation = creation;
-    ret.from = Utils::toLowercaseAddress(dev::eth::toAddress(from));
-    ret.to = Utils::toLowercaseAddress(dev::eth::toAddress(to));
+    ret.from = dev::eth::toAddress(Utils::toLowercaseAddress(from));
+    ret.to = dev::eth::toAddress(Utils::toLowercaseAddress(to));
     ret.value = value;
     if(!dataHex.empty()) { ret.data = dev::fromHex(dataHex); }
     ret.nonce = nonce;
@@ -182,7 +182,7 @@ std::string Wallet::sign(
 ) {
   // EIP-712 requires us to hash the message before signing
   address = Utils::toLowercaseAddress(address);
-  Secret s(dev::toHex(cipher::decrypt(address, password, err)));
+  Secret s(dev::toHex(Cipher::decrypt(address, password, err)));
   std::string signedData = std::string("\x19") + "Ethereum Signed Message:\n"
     + boost::lexical_cast<std::string>(dataToSign.size()) + dataToSign;
   dev::h256 messageHash(dev::toHex(dev::sha3(signedData, false)));
@@ -201,7 +201,7 @@ std::future<std::string> Wallet::ecRecover(
 std::string Wallet::signTransaction(
   dev::eth::TransactionSkeleton txObj, std::string password, Error &err
 ) {
-  Secret s(dev::toHex(cipher::decrypt(dev::toString(txObj.from), password, err)));
+  Secret s(dev::toHex(Cipher::decrypt(dev::toString(txObj.from), password, err)));
   std::stringstream txHexBuffer;
   try {
     dev::eth::TransactionBase t(txObj);

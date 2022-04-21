@@ -12,9 +12,10 @@
 #include <web3cpp/devcrypto/Common.h>
 
 #include <boost/lexical_cast.hpp>
+
 /**
  * Simple wrapper for BIP39 interactions.
- * uses https://github.com/itamarcps/bip3x to ensure safety (OpenSSL as randomness).
+ * Uses https://github.com/itamarcps/bip3x to ensure safety (OpenSSL as randomness).
  */
 
 namespace BIP39 {
@@ -23,7 +24,6 @@ namespace BIP39 {
    * Returns the mnemonic phrase.
    */
   bip3x::Bip39Mnemonic::MnemonicResult createNewMnemonic();
-
 
   /**
    * Create a public/private key pair for an Account using a mnemonic phrase
@@ -45,11 +45,7 @@ namespace BIP39 {
    * "m/44'/60'/0'/"
    * return a vector of pairs, where first = address and second = path.
    */
-
   std::vector<std::pair<std::string,std::string>> generateAccountsFromSeed(std::string &phrase, std::string derivPath, int64_t start);
-
 }
-
-
 
 #endif  // BIP3X_H

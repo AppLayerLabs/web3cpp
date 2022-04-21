@@ -56,10 +56,10 @@ class Account {
     std::string name() { return _name; }
     std::string derivationPath() { return _derivationPath; };
     uint64_t nonce() { return _nonce; };
+    bool isLedger() { return _isLedger; };
 
     // Network related requests.
     std::future<BigNumber> balance();
-    bool isLedger() { return _isLedger; };
 };
 
 #endif  // ACCOUNTS_H

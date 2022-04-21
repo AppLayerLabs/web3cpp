@@ -1,6 +1,6 @@
 #include <web3cpp/Cipher.h>
 
-std::string cipher::encrypt(std::string const& plainText, std::string const& password, Error &error) {
+std::string Cipher::encrypt(std::string const& plainText, std::string const& password, Error &error) {
   // Derive the key.
   // operator+ for vectors are defined inside a dev namespace on CommonData.h
   using namespace dev;
@@ -28,7 +28,7 @@ std::string cipher::encrypt(std::string const& plainText, std::string const& pas
   return ret.dump();
 }
 
-std::string cipher::decrypt(std::string const& cipherText, std::string const& password, Error& error) {
+std::string Cipher::decrypt(std::string const& cipherText, std::string const& password, Error& error) {
   // Derive the key.
   json o = json::parse(cipherText);
   dev::bytesSec derivedKey;

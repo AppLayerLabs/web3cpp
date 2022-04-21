@@ -105,20 +105,20 @@ std::string Utils::toUppercaseAddress(std::string address) {
 
 std::string Utils::toChecksumAddress(std::string address) {
   // Address has to be hashed as all lower-case and without the "0x" part
-  std::string add = address;
-  std::transform(add.begin(), add.end(), add.begin(), ::tolower);
-  if (add.substr(0, 2) == "0x") { add = add.substr(2); }
-  std::string hash = dev::toHex(dev::sha3(add));
+  address = Utils::toLowercaseAddress(address);
+  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  std::string hash = dev::toHex(dev::sha3(address));
   std::string ret;
-  for (int i = 0; i < add.length(); i++) {
-    // If ith character hash is 8 to f then make it uppercase
+  for (int i = 0; i < address.length(); i++) {
+    // If ith character hash is 8-F then make it uppercase
     ret += (std::stoi(hash.substr(i, 1), nullptr, 16) > 7)
-      ? std::toupper(add[i]) : std::tolower(add[i]);
+      ? std::toupper(address[i]) : std::tolower(address[i]);
   }
   return "0x" + ret;
 }
 
 bool Utils::checkAddressChecksum(std::string address) {
+  // TODO: revise this
   // Address has to be hashed as all lower-case and without the "0x" part
   if (address.substr(0, 2) == "0x") { address = address.substr(2); }
   std::string hash = dev::toHex(dev::sha3(address));
@@ -166,7 +166,8 @@ std::string Utils::hexToNumberString(std::string hex) {
 BigNumber Utils::hexToBigNumber(std::string hex) {
   BigNumber ret;
   if (hex.substr(0,2) == "0x") { hex = hex.substr(2); } // Remove "0x"
-  // ret = boost::lexical_cast<HexTo<BigNumber>>(hex):
+  // TODO: fix this
+  //ret = boost::lexical_cast<HexTo<BigNumber>>(hex);
   return ret;
 }
 
@@ -220,7 +221,7 @@ std::string Utils::utf8ToHex(std::string str) {
 }
 
 std::string Utils::stringToHex(std::string hex) {
-  return utf8ToHex(hex);
+  return Utils::utf8ToHex(hex);
 }
 
 std::string Utils::toWei(std::string amount, int decimals) {
@@ -228,9 +229,7 @@ std::string Utils::toWei(std::string amount, int decimals) {
   std::string valuestr = "";
 
   // Check if input is valid
-  if (amount.find_first_not_of("0123456789.") != std::string::npos) {
-    return "";
-  }
+  if (amount.find_first_not_of("0123456789.") != std::string::npos) return "";
 
   // Read value from input string
   size_t index = 0;
@@ -241,9 +240,7 @@ std::string Utils::toWei(std::string amount, int decimals) {
   ++index;  // Jump fixed point
 
   // Check if fixed point exists
-  if (amount[index-1] == '.' && (amount.size() - (index)) > decimals) {
-    return "";
-  }
+  if (amount[index-1] == '.' && (amount.size() - (index)) > decimals) return "";
 
   // Check if input precision matches digit precision
   if (index < amount.size()) {
@@ -255,34 +252,25 @@ std::string Utils::toWei(std::string amount, int decimals) {
   }
 
   // Create padding if there are missing decimals
-  while (digitPadding.size() < decimals) {
-    digitPadding += '0';
-  }
+  while (digitPadding.size() < decimals) digitPadding += '0';
   valuestr += digitPadding;
-  while (valuestr[0] == '0') {
-    valuestr.erase(0,1);
-  }
-
+  while (valuestr[0] == '0') valuestr.erase(0,1);
   if (valuestr == "") valuestr = "0";
   return valuestr;
 }
 
 std::string Utils::fromWei(std::string amount, int decimals) {
   std::string result;
-
   if (amount.size() <= decimals) {
     int valueToPoint = decimals - amount.size();
     result += "0.";
-    for (int i = 0; i < valueToPoint; ++i) {
-      result += "0";
-    }
+    for (int i = 0; i < valueToPoint; ++i) result += "0";
     result += amount;
   } else {
     result = amount;
     int pointToPlace = result.size() - decimals;
     result.insert(pointToPlace, ".");
   }
-
   if (result == "") result = "0";
   return result;
 }

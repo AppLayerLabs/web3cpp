@@ -28,7 +28,7 @@ using json = nlohmann::json;
 
 // TODO:
 // - Inherit the umbrella class to get access to common functions
-//   - setProvider(), providers, givenProvider, currentProvider, BatchRequest(), extend()
+//   - setProvider(), providers, givenProvider, currentProvider, extend()
 // - Decide how to deal with callbacks on (almost) all functions
 
 class Wallet {

@@ -96,6 +96,7 @@ namespace Utils {
   /**
    * Bloom filter functions.
    * See https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html#functions
+   * TODO: implement those(?)
    */
   bool isBloom(std::string bloom);
   bool isUserAddressInBloom(std::string bloom, std::string address);
@@ -129,6 +130,7 @@ namespace Utils {
    * Calculates the sha3 of given input parameters in the same way Solidity would.
    * This means arguments will be ABI converted and tightly packed before being hashed.
    * Same details as above.
+   * TODO: decide how to deal with mixed params
    */
   //std::string soliditySha3(mixed param1 [, mixed param2, ...]);
   //std::string soliditySha3Raw(mixed param1 [, mixed param2, ...]);
@@ -188,7 +190,8 @@ namespace Utils {
   std::string hexToString(std::string hex);
 
   // Returns the ASCII string representation of a given HEX value.
-  std::string hexToAscii(std::string hex);
+  // TODO: implement this
+  //std::string hexToAscii(std::string hex);
 
   /**
    * Returns the HEX representation of a given UTF-8 string.
@@ -198,12 +201,15 @@ namespace Utils {
   std::string stringToHex(std::string str);
 
   // Returns the HEX representation of a given ASCII string.
-  std::string asciiToHex(std::string str);
+  // TODO: implement this
+  //std::string asciiToHex(std::string str);
 
   // Returns a byte array from the given HEX string.
+  // TODO: implement this
   //bytes[] hexToBytes(hex);
 
   // Returns a HEX string form a byte array.
+  // TODO: implement this
   //std::string bytesToHex(byteArray);
 
   /**

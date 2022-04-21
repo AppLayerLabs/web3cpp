@@ -17,23 +17,17 @@
 #include <web3cpp/root_certificates.h>
 #include <web3cpp/Error.h>
 
+// Module for making HTTP requests.
 
 namespace Net {
-
-  enum RequestTypes {
-    POST,
-    GET
-  };
-
-  //std::future<std::string> HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
-  std::string HTTPRequest(Utils::Provider *provider, RequestTypes requestType, std::string reqBody);
-  std::future<std::string> customHTTPRequest(std::string reqBody, 
-                                             std::string host, 
-                                             std::string port, 
-                                             std::string target, 
-                                             std::string requestType, 
-                                             std::string contentType);
-
-} 
+  enum RequestTypes { POST, GET };
+  std::string HTTPRequest(
+    Utils::Provider *provider, RequestTypes requestType, std::string reqBody
+  );
+  std::string customHTTPRequest(
+    std::string reqBody, std::string host, std::string port,
+    std::string target, std::string requestType, std::string contentType
+  );
+}
 
 #endif  // NET_H

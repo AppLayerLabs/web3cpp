@@ -14,9 +14,13 @@
 
 using json = nlohmann::json;
 
-namespace cipher {
-  std::string encrypt(std::string const& plainText, std::string const& password, Error& error);
-  std::string decrypt(std::string const& cipherText, std::string const& password, Error& error);
+namespace Cipher {
+  std::string encrypt(
+    std::string const& plainText, std::string const& password, Error& error
+  );
+  std::string decrypt(
+    std::string const& cipherText, std::string const& password, Error& error
+  );
 }
 
 #endif // CIPHER_H

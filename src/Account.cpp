@@ -6,26 +6,30 @@ Account::Account(
 ) : _address(__address), _name(__name), _derivationPath(__derivationPath),
   _isLedger(__isLedger), provider(_provider)
 {
-  // TODO: Load transaction data.
   Error error;
-  auto nonceRequest = Net::HTTPRequest(this->provider, Net::RequestTypes::POST, RPC::eth_getTransactionCount(_address, "latest", error).dump(0));
-  //std::cout << nonceRequest << std::endl;
+  std::string nonceRequest = Net::HTTPRequest(
+    this->provider, Net::RequestTypes::POST,
+    RPC::eth_getTransactionCount(_address, "latest", error).dump()
+  );
   json nonceJson = json::parse(nonceRequest);
   _nonce = boost::lexical_cast<HexTo<uint64_t>>(nonceJson["result"].get<std::string>());
 }
 
 std::future<BigNumber> Account::balance() {
   return std::async([=]{
+    Error error;
     BigNumber ret;
-    json request;
-    request["jsonrpc"] = "2.0";
-    request["method"] = "eth_getBalance";
-    request["params"] = json::array();
-    request["params"].push_back(this->address());
-    request["params"].push_back("latest");
-    auto balanceRequestStr = Net::HTTPRequest(provider, Net::RequestTypes::GET, request.dump(0));
+    std::string balanceRequestStr = Net::HTTPRequest(
+      this->provider, Net::RequestTypes::GET,
+      RPC::eth_getBalance(this->_address, "latest", error).dump()
+    );
+    if (error.getCode() != 0) {
+      std::cout << "Error on getting balance for account " << this->_address
+        << ": " << error.what() << std::endl;
+      return ret;
+    }
     json balanceRequest = json::parse(balanceRequestStr);
-    BigNumber balance = Utils::hexToBigNumber(balanceRequest["result"].get<std::string>());
+    ret = Utils::hexToBigNumber(balanceRequest["result"].get<std::string>());
     return ret;
   });
 }

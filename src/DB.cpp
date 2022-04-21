@@ -8,8 +8,8 @@ bool Database::openDB() {
   this->dbStatus = leveldb::DB::Open(this->dbOpts, this->path.string(), &this->db);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    std::cout << std::string("Error opening ") << this->name
-      << " database! " << this->dbStatus.ToString() << std::endl;
+    std::cout << "Error opening " << this->name << " database!"
+      << this->dbStatus.ToString() << std::endl;
     return false;
   }
   this->dbMutex.unlock();
@@ -54,8 +54,9 @@ bool Database::putKeyValue(std::string const &key, std::string const &value) {
   this->dbStatus = this->db->Put(leveldb::WriteOptions(), key, value);
   if (!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error writing at ") + this->name + " database at key "
-      + key + this->dbStatus.ToString();
+    std::cout << "Error putting key " << key << " at database " << this->name
+      << ": " << this->dbStatus.ToString();
+    return false;
   }
   this->dbMutex.unlock();
   return this->dbStatus.ok();
@@ -66,8 +67,9 @@ bool Database::deleteKeyValue(std::string const &key) {
   this->dbStatus = this->db->Delete(leveldb::WriteOptions(), key);
   if(!this->dbStatus.ok()) {
     this->dbMutex.unlock();
-    throw std::string("Error deleting at ") + this->name + " database at key "
-      + key + this->dbStatus.ToString();
+    std::cout << "Error deleting key " << key << " at database " << this->name
+      << ": " << this->dbStatus.ToString();
+    return false;
   }
   this->dbMutex.unlock();
   return this->dbStatus.ok();
