@@ -196,7 +196,7 @@ std::string Utils::hexToUtf8(std::string hex) {
     str += std::to_string(code);
   }
 
-  return str; // TODO: check if UTF-8 works here (should be utf8.decode(str))
+  return str;
 }
 
 std::string Utils::hexToString(std::string hex) {
@@ -204,7 +204,6 @@ std::string Utils::hexToString(std::string hex) {
 }
 
 std::string Utils::utf8ToHex(std::string str) {
-  // TODO: check if UTF-8 works here (should be utf8.encode(str))
   std::string hex = "";
 
   // Remove \u0000 padding from either side

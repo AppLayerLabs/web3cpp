@@ -43,45 +43,6 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   return true;
 }
 
-bool Wallet::importPrivKey(
-  dev::Secret const &secret, std::string const &password,
-  std::string const &name, std::string const &derivationPath, Error &error
-) {
-  // Check if password is correct
-  json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
-  auto originalKey = dev::fromHex(walletInfo["key"]);
-  dev::SecureFixedHash<16> oldKey(originalKey);
-  auto originalSalt = dev::fromHex(walletInfo["salt"]);
-  auto originalIterations = walletInfo["iterations"];
-  auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, originalSalt, originalIterations, 16));
-  if (key != oldKey) { error.setCode(1); return false; } // Incorrect Password.
-
-  // Create the encrypted key
-  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
-  encryptedKey["address"] = Utils::toLowercaseAddress(
-    "0x" + dev::toHex(dev::toAddress(secret))
-  );
-  encryptedKey["name"] = name;
-  encryptedKey["derivationPath"] = derivationPath;
-  encryptedKey["isLedger"] = false;
-
-  // Import the account
-  std::vector<std::string> ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    if (acc.first == encryptedKey["address"]) {
-      error.setCode(3);  // Account Exists
-      return false;
-    }
-  }
-  if (!accountDB.putKeyValue(encryptedKey["address"], encryptedKey.dump())) {
-    error.setCode(2); // Database Insert Failed
-    return false;
-  }
-  error.setCode(0); // No Error
-  return true;
-}
-
 bool Wallet::loadWallet(std::string const &password, Error &error) {
   if (!boost::filesystem::exists(walletExistsPath())) { createNewWallet(password, error); }
   // Check if password is correct
@@ -150,6 +111,45 @@ std::string Wallet::createAccount(
   return ret;
 }
 
+bool Wallet::importPrivKey(
+  dev::Secret const &secret, std::string const &password,
+  std::string const &name, std::string const &derivationPath, Error &error
+) {
+  // Check if password is correct
+  json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
+  auto originalKey = dev::fromHex(walletInfo["key"]);
+  dev::SecureFixedHash<16> oldKey(originalKey);
+  auto originalSalt = dev::fromHex(walletInfo["salt"]);
+  auto originalIterations = walletInfo["iterations"];
+  auto key = dev::SecureFixedHash<16>(dev::pbkdf2(password, originalSalt, originalIterations, 16));
+  if (key != oldKey) { error.setCode(1); return false; } // Incorrect Password.
+
+  // Create the encrypted key
+  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
+  encryptedKey["address"] = Utils::toLowercaseAddress(
+    "0x" + dev::toHex(dev::toAddress(secret))
+  );
+  encryptedKey["name"] = name;
+  encryptedKey["derivationPath"] = derivationPath;
+  encryptedKey["isLedger"] = false;
+
+  // Import the account
+  std::vector<std::string> ret;
+  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
+  for (std::pair<std::string, std::string> acc : accs) {
+    if (acc.first == encryptedKey["address"]) {
+      error.setCode(3);  // Account Exists
+      return false;
+    }
+  }
+  if (!accountDB.putKeyValue(encryptedKey["address"], encryptedKey.dump())) {
+    error.setCode(2); // Database Insert Failed
+    return false;
+  }
+  error.setCode(0); // No Error
+  return true;
+}
+
 bool Wallet::deleteAccount(std::string address) {
   return this->accountDB.deleteKeyValue(Utils::toLowercaseAddress(address));
 }
@@ -191,10 +191,52 @@ std::string Wallet::sign(
   return std::string("0x") + dev::toHex(dev::Signature(sigStruct));
 }
 
-std::future<std::string> Wallet::ecRecover(
+std::string Wallet::ecRecover(
   std::string dataThatWasSigned, std::string signature
 ) {
-  return {}; // TODO
+  // Split signature into r/s/v
+  if (signature.substr(0, 2) == "0x") { signature = signature.substr(2); }  // Remove "0x"
+  std::string r = signature.substr(0, 64);  // 32 hex bytes (64 chars - 0-64)
+  std::string s = signature.substr(65, 64); // 32 hex bytes (64 chars - 65-128)
+  std::string v = signature.substr(128, 2); // 1 hex byte (2 chars - 129-130)
+
+  // Set up the context for secp256k1 and parse the signature
+  secp256k1_context* ctx = secp256k1_context_create(
+    SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY
+  );
+  secp256k1_ecdsa_recoverable_signature rawSig;
+  if (!secp256k1_ecdsa_recoverable_signature_parse_compact(
+    ctx, &rawSig, (unsigned char*) signature.data(), std::stoi(v)
+  )) {
+    std::cout << "Cannot parse compact" << std::endl;
+    return "";
+  }
+
+  // Hash the data that was signed, wrap it and hash it again
+  std::array<uint8_t, 32> hash;
+  keccak_256(hash.data(), hash.size(), (unsigned char*) dataThatWasSigned.data());
+  dataThatWasSigned = std::string("\x19") + "Ethereum Signed Message:\n32"
+    + std::string(hash.begin(), hash.end());
+  keccak_256(hash.data(), hash.size(), (unsigned char*) dataThatWasSigned.data());
+
+  // Recover the raw public key based on the hash data and signature
+  secp256k1_pubkey rawPubkey;
+  if (!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, hash.data())) {  // 32 bit hash
+    std::cout << "Cannot recover public key" << std::endl;
+    return "";
+  }
+
+  // Serialize the public key and hash out the address
+  std::array<uint8_t, 65> pubkey;
+  size_t biglen = 65;
+  secp256k1_ec_pubkey_serialize(
+    ctx, pubkey.data(), &biglen, &rawPubkey, SECP256K1_EC_UNCOMPRESSED
+  );
+  std::string out = std::string(pubkey.begin(), pubkey.end()).substr(1);
+  keccak_256(hash.data(), hash.size(), (unsigned char*) out.data());
+  // TODO: implement bytesToHex() to return this
+  //return std::string("0x") + Utils::bytesToHex(hash).substr(24);
+  return "";
 }
 
 std::string Wallet::signTransaction(
@@ -241,7 +283,7 @@ void Wallet::unlockAccount(
   ; // TODO
 }
 
-std::future<bool> Wallet::lockAccount(std::string address) {
+bool Wallet::lockAccount(std::string address) {
   address = Utils::toLowercaseAddress(address);
   return {}; // TODO
 }
@@ -274,8 +316,3 @@ Account Wallet::getAccountDetails(std::string address) {
   return Account();
 }
 
-std::future<std::string> Wallet::importRawKey(
-  std::string privateKey, std::string password
-) {
-  return {}; // TODO
-}

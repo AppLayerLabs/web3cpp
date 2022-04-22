@@ -95,18 +95,6 @@ namespace Utils {
   boost::filesystem::path getDefaultDataDir();
 
   /**
-   * Bloom filter functions.
-   * See https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html#functions
-   * TODO: implement those(?)
-   */
-  bool isBloom(std::string bloom);
-  bool isUserAddressInBloom(std::string bloom, std::string address);
-  bool isContractAddressInBloom(std::string bloom, std::string contractAddress);
-  bool isTopic(std::string topic);
-  bool isTopicInBloom(std::string bloom, std::string topic);
-  bool isInBloom(std::string bloom, std::string value);
-
-  /**
    * Generates a cryptographically strong pseudo-random HEX string from a given byte size.
    * e.g. a size of 32 will result in a 32-byte HEX string,
    * which is a 64-char string prefixed with "0x".
@@ -209,7 +197,7 @@ namespace Utils {
   // TODO: implement this
   //bytes[] hexToBytes(hex);
 
-  // Returns a HEX string form a byte array.
+  // Returns a HEX string from a byte array.
   // TODO: implement this
   //std::string bytesToHex(byteArray);
 
@@ -230,13 +218,6 @@ namespace Utils {
   std::string leftPad(std::string string, unsigned int characterAmount, std::string sign = "0");
   std::string padRight(std::string string, unsigned int characterAmount, std::string sign = "0");
   std::string rightPad(std::string string, unsigned int characterAmount, std::string sign = "0");
-
-  /**
-   * Converts a negative number into a two's complement.
-   * Returns the converted HEX string.
-   */
-  // TODO: implement this(?)
-  //std::string toTwosComplement(number);
 
   /**
    * Read from/write to a JSON file, respectively.

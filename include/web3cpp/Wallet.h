@@ -10,6 +10,10 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <nlohmann/json.hpp>
 
+#include <bip3x/crypto/sha3.h>  // keccak_256()
+#include <secp256k1.h>
+#include <secp256k1_recovery.h>
+
 #include <web3cpp/devcore/Common.h>
 #include <web3cpp/devcore/FixedHash.h>
 #include <web3cpp/devcore/Address.h>
@@ -52,13 +56,6 @@ class Wallet {
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string const &password, Error &error);
 
-    // Import a given private key into the wallet database.
-    // Always stores address as lowercase.
-    bool importPrivKey(
-      dev::Secret const &secret, std::string const &password,
-      std::string const &name, std::string const &derivationPath, Error &error
-    );
-
   public:
     // Constructor.
     Wallet(Utils::Provider *providerPointer, boost::filesystem::path _path)
@@ -96,6 +93,13 @@ class Wallet {
       Error &error, std::string seed = ""
     );
 
+    // Import a given private key into the wallet database.
+    // Always stores address as lowercase.
+    bool importPrivKey(
+      dev::Secret const &secret, std::string const &password,
+      std::string const &name, std::string const &derivationPath, Error &error
+    );
+
     /**
      * Deletes a previously created account.
      * Converts input to lowercase before attempting to delete.
@@ -128,10 +132,11 @@ class Wallet {
     );
 
     /**
-     * Recovers the account that signed the data.
+     * Recovers the account that signed the given data.
+     * Signature is the one returned from sign().
      * dataThatWasSigned will be converted to hex using Utils.utf8ToHex().
      */
-    std::future<std::string> ecRecover(
+    std::string ecRecover(
       std::string dataThatWasSigned, std::string signature
     );
 
@@ -158,7 +163,7 @@ class Wallet {
     );
 
     // Locks a specific account.
-    std::future<bool> lockAccount(std::string address);
+    bool lockAccount(std::string address);
 
     // Returns a list of addresses controlled by the node, and the
     // details for a specific address, respectively.
@@ -166,15 +171,6 @@ class Wallet {
     // Account object.
     std::vector<std::string> getAccounts();
     Account getAccountDetails(std::string address);
-
-    /**
-     * Imports a given private key into the keystore, encrypting it with the password.
-     * privateKey is a hex string without the "0x".
-     * Returns the address of the new account.
-     */
-    std::future<std::string> importRawKey(
-      std::string privateKey, std::string password
-    );
 };
 
 #endif  // WALLET_H
