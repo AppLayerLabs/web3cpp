@@ -235,6 +235,7 @@ namespace Utils {
    * Converts a negative number into a two's complement.
    * Returns the converted HEX string.
    */
+  // TODO: implement this(?)
   //std::string toTwosComplement(number);
 
   /**

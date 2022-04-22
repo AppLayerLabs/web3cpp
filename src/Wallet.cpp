@@ -2,14 +2,13 @@
 
 bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Create the paths if they don't exist yet
-  if (!boost::filesystem::exists(walletExistsPath())) {
-    boost::filesystem::create_directories(walletExistsPath());
-  }
-  if (!boost::filesystem::exists(walletFolder())) {
-    boost::filesystem::create_directories(walletFolder());
-  }
-  if (!boost::filesystem::exists(accountsFolder())) {
-    boost::filesystem::create_directories(accountsFolder());
+  std::vector<boost::filesystem::path> paths {
+    walletExistsPath(), walletFolder(), accountsFolder(), transactionsFolder()
+  };
+  for (boost::filesystem::path path : paths) {
+    if (!boost::filesystem::exists(path)) {
+      boost::filesystem::create_directories(path);
+    }
   }
 
   // Initialize a new Wallet
@@ -20,9 +19,11 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
     {"key", key.makeInsecure().hex()},
     {"iterations", 262144}
   };
-  infoDB.putKeyValue("walletInfo", walletInfo.dump());
-
-  // TODO: error handling here
+  if (!infoDB.putKeyValue("walletInfo", walletInfo.dump())){
+    error.setCode(2); // Database Insert Failed
+    std::cout << "Failed to create wallet: " << error.what() << std::endl;
+    return false;
+  }
 
   // Initialize the seed json and cipher, then create the salt.
   // Use exactly as many bytes for the cipher as needed.
@@ -118,17 +119,15 @@ std::string Wallet::createAccount(
   Error &error, std::string seed
 ) {
   if (!checkPassword(password)) { error.setCode(1); return ""; } // Incorrect Password
-  std::cout << this->accountDB.getAllKeys().size() << std::endl;
-  // Get the seed phrase.
   std::string seedPhrase;
   if (seed.empty()) {
-    // Load the phrase from JSON.
+    // Load the seed phrase from JSON.
     boost::filesystem::path tmpPath = seedPhraseFile();
     json seedJson = Utils::readJSONFile(tmpPath);
     auto decrypt = dev::SecretStore::decrypt(seedJson.dump(), password);
     seedPhrase = decrypt.ref().toString();
   } else {
-    // Use the custom phrase.
+    // Use the provided custom seed phrase.
     seedPhrase = seed;
   }
 

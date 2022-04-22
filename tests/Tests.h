@@ -96,7 +96,7 @@ class Tests {
       } else {
         failed("Accounts don't match");
       }
-      std::cout << web3.wallet.deleteAccount(result) << std::endl;
+      web3.wallet.deleteAccount(result);
       return;
     }
 };

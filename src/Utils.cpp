@@ -172,11 +172,8 @@ std::string Utils::hexToNumberString(std::string hex) {
 }
 
 BigNumber Utils::hexToBigNumber(std::string hex) {
-  BigNumber ret;
   if (hex.substr(0,2) == "0x") { hex = hex.substr(2); } // Remove "0x"
-  // TODO: fix this
-  //ret = boost::lexical_cast<HexTo<BigNumber>>(hex);
-  return ret;
+  return boost::lexical_cast<HexTo<dev::u256>>(hex);
 }
 
 std::string Utils::hexToUtf8(std::string hex) {

@@ -47,7 +47,7 @@ class Wallet {
     boost::filesystem::path walletFolder()       { return path.string() + "/wallet"; };
     boost::filesystem::path accountsFolder()     { return path.string() + "/wallet/accounts"; };
     boost::filesystem::path seedPhraseFile()     { return path.string() + "/wallet/seed"; };
-    boost::filesystem::path transactionsFolder() { return path.string() + "/transactions"; }
+    boost::filesystem::path transactionsFolder() { return path.string() + "/wallet/transactions"; }
 
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string const &password, Error &error);
