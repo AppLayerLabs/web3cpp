@@ -26,11 +26,6 @@ using json = nlohmann::json;
 // Module that interacts with a node's accounts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html
 
-// TODO:
-// - Inherit the umbrella class to get access to common functions
-//   - setProvider(), providers, givenProvider, currentProvider, extend()
-// - Decide how to deal with callbacks on (almost) all functions
-
 class Wallet {
   private:
     // Wallet password hash, salt and number of PBKDF2 iterations.

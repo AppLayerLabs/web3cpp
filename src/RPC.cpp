@@ -460,7 +460,7 @@ json RPC::eth_getFilterLogs(std::string filterId, Error &err) {
     : _buildJSON("eth_getFilterLogs", {filterId});
 }
 
-json RPC::eth_getLogs(json filterOptions) {
+json RPC::eth_getLogs(json filterOptions, Error &err) {
   // TODO: filterOptions sanity check (there's a lot)
   return _buildJSON("eth_getLogs", {filterOptions});
 }

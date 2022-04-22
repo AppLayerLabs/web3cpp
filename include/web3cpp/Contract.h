@@ -10,11 +10,8 @@
 // Module that abstracts a smart contract.
 
 // TODO:
-// - Inherit Eth to have access to some properties
-//   - defaultAccount/Chain/Block/Hardfork/Common, transaction timeouts, handleRevert, etc.
-// - Implement events (once, events, events.allEvents, getPastEvents)
-// - Check if Method implementation should be this way
-// - Decide how to deal with callbacks and promievents for some functions
+// - Implement promievents to deal with those functions:
+//   - once(), events(), allEvents(), getPastEvents())
 
 class Contract {
   public:

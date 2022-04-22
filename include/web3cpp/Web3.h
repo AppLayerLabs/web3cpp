@@ -11,6 +11,8 @@
 
 // Main/Umbrella class that houses all modules.
 
+// TODO: point all Providers on classes to this one
+
 class Web3 {
   private:
     boost::filesystem::path defaultPath;

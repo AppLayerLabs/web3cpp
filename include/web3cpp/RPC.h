@@ -9,13 +9,16 @@
 #include <web3cpp/Error.h>
 #include <web3cpp/Utils.h>
 
-// Module that helps with building JSON-RPC requests, for use in Eth.
-// Every function returns a formatted and ready-to-use JSON object that
-// can be sent through an HTTP request to the network.
-// When required, functions will do sanity checks on inputs and will set
-// error codes and return empty JSON objects if those checks fail.
-// Every JSON object returned defaults to an id of "1".
-// See the docs at https://eth.wiki/json-rpc/API
+/**
+ * Module that helps with building JSON-RPC requests, for use in Eth.
+ * Every function returns a formatted and ready-to-use JSON object that
+ * can be sent through an HTTP request to the network.
+ * When required, functions will do sanity checks on inputs and will set
+ * error codes if those checks fail.
+ * Every JSON object returned defaults to an id of "1".
+ * See the docs at https://eth.wiki/json-rpc/API for return types
+ * and how to deal with them.
+ */
 
 namespace RPC {
   json _buildJSON(std::string method, json params = json::array());
@@ -82,7 +85,7 @@ namespace RPC {
   json eth_uninstallFilter(std::string filterId, Error &err);
   json eth_getFilterChanges(std::string filterId, Error &err);
   json eth_getFilterLogs(std::string filterId, Error &err);
-  json eth_getLogs(json filterOptions);
+  json eth_getLogs(json filterOptions, Error &err);
   json eth_getWork();
   json eth_submitWork(std::string nonce, std::string powHash, std::string digest, Error &err);
   json eth_submitHashrate(std::string hashrate, std::string id, Error &err);
