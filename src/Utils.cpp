@@ -104,31 +104,39 @@ std::string Utils::toUppercaseAddress(std::string address) {
 }
 
 std::string Utils::toChecksumAddress(std::string address) {
-  // Address has to be hashed as all lower-case and without the "0x" part
+  // Hash needs address to be all lower-case and without the "0x" part
   address = Utils::toLowercaseAddress(address);
   if (address.substr(0, 2) == "0x") { address = address.substr(2); }
   std::string hash = dev::toHex(dev::sha3(address));
   std::string ret;
   for (int i = 0; i < address.length(); i++) {
-    // If ith character hash is 8-F then make it uppercase
-    ret += (std::stoi(hash.substr(i, 1), nullptr, 16) > 7)
-      ? std::toupper(address[i]) : std::tolower(address[i]);
+    if (std::isdigit(address[i])) {
+      // [0-9] - Can't uppercase so we skip it
+      ret += address[i];
+    } else {
+      // [A-F] - If character hash is 8-F then make it uppercase
+      int nibble = std::stoi(hash.substr(i, 1), nullptr, 16);
+      ret += (nibble >= 8) ? std::toupper(address[i]) : std::tolower(address[i]);
+    }
   }
   return "0x" + ret;
 }
 
 bool Utils::checkAddressChecksum(std::string address) {
-  // TODO: revise this
-  // Address has to be hashed as all lower-case and without the "0x" part
+  // Hash needs address to be all lower-case and without the "0x" part
   if (address.substr(0, 2) == "0x") { address = address.substr(2); }
-  std::string hash = dev::toHex(dev::sha3(address));
+  std::string hash = dev::toHex(dev::sha3(
+    Utils::toLowercaseAddress(address).substr(2)
+  ));
   for (int i = 0; i < address.length(); i++) {
-    bool upperHash = (std::stoi(hash.substr(i, 1), nullptr, 16) > 7);
-    bool lowerHash = (std::stoi(hash.substr(i, 1), nullptr, 16) <= 7);
-    bool upperChar = (std::toupper(address[i]) == address[i]);
-    bool lowerChar = (std::tolower(address[i]) == address[i]);
-    if ((upperHash && !upperChar) || (lowerHash && !lowerChar)) {
-      return false;
+    if (!std::isdigit(address[i])) {  // Only check A-F
+      int nibble = std::stoi(hash.substr(i, 1), nullptr, 16);
+      if (
+        (nibble >= 8 && !std::isupper(address[i])) ||
+        (nibble < 8 && !std::islower(address[i]))
+      ) {
+        return false;
+      }
     }
   }
   return true;

@@ -4,6 +4,7 @@
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS
 
 #include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <string>
 #include <mutex>
@@ -153,7 +154,7 @@ namespace Utils {
    * Converts an address to its all-lowercase, all-uppercase and
    * checksum version, respectively.
    * "0x" is automatically added at the beginning of the string.
-   * Adapted from https://github.com/ethereum/EIPs/issues/55
+   * Adapted from https://eips.ethereum.org/EIPS/eip-55
    */
   std::string toLowercaseAddress(std::string address);
   std::string toUppercaseAddress(std::string address);
