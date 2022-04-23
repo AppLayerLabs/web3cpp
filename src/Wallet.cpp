@@ -234,9 +234,11 @@ std::string Wallet::ecRecover(
   );
   std::string out = std::string(pubkey.begin(), pubkey.end()).substr(1);
   keccak_256(hash.data(), hash.size(), (unsigned char*) out.data());
-  // TODO: implement bytesToHex() to return this
-  //return std::string("0x") + Utils::bytesToHex(hash).substr(24);
-  return "";
+  std::vector<char> hashVec;
+  for (int i = 0; i < hash.size(); i++) {
+    hashVec.push_back(hash[i]);
+  }
+  return std::string("0x") + Utils::bytesToHex(hashVec).substr(24);
 }
 
 std::string Wallet::signTransaction(

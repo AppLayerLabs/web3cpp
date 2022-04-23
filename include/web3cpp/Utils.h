@@ -172,34 +172,24 @@ namespace Utils {
   BigNumber hexToBigNumber(std::string hex);
 
   /**
-   * Returns the UTF-8 string representation of a given HEX value.
+   * Returns the UTF-8/ASCII/byte array string representation
+   * of a given HEX value, respectively.
    * hexToString() is an alias of hexToUtf8().
    */
   std::string hexToUtf8(std::string hex);
   std::string hexToString(std::string hex);
-
-  // Returns the ASCII string representation of a given HEX value.
-  // TODO: implement this
-  //std::string hexToAscii(std::string hex);
+  std::string hexToAscii(std::string hex);
+  std::vector<char> hexToBytes(std::string hex);
 
   /**
-   * Returns the HEX representation of a given UTF-8 string.
+   * Returns the HEX representation of a given
+   * UTF-8/ASCII/byte array string, respectively.
    * stringToHex() is an alias of utf8ToHex().
    */
   std::string utf8ToHex(std::string str);
   std::string stringToHex(std::string str);
-
-  // Returns the HEX representation of a given ASCII string.
-  // TODO: implement this
-  //std::string asciiToHex(std::string str);
-
-  // Returns a byte array from the given HEX string.
-  // TODO: implement this
-  //bytes[] hexToBytes(hex);
-
-  // Returns a HEX string from a byte array.
-  // TODO: implement this
-  //std::string bytesToHex(byteArray);
+  std::string asciiToHex(std::string str);
+  std::string bytesToHex(std::vector<char> byteArray);
 
   /**
    * Converts any amount to/from Wei, respectively.

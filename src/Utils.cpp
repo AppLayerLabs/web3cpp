@@ -203,6 +203,32 @@ std::string Utils::hexToString(std::string hex) {
   return Utils::hexToUtf8(hex);
 }
 
+std::string Utils::hexToAscii(std::string hex) {
+  if (!isHexStrict(hex)) {
+    throw std::string("Error converting non-hex value to ASCII: ") + hex;
+  }
+  hex = hex.substr(2);  // Remove "0x"
+
+  std::string str;
+  for (int i = 0; i < hex.length(); i += 2) {
+    str += std::stoul(hex.substr(i, 2), nullptr, 16);
+  }
+  return str;
+}
+
+std::vector<char> Utils::hexToBytes(std::string hex) {
+  if (!isHexStrict(hex)) {
+    throw std::string("Error converting non-hex value to bytes: ") + hex;
+  }
+  hex = hex.substr(2);  // Remove "0x"
+
+  std::vector<char> bytes;
+  for (int i = 0; i < hex.length(); i += 2) {
+    bytes.push_back((char) std::stoul(hex.substr(i, 2), nullptr, 16));
+  }
+  return bytes;
+}
+
 std::string Utils::utf8ToHex(std::string str) {
   std::string hex = "";
 
@@ -226,6 +252,29 @@ std::string Utils::utf8ToHex(std::string str) {
 
 std::string Utils::stringToHex(std::string hex) {
   return Utils::utf8ToHex(hex);
+}
+
+std::string Utils::asciiToHex(std::string str) {
+  std::string hex = "";
+
+  std::ostringstream result;
+  result << std::setw(2) << std::setfill('0') << std::hex;
+  std::copy(hex.begin(), hex.end(), std::ostream_iterator<unsigned int>(result, ""));
+
+  return "0x" + hex;
+}
+
+std::string Utils::bytesToHex(std::vector<char> byteArray) {
+  std::string hex = "";
+
+  std::ostringstream result;
+  result << std::setw(2) << std::setfill('0') << std::hex;
+  for (int i = 0; i < byteArray.size(); i++) {
+    result << (int) byteArray[i];
+  }
+  hex = result.str();
+
+  return "0x" + hex;
 }
 
 std::string Utils::toWei(std::string amount, int decimals) {
