@@ -1,8 +1,11 @@
 #ifndef WALLET_H
 #define WALLET_H
 
+#include <chrono>
+#include <ctime>
 #include <future>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "Utils.h"
@@ -44,7 +47,11 @@ class Wallet {
     Database accountDB;
     Database transactionDB;
 
+    // Variables for Wallet load status and password storage.
     bool _isLoaded;
+    std::string _password;
+    std::time_t _passEnd;
+    std::thread _passThread;
 
     // Paths for wallet file and secrets folder.
     boost::filesystem::path walletExistsPath()   { return path.string() + "/wallet.info"; };
@@ -52,6 +59,18 @@ class Wallet {
     boost::filesystem::path accountsFolder()     { return path.string() + "/wallet/accounts"; };
     boost::filesystem::path seedPhraseFile()     { return path.string() + "/wallet/seed"; };
     boost::filesystem::path transactionsFolder() { return path.string() + "/wallet/transactions"; }
+
+    // Thread function for storing/clearing password in memory
+    void passHandler() {
+      while (true) {
+        std::time_t now = std::time(nullptr);
+        if (now > this->_passEnd) break;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+      this->_password = "";
+      this->_passEnd = 0;
+      return;
+    }
 
     // Called by loadWallet() if no wallet is found on the desired path.
     bool createNewWallet(std::string const &password, Error &error);
@@ -157,13 +176,12 @@ class Wallet {
       std::string txHash, std::string password, Error &err
     );
 
-    // Unlocks a specific account for a given number of seconds.
-    void unlockAccount(
-      std::string address, std::string password, unsigned int unlockDuration
-    );
-
-    // Locks a specific account.
-    bool lockAccount(std::string address);
+    // Stores/wipes the Wallet's password to/from memory, respectively.
+    // 0 seconds = "store indefinitely until wiped manually".
+    // Any non-zero value will spawn a thread that wipes automatically
+    // after said value counts down to 0.
+    void storePassword(std::string password, unsigned int seconds = 0);
+    void clearPassword();
 
     // Returns a list of addresses controlled by the node, and the
     // details for a specific address, respectively.

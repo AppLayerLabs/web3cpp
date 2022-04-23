@@ -199,13 +199,11 @@ class Eth {
     // Signs data using a specific account, which needs to be unlocked.
     // dataToSign will be converted using Utils.utf8ToHex().
     // Address can be a string or the index of a local wallet in Accounts.Wallet.
-    // TODO: check if account is unlocked before signing
     std::future<std::string> sign(std::string dataToSign, std::string address);
     std::future<std::string> sign(std::string dataToSign, unsigned int address);
 
     // Signs a transaction. transactionObject is the same as sendTransaction().
     // Returns the signed transaction object.
-    // TODO: check if account is unlocked before signing
     std::future<json> signTransaction(json txObj);
 
     // Executes a message call transaction, which is directly executed in the

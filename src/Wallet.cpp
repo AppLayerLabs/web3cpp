@@ -278,16 +278,18 @@ std::future<json> Wallet::sendTransaction(
   });
 }
 
-void Wallet::unlockAccount(
-  std::string address, std::string password, unsigned int unlockDuration
-) {
-  address = Utils::toLowercaseAddress(address);
-  ; // TODO
+void Wallet::storePassword(std::string password, unsigned int seconds) {
+  this->_password = password;
+  if (seconds > 0) {
+    this->_passEnd = std::time(nullptr) + seconds;
+    this->_passThread = std::thread(std::bind(&Wallet::passHandler, this));
+    this->_passThread.detach();
+  }
 }
 
-bool Wallet::lockAccount(std::string address) {
-  address = Utils::toLowercaseAddress(address);
-  return {}; // TODO
+void Wallet::clearPassword() {
+  this->_password = "";
+  this->_passEnd = 0; // This ensures the thread will be terminated
 }
 
 std::vector<std::string> Wallet::getAccounts() {
