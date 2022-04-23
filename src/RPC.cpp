@@ -8,9 +8,9 @@ bool RPC::_checkHexData(std::string hex, bool strict) {
   return (strict) ? Utils::isHexStrict(hex) : Utils::isHex(hex);
 }
 
-// TODO: maybe check length against actual hex bytes instead of string chars?
-bool RPC::_checkHexLength(std::string hex, int length) {
-  return (hex.length() == length);
+bool RPC::_checkHexLength(std::string hex, int hexLength) {
+  int start = (hex.substr(0, 2) == "0x") ? 2 : 0;
+  return (hex.substr(start).length() / 2 == length);
 }
 
 bool RPC::_checkAddress(std::string add) {
@@ -141,9 +141,8 @@ json RPC::eth_getTransactionCount(std::string address, BigNumber defaultBlock, E
 json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -165,9 +164,8 @@ json RPC::eth_getBlockTransactionCountByNumber(BigNumber number, Error &err) {
 json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -308,9 +306,8 @@ json RPC::eth_estimateGas(json callObject, Error &err) {
 json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -332,9 +329,8 @@ json RPC::eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, 
 json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -344,9 +340,8 @@ json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
 json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -373,9 +368,8 @@ json RPC::eth_getTransactionByBlockNumberAndIndex(BigNumber number, std::string 
 json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -385,9 +379,8 @@ json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
 json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
   int errCode = 0;
   [&](){
-    // hash: "0x" + 32 hex bytes (64 chars)
     if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(hash, 66)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(hash, 32)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -481,7 +474,6 @@ json RPC::eth_getFilterLogs(std::string filterId, Error &err) {
 }
 
 json RPC::eth_getLogs(json filterOptions, Error &err) {
-  // blockhash: "0x" + 32 hex bytes (64 chars)
   int errCode = 0;
   [&](){
     if (!filterOptions.count("fromBlock")) {
@@ -516,7 +508,7 @@ json RPC::eth_getLogs(json filterOptions, Error &err) {
     }
     if (filterOptions.count("blockhash")) {
       if (!_checkHexData(filterOptions["blockhash"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(filterOptions["blockhash"], 66)) { errCode = 6; return; } // Invalid Hash Length
+      if (!_checkHexLength(filterOptions["blockhash"], 32)) { errCode = 6; return; } // Invalid Hash Length
     }
   }();
   err.setCode(errCode);
@@ -531,14 +523,11 @@ json RPC::eth_getWork() {
 json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string digest, Error &err) {
   int errCode = 0;
   [&](){
-    // nonce: "0x" + 8 hex bytes (16 chars)
-    // powHash: "0x" + 32 hex bytes (64 chars)
-    // digest: "0x" + 32 hex bytes (64 chars)
     if (
       !_checkHexData(nonce) || !_checkHexData(powHash) || !_checkHexData(digest)
     ) { errCode = 4; return; } // Invalid Hex Data
     if (
-      !_checkHexLength(nonce, 18) || !_checkHexLength(powHash, 66) || !_checkHexLength(nonce, 66)
+      !_checkHexLength(nonce, 8) || !_checkHexLength(powHash, 32) || !_checkHexLength(nonce, 32)
     ) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
@@ -549,13 +538,11 @@ json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string dig
 json RPC::eth_submitHashrate(std::string hashrate, std::string id, Error &err) {
   int errCode = 0;
   [&](){
-    // hashrate: "0x" + 32 hex bytes (64 chars)
-    // id: "0x" + 32 hex bytes (64 chars)
     if (
       !_checkHexData(hashrate) || !_checkHexData(id)
     ) { errCode = 4; return; } // Invalid Hex Data
     if (
-      !_checkHexLength(hashrate, 66) || !_checkHexLength(id, 66)
+      !_checkHexLength(hashrate, 32) || !_checkHexLength(id, 32)
     ) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
@@ -586,8 +573,6 @@ json RPC::shh_version() {
 }
 
 json RPC::shh_post(json whisperPostObject, Error &err) {
-  // from: "0x" + 65 hex bytes (130 chars)
-  // to: "0x" + 65 hex bytes (130 chars)
   int errCode = 0;
   [&](){
     for (json topic : whisperPostObject["topics"]) {
@@ -599,11 +584,11 @@ json RPC::shh_post(json whisperPostObject, Error &err) {
     if (!_checkHexData(whisperPostObject["ttl"])) { errCode = 4; return; } // Invalid Hex Data
     if (whisperPostObject.count("from")) {
       if (!_checkHexData(whisperPostObject["from"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(whisperPostObject["from"], 132)) { errCode = 6; return; } // Invalid Hash Length
+      if (!_checkHexLength(whisperPostObject["from"], 65)) { errCode = 6; return; } // Invalid Hash Length
     }
     if (whisperPostObject.count("to")) {
       if (!_checkHexData(whisperPostObject["to"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(whisperPostObject["to"], 132)) { errCode = 6; return; } // Invalid Hash Length
+      if (!_checkHexLength(whisperPostObject["to"], 65)) { errCode = 6; return; } // Invalid Hash Length
     }
   }();
   err.setCode(errCode);
@@ -626,9 +611,8 @@ json RPC::shh_newGroup() {
 json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
   int errCode = 0;
   [&](){
-    // identityAddress: "0x" + 65 hex bytes (130 chars)
     if (!_checkHexData(identityAddress)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(identityAddress, 132)) { errCode = 6; return; } // Invalid Hash Length
+    if (!_checkHexLength(identityAddress, 65)) { errCode = 6; return; } // Invalid Hash Length
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -636,7 +620,6 @@ json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
 }
 
 json RPC::shh_newFilter(json filterOptions, Error &err) {
-  // to: "0x" + 65 bytes (130 chars)
   int errCode = 0;
   [&](){
     for (json topic : filterOptions["topics"]) {
@@ -645,7 +628,7 @@ json RPC::shh_newFilter(json filterOptions, Error &err) {
     }
     if (filterOptions.count("to")) {
       if (!_checkHexData(filterOptions["to"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(filterOptions["to"], 132)) { errCode = 6; return; } // Invalid Hash Length
+      if (!_checkHexLength(filterOptions["to"], 65)) { errCode = 6; return; } // Invalid Hash Length
     }
   }();
   err.setCode(errCode);

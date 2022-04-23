@@ -21,9 +21,13 @@
  */
 
 namespace RPC {
+  // Helper functions to check/format data.
+  // checkHexLength requires a hex string but checks actual hex bytes
+  // while ignoring the "0x" (if it exists).
+  // e.g. "0xdeadbeef" = 4 ("de ad be ef") instead of 8 ("d e a d b e e f").
   json _buildJSON(std::string method, json params = json::array());
   bool _checkHexData(std::string hex, bool strict = true);
-  bool _checkHexLength(std::string hex, int length);
+  bool _checkHexLength(std::string hex, int hexLength);
   bool _checkAddress(std::string add);
   bool _checkDefaultBlock(std::string defaultBlock);
   bool _checkNumber(std::string num);
