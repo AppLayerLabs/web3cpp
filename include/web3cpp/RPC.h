@@ -76,10 +76,7 @@ namespace RPC {
   json eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err);
   json eth_getUncleByBlockNumberAndIndex(BigNumber number, std::string index, Error &err);
   json eth_getCompilers();
-  json eth_compileSolidity(std::string sourceCode);
-  json eth_compileLLL(std::string sourceCode);
-  json eth_compileSerpent(std::string sourceCode);
-  json eth_newFilter(json filterOptions);
+  json eth_newFilter(json filterOptions, Error &err);
   json eth_newBlockFilter();
   json eth_newPendingTransactionFilter();
   json eth_uninstallFilter(std::string filterId, Error &err);
@@ -96,12 +93,12 @@ namespace RPC {
   json db_getHex(std::string dbName, std::string key);
 
   json shh_version();
-  json shh_post(json whisperPostObject);
+  json shh_post(json whisperPostObject, Error &err);
   json shh_newIdentity();
   json shh_hasIdentity();
   json shh_newGroup();
   json shh_addToGroup(std::string identityAddress, Error &err);
-  json shh_newFilter(json filterOptions);
+  json shh_newFilter(json filterOptions, Error &err);
   json shh_uninstallFilter(std::string filterId, Error &err);
   json shh_getFilterChanges(std::string filterId, Error &err);
   json shh_getMessages(std::string filterId, Error &err);

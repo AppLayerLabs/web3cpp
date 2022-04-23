@@ -8,6 +8,7 @@ bool RPC::_checkHexData(std::string hex, bool strict) {
   return (strict) ? Utils::isHexStrict(hex) : Utils::isHex(hex);
 }
 
+// TODO: maybe check length against actual hex bytes instead of string chars?
 bool RPC::_checkHexLength(std::string hex, int length) {
   return (hex.length() == length);
 }
@@ -414,24 +415,43 @@ json RPC::eth_getCompilers() {
   return _buildJSON("eth_getCompilers");
 }
 
-json RPC::eth_compileSolidity(std::string sourceCode) {
-  // TODO: sourceCode sanity check(? is it even possible?)
-  return _buildJSON("eth_compileSolidity", {sourceCode});
-}
-
-json RPC::eth_compileLLL(std::string sourceCode) {
-  // TODO: sourceCode sanity check(? is it even possible?)
-  return _buildJSON("eth_compileLLL", {sourceCode});
-}
-
-json RPC::eth_compileSerpent(std::string sourceCode) {
-  // TODO: sourceCode sanity check(? is it even possible?)
-  return _buildJSON("eth_compileSerpent", {sourceCode});
-}
-
-json RPC::eth_newFilter(json filterOptions) {
-  // TODO: filterOptions sanity check (there's a lot)
-  return _buildJSON("eth_newFilter", {filterOptions});
+json RPC::eth_newFilter(json filterOptions, Error &err) {
+  int errCode = 0;
+  [&](){
+    if (!filterOptions.count("fromBlock")) {
+      filterOptions["fromBlock"] = "latest";
+    } else if (!_checkDefaultBlock(filterOptions["fromBlock"])) {
+      errCode = 9; return; // Invalid Block Number
+    }
+    if (!filterOptions.count("toBlock")) {
+      filterOptions["toBlock"] = "latest";
+    } else if (!_checkDefaultBlock(filterOptions["toBlock"])) {
+      errCode = 9; return; // Invalid Block Number
+    }
+    if (filterOptions.count("address")) {
+      if (filterOptions["address"].is_string()) {
+        if (!_checkAddress(filterOptions["address"])) {
+          errCode = 5; return; // Invalid Address
+        }
+      } else if (filterOptions["address"].is_array()) {
+        for (json address : filterOptions["address"]) {
+          std::string addressStr = address.get<std::string>();
+          if (!_checkAddress(addressStr)) {
+            errCode = 5; return; // Invalid Address
+          }
+        }
+      }
+    }
+    if (filterOptions.count("topics")) {
+      for (json topic : filterOptions["topics"]) {
+        std::string topicStr = topic.get<std::string>();
+        if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
+      }
+    }
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("eth_newFilter", {filterOptions});
 }
 
 json RPC::eth_newBlockFilter() {
@@ -461,8 +481,47 @@ json RPC::eth_getFilterLogs(std::string filterId, Error &err) {
 }
 
 json RPC::eth_getLogs(json filterOptions, Error &err) {
-  // TODO: filterOptions sanity check (there's a lot)
-  return _buildJSON("eth_getLogs", {filterOptions});
+  // blockhash: "0x" + 32 hex bytes (64 chars)
+  int errCode = 0;
+  [&](){
+    if (!filterOptions.count("fromBlock")) {
+      filterOptions["fromBlock"] = "latest";
+    } else if (!_checkDefaultBlock(filterOptions["fromBlock"])) {
+      errCode = 9; return; // Invalid Block Number
+    }
+    if (!filterOptions.count("toBlock")) {
+      filterOptions["toBlock"] = "latest";
+    } else if (!_checkDefaultBlock(filterOptions["toBlock"])) {
+      errCode = 9; return; // Invalid Block Number
+    }
+    if (filterOptions.count("address")) {
+      if (filterOptions["address"].is_string()) {
+        if (!_checkAddress(filterOptions["address"])) {
+          errCode = 5; return; // Invalid Address
+        }
+      } else if (filterOptions["address"].is_array()) {
+        for (json address : filterOptions["address"]) {
+          std::string addressStr = address.get<std::string>();
+          if (!_checkAddress(addressStr)) {
+            errCode = 5; return; // Invalid Address
+          }
+        }
+      }
+    }
+    if (filterOptions.count("topics")) {
+      for (json topic : filterOptions["topics"]) {
+        std::string topicStr = topic.get<std::string>();
+        if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
+      }
+    }
+    if (filterOptions.count("blockhash")) {
+      if (!_checkHexData(filterOptions["blockhash"])) { errCode = 4; return; } // Invalid Hex Data
+      if (!_checkHexLength(filterOptions["blockhash"], 66)) { errCode = 6; return; } // Invalid Hash Length
+    }
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("eth_getLogs", {filterOptions});
 }
 
 json RPC::eth_getWork() {
@@ -526,9 +585,30 @@ json RPC::shh_version() {
   return _buildJSON("shh_version");
 }
 
-json RPC::shh_post(json whisperPostObject) {
-  // TODO: whisperPostObject sanity check (there's a lot)
-  return _buildJSON("shh_post", {whisperPostObject});
+json RPC::shh_post(json whisperPostObject, Error &err) {
+  // from: "0x" + 65 hex bytes (130 chars)
+  // to: "0x" + 65 hex bytes (130 chars)
+  int errCode = 0;
+  [&](){
+    for (json topic : whisperPostObject["topics"]) {
+      std::string topicStr = topic.get<std::string>();
+      if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
+    }
+    if (!_checkHexData(whisperPostObject["data"])) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexData(whisperPostObject["priority"])) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexData(whisperPostObject["ttl"])) { errCode = 4; return; } // Invalid Hex Data
+    if (whisperPostObject.count("from")) {
+      if (!_checkHexData(whisperPostObject["from"])) { errCode = 4; return; } // Invalid Hex Data
+      if (!_checkHexLength(whisperPostObject["from"], 132)) { errCode = 6; return; } // Invalid Hash Length
+    }
+    if (whisperPostObject.count("to")) {
+      if (!_checkHexData(whisperPostObject["to"])) { errCode = 4; return; } // Invalid Hex Data
+      if (!_checkHexLength(whisperPostObject["to"], 132)) { errCode = 6; return; } // Invalid Hash Length
+    }
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("shh_post", {whisperPostObject});
 }
 
 json RPC::shh_newIdentity() {
@@ -555,9 +635,22 @@ json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
     : _buildJSON("shh_addToGroup", {identityAddress});
 }
 
-json RPC::shh_newFilter(json filterOptions) {
-  // TODO: filterOptions sanity check (it's a bit complicated)
-  return _buildJSON("shh_newFilter", {filterOptions});
+json RPC::shh_newFilter(json filterOptions, Error &err) {
+  // to: "0x" + 65 bytes (130 chars)
+  int errCode = 0;
+  [&](){
+    for (json topic : filterOptions["topics"]) {
+      std::string topicStr = topic.get<std::string>();
+      if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
+    }
+    if (filterOptions.count("to")) {
+      if (!_checkHexData(filterOptions["to"])) { errCode = 4; return; } // Invalid Hex Data
+      if (!_checkHexLength(filterOptions["to"], 132)) { errCode = 6; return; } // Invalid Hash Length
+    }
+  }();
+  err.setCode(errCode);
+  return (err.getCode() != 0) ? json::object()
+    : _buildJSON("shh_newFilter", {filterOptions});
 }
 
 json RPC::shh_uninstallFilter(std::string filterId, Error &err) {
