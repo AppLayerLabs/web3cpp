@@ -77,12 +77,15 @@ class Wallet {
 
   public:
     // Constructor.
-    Wallet(Utils::Provider *providerPointer, boost::filesystem::path _path)
-      : provider(providerPointer), path(_path),
+    Wallet(Utils::Provider* _provider, boost::filesystem::path _path)
+      : provider(_provider), path(_path),
         infoDB("walletInfo", walletFolder()),
         accountDB("accounts", walletFolder()),
         transactionDB("transactions", walletFolder())
     {};
+
+    // Getter for provider.
+    Utils::Provider* getProvider() { return this->provider; }
 
     /**
      * Load a wallet with the given password.

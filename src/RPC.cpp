@@ -10,7 +10,7 @@ bool RPC::_checkHexData(std::string hex, bool strict) {
 
 bool RPC::_checkHexLength(std::string hex, int hexLength) {
   int start = (hex.substr(0, 2) == "0x") ? 2 : 0;
-  return (hex.substr(start).length() / 2 == length);
+  return (hex.substr(start).length() / 2 == hexLength);
 }
 
 bool RPC::_checkAddress(std::string add) {

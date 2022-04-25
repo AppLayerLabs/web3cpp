@@ -23,8 +23,15 @@ using json = nlohmann::json;
 //   - sendTransaction(), sendSignedTransaction()
 
 class Eth {
-  public:
+  private:
     Utils::Provider *provider;
+
+  public:
+    // Constructor.
+    Eth(Utils::Provider* _provider) : provider(_provider) {};
+
+    // Getter for provider.
+    Utils::Provider* getProvider() { return this->provider; }
 
     // Default address used as the default "from" property, if no "from"
     // property is specified in functions like sendTransaction() or call().

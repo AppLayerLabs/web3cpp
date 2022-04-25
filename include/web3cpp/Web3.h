@@ -5,13 +5,12 @@
 
 #include <nlohmann/json.hpp>
 
+#include <web3cpp/Eth.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/Wallet.h>
 #include <web3cpp/Error.h>
 
 // Main/Umbrella class that houses all modules.
-
-// TODO: point all Providers on classes to this one
 
 class Web3 {
   private:
@@ -24,10 +23,14 @@ class Web3 {
     Web3(Utils::Provider provider) : Web3(&provider, NULL) {}
     Web3(boost::filesystem::path path): Web3(NULL, &path) {}
 
+    // Getter for provider.
+    Utils::Provider* getProvider() { return &this->defaultProvider; }
+
     // Current version of the library.
     static std::string version;
 
-    // The proper wallet object.
+    // The proper objects for other classes.
+    Eth eth;
     Wallet wallet;
 
     // Current available providers.

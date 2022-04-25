@@ -15,8 +15,7 @@
 
 class Tests {
   private:
-    // The Web3 object that will be tested
-    Web3 web3;
+    // Password for the wallet
     std::string password;
 
     // Counters for passed/failed tests, and functions for controlling those
@@ -32,6 +31,9 @@ class Tests {
     }
 
   public:
+    // The Web3 object that will be tested
+    Web3 web3;
+
     // Constructor
     // TODO: custom path for test wallet
     Tests(std::string &password) {
