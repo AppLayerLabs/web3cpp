@@ -104,6 +104,12 @@ link_directories(
   "${CMAKE_SOURCE_DIR}/build/deps/lib"
 )
 
+# Set the project version as a macro in a header file
+configure_file(
+  "${CMAKE_SOURCE_DIR}/include/web3cpp/version.h.in"
+  "${CMAKE_SOURCE_DIR}/include/web3cpp/version.h" @ONLY
+)
+
 # Organize sources and headers
 file(GLOB WEB3CPP_HEADERS "include/web3cpp/*.h")
 file(GLOB WEB3CPP_SOURCES "src/*.cpp")
@@ -116,7 +122,7 @@ file(GLOB ETHCORE_SOURCES "src/ethcore/*.cpp")
 file(GLOB LEDGER_HEADERS "include/web3cpp/ledger/*.h")
 file(GLOB LEDGER_SOURCES "src/ledger/*.cpp")
 
-# Declare library target
+# Build the project
 if(BUILD_STATIC)
   add_library(${PROJECT_NAME} STATIC
     ${WEB3CPP_HEADERS} ${WEB3CPP_SOURCES}

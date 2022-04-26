@@ -147,7 +147,6 @@ class Wallet {
     /**
      * Signs a data string as an "Ethereum Signed Message" (EIP-712 compliant).
      * Usable with ecRecover().
-     * dataToSign will be converted to hex using Utils.utf8ToHex().
      */
     std::string sign(
       std::string dataToSign, std::string address, std::string password, Error &err
@@ -156,14 +155,13 @@ class Wallet {
     /**
      * Recovers the account that signed the given data.
      * Signature is the one returned from sign().
-     * dataThatWasSigned will be converted to hex using Utils.utf8ToHex().
      */
     std::string ecRecover(
       std::string dataThatWasSigned, std::string signature
     );
 
     /**
-     * Signs a transaction. "from" account needs to be unlocked.
+     * Signs a transaction.
      * Returns the signed transaction hash, or an empty string on failure.
      */
     std::string signTransaction(

@@ -6,7 +6,6 @@ Web3::Web3(Utils::Provider *provider, boost::filesystem::path *path) :
 {
   boost::nowide::nowide_filesystem();
   defaultProvider.ProviderLock.lock();
-  //std::cout << provider << std::endl;
   if (provider == NULL) {
     defaultProvider = Utils::Provider();
   } else {
@@ -14,5 +13,6 @@ Web3::Web3(Utils::Provider *provider, boost::filesystem::path *path) :
   }
   defaultProvider.ProviderLock.unlock();
   defaultPath = (path == NULL) ? Utils::getDefaultDataDir() : *path;
+  this->version = PROJECT_VERSION;
 }
 

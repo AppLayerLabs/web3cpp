@@ -72,41 +72,6 @@ std::future<std::string> Eth::getGasPrice() {
   });
 }
 
-std::future<json> Eth::getFeeHistory(
-  std::string blockCount, std::string newestBlock,
-  std::vector<std::string> rewardPercentiles
-) {
-  return {}; // TODO
-}
-
-std::future<json> Eth::getFeeHistory(
-  BigNumber blockCount, std::string newestBlock,
-  std::vector<std::string> rewardPercentiles
-) {
-  std::stringstream ss;
-  ss << blockCount;
-  return getFeeHistory(ss.str(), newestBlock, rewardPercentiles);
-}
-
-std::future<json> Eth::getFeeHistory(
-  std::string blockCount, BigNumber newestBlock,
-  std::vector<std::string> rewardPercentiles
-) {
-  std::stringstream ss;
-  ss << newestBlock;
-  return getFeeHistory(blockCount, ss.str(), rewardPercentiles);
-}
-
-std::future<json> Eth::getFeeHistory(
-  BigNumber blockCount, BigNumber newestBlock,
-  std::vector<std::string> rewardPercentiles
-) {
-  std::stringstream ss, ss2;
-  ss << blockCount;
-  ss2 << newestBlock;
-  return getFeeHistory(ss.str(), ss2.str(), rewardPercentiles);
-}
-
 std::future<std::vector<std::string>> Eth::getAccounts() {
   return std::async([=]{
     std::string req = Net::HTTPRequest(
@@ -310,10 +275,6 @@ std::future<json> Eth::getTransaction(std::string transactionHash) {
   });
 }
 
-std::future<std::vector<json>> Eth::getPendingTransactions() {
-  return {}; // TODO
-}
-
 std::future<json> Eth::getTransactionFromBlock(
   std::string hashStringOrNumber, bool isHash, std::string indexNumber
 ) {
@@ -392,10 +353,6 @@ std::future<std::string> Eth::sign(std::string dataToSign, std::string address) 
     std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
-}
-
-std::future<std::string> Eth::sign(std::string dataToSign, unsigned int address) {
-  return {}; // TODO
 }
 
 std::future<json> Eth::signTransaction(json txObj) {
@@ -500,37 +457,11 @@ std::future<bool> Eth::submitWork(
   });
 }
 
-std::future<std::vector<std::string>> Eth::requestAccounts() {
-  return {}; // TODO
+uint64_t Eth::getChainId() {
+  return this->provider->chainID;
 }
 
-std::future<unsigned int> Eth::getChainId() {
-  return {}; // TODO
-}
-
-std::future<std::string> Eth::getNodeInfo() {
-  return {}; // TODO
-}
-
-std::future<json> Eth::getProof(
-  std::string address, std::vector<std::string> storageKey, std::string blockNumber
-) {
-  return {}; // TODO
-}
-
-std::future<json> Eth::getProof(
-  std::string address, std::vector<BigNumber> storageKey, std::string blockNumber
-) {
-  std::vector<std::string> vec;
-  for (BigNumber bn : storageKey) {
-    std::stringstream ss;
-    ss << bn;
-    vec.push_back(ss.str());
-  }
-  return getProof(address, vec, blockNumber);
-}
-
-std::future<json> Eth::createAccessList(json callObject) {
-  return {}; // TODO
+std::string Eth::getNodeInfo() {
+  return std::string("web3cpp/") + PROJECT_VERSION;
 }
 

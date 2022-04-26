@@ -12,6 +12,8 @@
 #include <web3cpp/RPC.h>
 #include <web3cpp/Utils.h>
 
+#include "version.h"
+
 using json = nlohmann::json;
 
 // Module that interacts with the blockchain and smart contracts.
@@ -104,30 +106,6 @@ class Eth {
     // Current gas price = median gas price of the last few blocks.
     std::future<std::string> getGasPrice();
 
-    // Returns base fee per gas and transaction effective priority fee per gas
-    // history for the requested block range if available.
-    // Range between headBlock-4 and headBlock is guaranteed to be available,
-    // while retrieving data from the pending block and older history are
-    // optional to support.
-    // For pre-EIP-1559 blocks, the gas prices are returned as rewards and
-    // zeroes are returned for the base fee per gas.
-    std::future<json> getFeeHistory(
-      std::string blockCount, std::string newestBlock,
-      std::vector<std::string> rewardPercentiles
-    );
-    std::future<json> getFeeHistory(
-      BigNumber blockCount, std::string newestBlock,
-      std::vector<std::string> rewardPercentiles
-    );
-    std::future<json> getFeeHistory(
-      std::string blockCount, BigNumber newestBlock,
-      std::vector<std::string> rewardPercentiles
-    );
-    std::future<json> getFeeHistory(
-      BigNumber blockCount, BigNumber newestBlock,
-      std::vector<std::string> rewardPercentiles
-    );
-
     // Returns a list of accounts the node controls.
     std::future<std::vector<std::string>> getAccounts();
 
@@ -183,10 +161,6 @@ class Eth {
     // Returns a transaction matching the given hash.
     std::future<json> getTransaction(std::string transactionHash);
 
-    // Returns a list of pending transactions.
-    // Return structure is the same as getTransaction().
-    std::future<std::vector<json>> getPendingTransactions();
-
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
     // Return structure is the same as getTransaction().
@@ -203,11 +177,8 @@ class Eth {
       std::string address, std::string defaultBlock
     );
 
-    // Signs data using a specific account, which needs to be unlocked.
-    // dataToSign will be converted using Utils.utf8ToHex().
-    // Address can be a string or the index of a local wallet in Accounts.Wallet.
+    // Signs data using a specific account.
     std::future<std::string> sign(std::string dataToSign, std::string address);
-    std::future<std::string> sign(std::string dataToSign, unsigned int address);
 
     // Signs a transaction. transactionObject is the same as sendTransaction().
     // Returns the signed transaction object.
@@ -241,39 +212,12 @@ class Eth {
       std::string nonce, std::string powHash, std::string digest
     );
 
-    // Requests/enables the accounts from the current environment.
-    // Only works if using an injected provider from an application like
-    // MetaMask, Status or TrustWallet.
-    // Doesn't work if connected to a node with a default provider.
-    // See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
-    // for more info about the behaviour of this method.
-    // Returns an array of enabled accounts.
-    std::future<std::vector<std::string>> requestAccounts();
-
     // Returns the chain ID of the current connected node as described here:
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-695.md
-    std::future<unsigned int> getChainId();
+    uint64_t getChainId();
 
     // Returns a string with the current client version and info about the node.
-    std::future<std::string> getNodeInfo();
-
-    // Returns the account and storage values of the specified account,
-    // including the Merkle-proof as described here:
-    // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1186.md
-    std::future<json> getProof(
-      std::string address, std::vector<std::string> storageKey, std::string blockNumber
-    );
-    std::future<json> getProof(
-      std::string address, std::vector<BigNumber> storageKey, std::string blockNumber
-    );
-
-    // Calls to create an access list that a method execution will access
-    // when executed in the VM.
-    // The `from` address and `gas` MUST be specified if not already specified
-    // in `options` when instantiating a parent contract object.
-    // callObject is the same as sendTransaction(), except this method is
-    // specifically for contract method executions.
-    std::future<json> createAccessList(json callObject);
+    std::string getNodeInfo();
 };
 
 #endif  // ETH_H

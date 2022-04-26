@@ -8,7 +8,8 @@
 #include <web3cpp/Eth.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/Wallet.h>
-#include <web3cpp/Error.h>
+
+#include "version.h"
 
 // Main/Umbrella class that houses all modules.
 
@@ -27,7 +28,7 @@ class Web3 {
     Utils::Provider* getProvider() { return &this->defaultProvider; }
 
     // Current version of the library.
-    static std::string version;
+    std::string version;
 
     // The proper objects for other classes.
     Eth eth;
