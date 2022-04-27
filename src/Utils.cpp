@@ -328,29 +328,37 @@ std::string Utils::fromWei(std::string amount, int decimals) {
   return result;
 }
 
-std::string padLeft(std::string string, unsigned int characterAmount, std::string sign = "0") {
+std::string Utils::padLeft(
+  std::string string, unsigned int characterAmount, char sign
+) {
   bool hasPrefix = (string.substr(0, 2) == "0x");
   if (hasPrefix) { string = string.substr(2); }
-  int padding = (characterAmount - string.length() + 1 >= 0)
-    ? characterAmount - string.length() + 1 : 0;
-  std::string padded(sign, padding);
+  size_t padding = (characterAmount > string.length())
+    ? (characterAmount - string.length()) : 0;
+  std::string padded = (padding != 0) ? std::string(padding, sign) : "";
   return (hasPrefix ? "0x" : "") + padded + string;
 }
 
-std::string leftPad(std::string string, unsigned int characterAmount, std::string sign = "0") {
+std::string Utils::leftPad(
+  std::string string, unsigned int characterAmount, char sign
+) {
   return padLeft(string, characterAmount, sign);
 }
 
-std::string padRight(std::string string, unsigned int characterAmount, std::string sign = "0") {
+std::string Utils::padRight(
+  std::string string, unsigned int characterAmount, char sign
+) {
   bool hasPrefix = (string.substr(0, 2) == "0x");
   if (hasPrefix) { string = string.substr(2); }
-  int padding = (characterAmount - string.length() + 1 >= 0)
-    ? characterAmount - string.length() + 1 : 0;
-  std::string padded(sign, padding);
+  size_t padding = (characterAmount > string.length())
+    ? (characterAmount - string.length()) : 0;
+  std::string padded = (padding != 0) ? std::string(padding, sign) : "";
   return (hasPrefix ? "0x" : "") + string + padded;
 }
 
-std::string rightPad(std::string string, unsigned int characterAmount, std::string sign = "0") {
+std::string Utils::rightPad(
+  std::string string, unsigned int characterAmount, char sign
+) {
   return padRight(string, characterAmount, sign);
 }
 

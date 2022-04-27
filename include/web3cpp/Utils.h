@@ -202,12 +202,22 @@ namespace Utils {
   /**
    * Adds a padding on the left or right of a string, respectively.
    * Useful for adding paddings to HEX strings.
+   * If characterAmount happens to be less than the string's original size,
+   * the string will be returned untouched.
    * leftPad() and rightPad() are aliases of padLeft() and padRight().
    */
-  std::string padLeft(std::string string, unsigned int characterAmount, std::string sign = "0");
-  std::string leftPad(std::string string, unsigned int characterAmount, std::string sign = "0");
-  std::string padRight(std::string string, unsigned int characterAmount, std::string sign = "0");
-  std::string rightPad(std::string string, unsigned int characterAmount, std::string sign = "0");
+  std::string padLeft(
+    std::string string, unsigned int characterAmount, char sign = '0'
+  );
+  std::string leftPad(
+    std::string string, unsigned int characterAmount, char sign = '0'
+  );
+  std::string padRight(
+    std::string string, unsigned int characterAmount, char sign = '0'
+  );
+  std::string rightPad(
+    std::string string, unsigned int characterAmount, char sign = '0'
+  );
 
   /**
    * Read from/write to a JSON file, respectively.
