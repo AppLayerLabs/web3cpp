@@ -233,7 +233,7 @@ std::string Utils::utf8ToHex(std::string str) {
   std::string hex = "";
 
   // Remove \u0000 padding from either side
-  std::regex paddingRegex = std::regex("^(?:\u0000)*");
+  std::regex paddingRegex = std::regex("^(?:\\u0000)*");
   regex_replace(str, paddingRegex, "");
   reverse(str.begin(), str.end());
   regex_replace(str, paddingRegex, "");
