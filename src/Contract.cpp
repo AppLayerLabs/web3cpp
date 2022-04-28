@@ -57,7 +57,7 @@ bool Contract::isTypeArray(Types const &type) {
 
 std::string Contract::operator() (std::string function, json arguments, Error &error) {
   // Check if function exists.
-  std::cout << arguments.dump() << std::endl;
+  //std::cout << arguments.dump() << std::endl;
   std::string ret = "0x";
   if (!methods.count(function)) { error.setCode(16); return ""; } // ABI Functor Not Found
   if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
