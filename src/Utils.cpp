@@ -145,7 +145,7 @@ bool Utils::checkAddressChecksum(std::string address) {
 std::string Utils::toHex(std::string value) {
   std::stringstream ss;
   if (std::all_of(value.begin(), value.end(), ::isdigit)) { // Number string
-    ss << std::hex << value;
+    ss << std::hex << boost::lexical_cast<dev::u256>(value);
   } else {  // Text string
     for (int i = 0; i < value.length(); i++) {
       ss << std::hex << (int)value[i];
