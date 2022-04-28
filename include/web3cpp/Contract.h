@@ -25,47 +25,45 @@ using json = nlohmann::ordered_json;
 class Contract {
   private:
     enum Types {
-      uint256,
-      uint256Arr,
-      address,
-      addressArr,
-      boolean,
-      booleanArr,
-      bytes,
-      bytesArr,
-      string,
-      stringArr
+      uint256, uint256Arr,
+      address, addressArr,
+      boolean, booleanArr,
+      bytes, bytesArr,
+      string, stringArr
     };
 
-  std::string encodeABI(std::vector<Types> argumentTypes, std::vector<std::string> arguments);
-  bool isTypeArray(Types const &type);
+    std::string encodeABI(
+      std::vector<Types> argumentTypes, std::vector<std::string> arguments
+    );
+    bool isTypeArray(Types const &type);
 
   public:
     class Method {
-      json arguments;  // JSON array
-      //std::future<mixed> call(json options, BigNumber defaultBlock = Eth.defaultBlock); // from, gasPrice, gas
-      //promievent send(json options); // from, gasPrice, gas, value, nonce
-      std::future<BigNumber> estimateGas(json options); // from, gas, value
-      std::string encodeABI();
-      std::future<json> createAccessList(json options, std::string block); // from, gas
-      std::future<json> createAccessList(json options, BigNumber block); // from, gas
+      public:
+        json arguments;  // JSON array
+        //std::future<mixed> call(json options, BigNumber defaultBlock = Eth.defaultBlock); // from, gasPrice, gas
+        //promievent send(json options); // from, gasPrice, gas, value, nonce
+        std::future<BigNumber> estimateGas(json options); // from, gas, value
+        std::string encodeABI();
+        std::future<json> createAccessList(json options, std::string block); // from, gas
+        std::future<json> createAccessList(json options, BigNumber block); // from, gas
     };
 
     class Options {
       public:
-      std::string address;  // "to" address
-      json jsonInterface; // JSON array
-      std::string data;
-      std::string from;
-      std::string gasPrice;
-      BigNumber gas;
-      bool handleRevert;
-      unsigned int transactionBlockTimeout;
-      unsigned int transactionConfirmationBlocks;
-      unsigned int transactionPollingTimeout;
-      std::string chain;
-      std::string hardfork;
-      std::string common;
+        std::string address;  // "to" address
+        json jsonInterface; // JSON array
+        std::string data;
+        std::string from;
+        std::string gasPrice;
+        BigNumber gas;
+        bool handleRevert;
+        unsigned int transactionBlockTimeout;
+        unsigned int transactionConfirmationBlocks;
+        unsigned int transactionPollingTimeout;
+        std::string chain;
+        std::string hardfork;
+        std::string common;
     };
 
     // Constructor.
@@ -92,8 +90,7 @@ class Contract {
     // ALL ARGUMENTS ARE PARSED AS STRINGS INSIDE THE JSON!
     // Always used ordered_json!
     // Example json:
-
-    // Function(uint256, address[], uint256) 
+    // Function(uint256, address[], uint256)
     // [
     //   "5123815123858123",
     //   [
@@ -102,10 +99,13 @@ class Contract {
     //   ],
     //   "189237815123"
     // ]
-
-    // jsonArgs = json::parse("[\"5123815123858123\",[\"0xaaaaaaaaaaaaaaa...\",\"0xbbbbbbbbbbbbbbb...\"],\"189237815123\"]");
+    // jsonArgs = json::parse(
+    //   "[\"5123815123858123\",
+    //   [\"0xaaaaaaaaaaaaaaa...\",
+    //   \"0xbbbbbbbbbbbbbbb...\"],
+    //   \"189237815123\"]"
+    // );
     // contract("Function", jsonArgs, error);
-
     std::string operator() (std::string function, json arguments, Error &error);
 };
 

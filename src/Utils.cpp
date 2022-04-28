@@ -365,8 +365,7 @@ std::string Utils::rightPad(
 json Utils::readJSONFile(boost::filesystem::path &filePath) {
   json returnData;
   storageLock.lock();
-  std::cout << "File path: " << filePath.string() << std::endl;
-
+  //std::cout << "File path: " << filePath.string() << std::endl;
   if (!boost::filesystem::exists(filePath)) {
     throw std::string("Error reading json file: File does not exist");
   }
