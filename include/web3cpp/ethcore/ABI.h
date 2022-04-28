@@ -5,7 +5,7 @@
 
 #include <nlohmann/json>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 // Module that encodes/decodes ABI parameters for function calls.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-abi.html

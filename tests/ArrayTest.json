@@ -1,0 +1,80 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "item",
+				"type": "address"
+			}
+		],
+		"name": "addToAddressList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "list",
+				"type": "address[]"
+			}
+		],
+		"name": "addToAddressListArr",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes",
+				"name": "item",
+				"type": "bytes"
+			}
+		],
+		"name": "addToByteList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes[]",
+				"name": "list",
+				"type": "bytes[]"
+			}
+		],
+		"name": "addToByteListArr",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "item",
+				"type": "string"
+			}
+		],
+		"name": "addToStringList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string[]",
+				"name": "list",
+				"type": "string[]"
+			}
+		],
+		"name": "addToStringListArr",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]

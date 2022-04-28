@@ -27,7 +27,16 @@ class Error {
       {13, "Key Derivation Invalid Length"},
       {14, "Key Decryption MAC Mismatch"},
       {15, "Key Decryption Failed"},
-      {999, "Unknown Error"},
+      {16, "ABI Functor not found"},
+      {17, "ABI Invalid ABI lenght"},
+      {18, "ABI Arguments lenght invalid"},
+      {19, "ABI Invalid Json (not an array)"},
+      {20, "ABI Invalid Uint256 Array"},
+      {21, "ABI Invalid Address Array"},
+      {22, "ABI Invalid Boolean Array"},
+      {23, "ABI Invalid Bytes Array"},
+      {24, "ABI Invalid String Array"},
+      {999, "Unknown Error"}
     };
     uint64_t code;
     std::string message;

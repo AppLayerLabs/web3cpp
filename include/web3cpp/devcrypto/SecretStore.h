@@ -23,7 +23,7 @@
 #include "Common.h"
 
 using namespace dev;
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 namespace fs = boost::filesystem;
 
 // Boost 1.73 deprecated Bind placeholder declarations on global namespace.

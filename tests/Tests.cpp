@@ -28,3 +28,19 @@ void Tests::generateAccount(
   return;
 }
 
+void Tests::loadAndTestContract() {
+  boost::filesystem::path full_path(boost::filesystem::current_path());
+  boost::filesystem::path contractPath(full_path.parent_path().string() + "/tests/ArrayTest.json");
+  json contractJson = Utils::readJSONFile(contractPath);
+  Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
+  std::cout << "Contract Readed" << std::endl;
+  Error error;
+  std::string addToAddressListArrStr = ArrayTest("addToAddressListArr", json::array({json::array({"0x2E913a79206280B3882860B3eF4dF8204a62C8B1","0x2E913a79206280B3882860B3eF4dF8204a62C8B1"})}), error);
+  {
+    if (addToAddressListArrStr != "0x5fd673e8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000002E913a79206280B3882860B3eF4dF8204a62C8B10000000000000000000000002E913a79206280B3882860B3eF4dF8204a62C8B1") {
+      failed(error.what());
+    }
+  }
+
+  std::cout << error.what() << std::endl;
+}

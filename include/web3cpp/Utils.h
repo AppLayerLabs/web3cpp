@@ -27,7 +27,7 @@
 #include <web3cpp/devcore/CommonIO.h>
 #include <web3cpp/devcore/SHA3.h>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 using BigNumber = dev::u256;
 
 /**

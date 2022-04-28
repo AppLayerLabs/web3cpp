@@ -28,7 +28,7 @@
 #include <web3cpp/Cipher.h>
 #include <web3cpp/Bip39.h>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 // Module that interacts with a node's accounts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html

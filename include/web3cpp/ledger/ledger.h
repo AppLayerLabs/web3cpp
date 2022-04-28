@@ -14,7 +14,7 @@
 #include "encoding.h"
 
 // For convenience.
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 /**
  * Namespace for Ledger-related functions.

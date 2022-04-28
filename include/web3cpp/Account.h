@@ -12,7 +12,7 @@
 #include <nlohmann/json.hpp>
 #include <boost/filesystem.hpp>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 /**
  * Module that contains information about a given account,

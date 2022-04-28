@@ -14,7 +14,7 @@
 
 #include "version.h"
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 // Module that interacts with the blockchain and smart contracts.
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth.html

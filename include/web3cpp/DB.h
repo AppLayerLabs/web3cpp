@@ -8,7 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <leveldb/db.h>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 class Database {
   private:

@@ -10,6 +10,8 @@
 #include <vector>
 
 #include <web3cpp/Web3.h>
+#include <web3cpp/Contract.h>
+#include <web3cpp/Utils.h>
 
 /**
  * Helper class for unit testing.
@@ -86,6 +88,8 @@ class Tests {
     void generateAccount(
       std::string derivPath, std::string seed, std::string name, std::string example
     );
+
+    void loadAndTestContract();
 };
 
 #endif // TESTS_H

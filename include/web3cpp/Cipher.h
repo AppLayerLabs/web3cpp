@@ -12,7 +12,7 @@
 #include <web3cpp/devcore/CommonData.h>
 #include <web3cpp/devcore/SHA3.h>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 namespace Cipher {
   std::string encrypt(

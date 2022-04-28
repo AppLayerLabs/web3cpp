@@ -9,6 +9,8 @@ int main() {
     "testAccount",
     "0x3E8467983bA80734654208b274EBf01264526117"
   );
+
+  t.loadAndTestContract();
   t.showResults();
   return 0;
 }
