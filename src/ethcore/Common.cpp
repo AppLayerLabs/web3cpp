@@ -38,9 +38,11 @@ Address toAddress(std::string const& _s)
 {
 	try
 	{
-		auto b = fromHex(_s.substr(0, 2) == "0x" ? _s.substr(2) : _s, WhenError::Throw);
-		if (b.size() == 20)
-			return Address(b);
+		auto b = fromHex(
+      (_s.substr(0, 2) == "0x" || _s.substr(0, 2) == "0X")
+      ? _s.substr(2) : _s, WhenError::Throw
+    );
+		if (b.size() == 20) return Address(b);
 	}
 	catch (BadHexCharacter&) {}
 	BOOST_THROW_EXCEPTION(InvalidAddress());

@@ -195,7 +195,9 @@ std::string Wallet::ecRecover(
   std::string dataThatWasSigned, std::string signature
 ) {
   // Split signature into r/s/v
-  if (signature.substr(0, 2) == "0x") { signature = signature.substr(2); }  // Remove "0x"
+  if (signature.substr(0, 2) == "0x" || signature.substr(0, 2) == "0X") {
+    signature = signature.substr(2); // Remove "0x"
+  }
   std::string r = signature.substr(0, 64);  // 32 hex bytes (64 chars - 0-64)
   std::string s = signature.substr(65, 64); // 32 hex bytes (64 chars - 65-128)
   std::string v = signature.substr(128, 2); // 1 hex byte (2 chars - 129-130)
