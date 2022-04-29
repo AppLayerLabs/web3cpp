@@ -68,11 +68,10 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
   uint64_t index = 0;
   std::string arrToAppend;
   uint64_t array_start = 32 * arguments.size();
-  std::cout << "array start init: " << array_start << std::endl;
   while (true) {
     if (index == arguments.size() || index == methods[function].size()) { break; }
     Types argType = methods[function][index];
-    bool isArray;
+    bool isArray = false;
     if (isTypeArray(argType)) {
       ret += Utils::padLeft(
         Utils::toHex(boost::lexical_cast<std::string>(array_start)), 64
@@ -185,8 +184,8 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
               tmpRet += Utils::padRight(rawBytes, 64);
             }
           }
-          // 32 (start bytes) + entire message in packets of 32 bytes size
-          array_start += (32) + (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
+          // entire message in packets of 32 bytes size
+          array_start += (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
           arrToAppend += tmpRet;
           break; // Exit for loop
           break;  // Exit for loop
@@ -208,7 +207,6 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
            * [6]:  000000000000000000000000000000000000000000000000000000000000000c // Size of string[1]
            * [7]:  6262626262626262626262620000000000000000000000000000000000000000 // String[1]
            */
-          std::cout << "array_start string start: " << array_start << std::endl;
           std::string tmpRet = Utils::padLeft(
             Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
           );
@@ -259,7 +257,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
             }
           }
           // Adjust array_start size correctly.
-          array_start += (32) + (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
+          array_start += (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
           arrToAppend += tmpRet;
           break; // Exit for loop
         }
@@ -291,7 +289,38 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
       }
       // Bytes
       if (argType == Types::bytes) {
+        ret += Utils::padLeft(Utils::toHex(boost::lexical_cast<std::string>(array_start)), 64,'0');
+        // Append a extral 0 to argument if odd.
+        argument = Utils::stripHexPrefix(argument);
+        if (argument.size() % 2 == 1) {
+          argument = std::string("0") + argument;
+        }
 
+        std::string tmpStr = Utils::padLeft(Utils::toHex(boost::lexical_cast<std::string>(argument.size()/2)),64,'0');
+
+        bigfloat division = bigfloat(argument.size()) / 64;
+        uint64_t multiplication = boost::lexical_cast<uint64_t>(boost::multiprecision::ceil(division));
+        argument = Utils::padRight(argument, (64 * multiplication), '0');
+        tmpStr += argument;
+        
+        array_start += 32 + (32 * multiplication);
+        arrToAppend += tmpStr;
+      }
+      // String
+      if (argType == Types::string) {
+        ret += Utils::padLeft(Utils::toHex(boost::lexical_cast<std::string>(array_start)), 64,'0');
+        // Convert string to raw hex.
+        argument = Utils::stripHexPrefix(Utils::utf8ToHex(argument));
+
+        std::string tmpStr = Utils::padLeft(Utils::toHex(boost::lexical_cast<std::string>(argument.size()/2)),64,'0');
+
+        bigfloat division = bigfloat(argument.size()) / 64;
+        uint64_t multiplication = boost::lexical_cast<uint64_t>(boost::multiprecision::ceil(division));
+        argument = Utils::padRight(argument, (64 * multiplication), '0');
+        tmpStr += argument;
+        
+        array_start += 32 + (32 * multiplication);
+        arrToAppend += tmpStr;
       }
     }
     index++;

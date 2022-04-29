@@ -20,6 +20,24 @@
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "item",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "item2",
+				"type": "string"
+			}
+		],
+		"name": "addMultipleToStringList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "item",
 				"type": "address"
@@ -126,7 +144,7 @@
 				"type": "bytes[]"
 			}
 		],
-		"name": "testMuiltipleByteArray",
+		"name": "testMultipleByteArray",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
