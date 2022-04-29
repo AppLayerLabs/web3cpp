@@ -68,6 +68,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
   uint64_t index = 0;
   std::string arrToAppend;
   uint64_t array_start = 32 * arguments.size();
+  std::cout << "array start init: " << array_start << std::endl;
   while (true) {
     if (index == arguments.size() || index == methods[function].size()) { break; }
     Types argType = methods[function][index];
@@ -80,14 +81,17 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
     }
     // Arrays are parsed differently, as we need to encode every argument.
     if (isArray) {
-      arrToAppend += Utils::padLeft(
-        Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
-      );
+      // Append array size... except for bytes and strings
+      if (argType != Types::bytesArr && argType != Types::stringArr) {
+        arrToAppend += Utils::padLeft(
+          Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
+        );
+      }
       // Check arguments
       for (auto item : arguments[index]) {
         // Uint256[]
         if (argType == Types::uint256Arr) {
-          array_start += 32 * arguments[index].size();
+          array_start += (32) + 32 * arguments[index].size();
           if (!std::all_of(item.begin(), item.end(), ::isdigit)) {
             error.setCode(20); return ""; // ABI Invalid Uint256 Array
           }
@@ -96,7 +100,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
         // address[]
         if (argType == Types::addressArr) {
-          array_start += 32 * arguments[index].size();
+          array_start += (32) + 32 * arguments[index].size();
           item = Utils::stripHexPrefix(item); // Remove "0x"
           if (!Utils::isAddress(item)) {
             error.setCode(21); return ""; // ABI Invalid Address Array
@@ -106,8 +110,8 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
         // boolean[]
         if (argType == Types::booleanArr) {
-          array_start += 32 * arguments[index].size();
-          if (item[0] != "0" || item[0] != "1") {
+          array_start += (32) + 32 * arguments[index].size();
+          if (item[0] != '0' || item[0] != '1') {
             error.setCode(22); return ""; // ABI Invalid Boolean Array
           }
           arrToAppend += Utils::padLeft(item, 64);
@@ -130,6 +134,9 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
            * Besides that we need to parse bytes larger than 32 bytes.
            * Then, put all bytes items in a string array.
            */
+          std::string tmpRet = Utils::padLeft(
+            Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
+          );
           uint64_t bytesOffSet = 32 * arguments[index].size(); // 32 * quantity of arguments
           std::vector<std::string> bytesTmpVec;
           for (auto item : arguments[index]) {
@@ -156,7 +163,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
           // Append location of each byte inside the array.
           for (auto bytes : bytesVec) {
-            arrToAppend += Utils::padLeft(
+            tmpRet += Utils::padLeft(
               Utils::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
             );
             // Offset by next item size + 32 bytes used to determine item size..
@@ -168,16 +175,20 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
           }
           // Append the byte itself.
           for (auto bytes : bytesVec) {
-            arrToAppend += Utils::padLeft(
+            tmpRet += Utils::padLeft(
               Utils::toHex(boost::lexical_cast<std::string>(bytes.second)), 64
             );
             for (auto rawBytes : bytes.first) {
               if(!Utils::isHex(rawBytes)) {
                 error.setCode(23); return ""; // ABI Invalid Bytes Array
               }
-              arrToAppend += Utils::padRight(rawBytes, 64);
+              tmpRet += Utils::padRight(rawBytes, 64);
             }
           }
+          // 32 (start bytes) + entire message in packets of 32 bytes size
+          array_start += (32) + (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
+          arrToAppend += tmpRet;
+          break; // Exit for loop
           break;  // Exit for loop
         }
 
@@ -197,6 +208,10 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
            * [6]:  000000000000000000000000000000000000000000000000000000000000000c // Size of string[1]
            * [7]:  6262626262626262626262620000000000000000000000000000000000000000 // String[1]
            */
+          std::cout << "array_start string start: " << array_start << std::endl;
+          std::string tmpRet = Utils::padLeft(
+            Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
+          );
           uint64_t bytesOffSet = 32 * arguments[index].size(); // 32 * quantity of arguments
 
           // Array start also needs to be encoded correctly.
@@ -220,7 +235,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
           // Append location of each byte inside the array.
           for (auto string : stringVec) {
-            arrToAppend += Utils::padLeft(
+            tmpRet += Utils::padLeft(
               Utils::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
             );
             // Offset by next item size + 32 bytes used to determine item size..
@@ -233,18 +248,50 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
           // Append the string itself.
           for (auto string : stringVec) {
-            arrToAppend += Utils::padLeft(
+            tmpRet += Utils::padLeft(
               Utils::toHex(boost::lexical_cast<std::string>(string.second)), 64
             );
             for (auto rawString : string.first) {
               if(!Utils::isHex(rawString)) {
                 error.setCode(24); return ""; // ABI Invalid String Array
               }
-              arrToAppend += Utils::padRight(rawString, 64);
+              tmpRet += Utils::padRight(rawString, 64);
             }
           }
+          // Adjust array_start size correctly.
+          array_start += (32) + (32 * (tmpRet.size()/64)); // 64 chars, 32 bytes
+          arrToAppend += tmpRet;
           break; // Exit for loop
         }
+      }
+    } else {
+      // Item is not an array.
+      std::string argument = arguments[index].get<std::string>();
+      // uint256
+      if (argType == Types::uint256) {
+          if (!std::all_of(argument.begin(), argument.end(), ::isdigit)) {
+            error.setCode(25); return ""; // ABI Invalid Uint256
+          }
+          ret += Utils::padLeft(Utils::toHex(argument), 64);
+      }
+      // Address
+      if (argType == Types::address) {
+        argument = Utils::stripHexPrefix(argument); // Remove "0x"
+        if (!Utils::isAddress(argument)) {
+          error.setCode(26); return ""; // ABI Invalid Address Array
+        }
+        ret += Utils::padLeft(argument, 64);
+      }
+      // Boolean
+      if (argType == Types::boolean) {
+        if (argument[0] != '0' || argument[0] != '1') {
+          error.setCode(27); return ""; // ABI Invalid Boolean Array
+        }
+        ret += Utils::padLeft(argument, 64);
+      }
+      // Bytes
+      if (argType == Types::bytes) {
+
       }
     }
     index++;

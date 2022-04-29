@@ -2,6 +2,24 @@
 	{
 		"inputs": [
 			{
+				"internalType": "bytes",
+				"name": "item",
+				"type": "bytes"
+			},
+			{
+				"internalType": "bytes",
+				"name": "item2",
+				"type": "bytes"
+			}
+		],
+		"name": "addMultipleToByteList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "item",
 				"type": "address"
@@ -91,6 +109,42 @@
 			}
 		],
 		"name": "addToStringListArrWithValue",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes[]",
+				"name": "list1",
+				"type": "bytes[]"
+			},
+			{
+				"internalType": "bytes[]",
+				"name": "list2",
+				"type": "bytes[]"
+			}
+		],
+		"name": "testMuiltipleByteArray",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "array1",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "array2",
+				"type": "uint256[]"
+			}
+		],
+		"name": "testMultipleUint256Array",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

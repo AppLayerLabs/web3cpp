@@ -36,6 +36,9 @@ class Error {
       {22, "ABI Invalid Boolean Array"},
       {23, "ABI Invalid Bytes Array"},
       {24, "ABI Invalid String Array"},
+      {25, "ABI Invalid Uint256"},
+      {26, "ABI Invalid Address"},
+      {27, "ABI Invalid Boolean"},
       {999, "Unknown Error"}
     };
     uint64_t code;
