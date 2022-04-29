@@ -54,7 +54,7 @@ BigNumber Utils::toBN(std::string number) {
 }
 
 std::string Utils::sha3(std::string string) {
-  return (!string.empty()) ? dev::sha3(string, false) : "";
+  return (!string.empty()) ? dev::toHex(dev::sha3(string, false)) : "";
 }
 
 std::string Utils::keccak256(std::string string) {
@@ -62,7 +62,7 @@ std::string Utils::keccak256(std::string string) {
 }
 
 std::string Utils::sha3Raw(std::string string) {
-  return dev::sha3(string, false);
+  return dev::toHex(dev::sha3(string, false));
 }
 
 bool Utils::isHex(std::string hex) {
