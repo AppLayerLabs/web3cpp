@@ -68,7 +68,6 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
   uint64_t index = 0;
   std::string arrToAppend;
   uint64_t array_start = 32 * arguments.size();
-  uint64_t bytesOffSet = 0;
   while (true) {
     if (index == arguments.size() || index == methods[function].size()) { break; }
     Types argType = methods[function][index];
@@ -119,10 +118,10 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
           /**
            * Bytes arrays are encoded differently from the others:
            * Encode bytes 0xaaaa and 0xaaaa as first argument of the function (function(bytes[] calldata list)).
-           * [0]:  0000000000000000000000000000000000000000000000000000000000000020 // Start of bytes[]
+           * [0]:  0000000000000000000000000000000000000000000000000000000000000020 // Start of bytes[] <- this locate is global, the offset here is compared to the whole ABI
            * [1]:  0000000000000000000000000000000000000000000000000000000000000002 // Quantity of items inside bytes[]
-           * [2]:  0000000000000000000000000000000000000000000000000000000000000040 // Location of bytes[0]
-           * [3]:  0000000000000000000000000000000000000000000000000000000000000080 // Location of bytes[1]
+           * [2]:  0000000000000000000000000000000000000000000000000000000000000040 // Location of bytes[0] <- this locate is local, it is 64 bytes from the start of the array (item [1])
+           * [3]:  0000000000000000000000000000000000000000000000000000000000000080 // Location of bytes[1] <- this locate is local, it is 128 bytes from the start of the array (item [1])
            * [4]:  0000000000000000000000000000000000000000000000000000000000000002 // Quantity of bytes on bytes[0] (2, 'aa' and 'aa')
            * [5]:  aaaa000000000000000000000000000000000000000000000000000000000000 // Raw bytes.
            * [6]:  0000000000000000000000000000000000000000000000000000000000000002 // Same as 4 for bytes[1].
@@ -131,15 +130,20 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
            * Besides that we need to parse bytes larger than 32 bytes.
            * Then, put all bytes items in a string array.
            */
-          bytesOffSet = array_start + 32;
-          arrToAppend += Utils::padLeft(
-            Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
-          );
+          uint64_t bytesOffSet = 32 * arguments[index].size(); // 32 * quantity of arguments
           std::vector<std::string> bytesTmpVec;
           for (auto item : arguments[index]) {
             bytesTmpVec.push_back(Utils::stripHexPrefix(item));
           }
-          // Split bytes vector into a vector of vectors of 64 chars max each.
+
+          // Assert Sizing if missing.
+          // example: bytes 0xaaa will be 0aaa00000... in the ABI!.
+          for (auto &bytesString : bytesTmpVec) {
+            if (bytesString.size() % 2 == 1) { // Odd number, missing a extra char on the first byte.
+              bytesString = std::string("0") + bytesString;
+            }
+          }
+          // Split bytes vector into a vector of vectors of 64 chars (32 bytes) max each.
           // Pair of vector of bytes + vector total size.
           std::vector<std::pair<std::vector<std::string>,uint64_t>> bytesVec;
           for (auto bytesString : bytesTmpVec) {
@@ -147,22 +151,28 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
             for (size_t i = 0; i < bytesString.size(); i += 64) {
               tmp.push_back(bytesString.substr(i, 64));
             }
-            bytesVec.push_back(std::make_pair(tmp, bytesString.size()));
+            bytesVec.push_back(std::make_pair(tmp, bytesString.size()/2));
           }
+
           // Append location of each byte inside the array.
           for (auto bytes : bytesVec) {
             arrToAppend += Utils::padLeft(
-              dev::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
+              Utils::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
             );
-            bytesOffSet += 32 * bytes.second;
+            // Offset by next item size + 32 bytes used to determine item size..
+            // Round it to upper (nearest upwards 32 multiple).
+            bytesOffSet += (32) + bytes.second; 
+            dev::bigfloat division = dev::bigfloat(bytesOffSet) / dev::bigfloat(32);
+            dev::bigfloat multiplication = boost::multiprecision::ceil(division);
+            bytesOffSet = (32) * boost::lexical_cast<uint64_t>(multiplication);
           }
           // Append the byte itself.
           for (auto bytes : bytesVec) {
             arrToAppend += Utils::padLeft(
-              dev::toHex(boost::lexical_cast<std::string>(bytes.second)), 64
+              Utils::toHex(boost::lexical_cast<std::string>(bytes.second)), 64
             );
             for (auto rawBytes : bytes.first) {
-              if(Utils::isHex(rawBytes)) {
+              if(!Utils::isHex(rawBytes)) {
                 error.setCode(23); return ""; // ABI Invalid Bytes Array
               }
               arrToAppend += Utils::padRight(rawBytes, 64);
@@ -187,10 +197,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
            * [6]:  000000000000000000000000000000000000000000000000000000000000000c // Size of string[1]
            * [7]:  6262626262626262626262620000000000000000000000000000000000000000 // String[1]
            */
-          bytesOffSet = array_start + 32;
-          arrToAppend += Utils::padLeft(
-            Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
-          );
+          uint64_t bytesOffSet = 32 * arguments[index].size(); // 32 * quantity of arguments
 
           // Array start also needs to be encoded correctly.
           // Let's do the same parsing we do on bytes, but with extra steps
@@ -208,24 +215,29 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
             for (size_t i = 0; i < string.size(); i += 64) {
               tmp.push_back(string.substr(i, 64));
             }
-            stringVec.push_back(std::make_pair(tmp, string.size()));
+            stringVec.push_back(std::make_pair(tmp, string.size()/2));
           }
 
           // Append location of each byte inside the array.
           for (auto string : stringVec) {
             arrToAppend += Utils::padLeft(
-              dev::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
+              Utils::toHex(boost::lexical_cast<std::string>(bytesOffSet)), 64
             );
-            bytesOffSet += 32 * string.second;
+            // Offset by next item size + 32 bytes used to determine item size..
+            // Round it to upper (nearest upwards 32 multiple).
+            bytesOffSet += (32) + string.second; 
+            dev::bigfloat division = dev::bigfloat(bytesOffSet) / dev::bigfloat(32);
+            dev::bigfloat multiplication = boost::multiprecision::ceil(division);
+            bytesOffSet = (32) * boost::lexical_cast<uint64_t>(multiplication);
           }
 
           // Append the string itself.
           for (auto string : stringVec) {
             arrToAppend += Utils::padLeft(
-              dev::toHex(boost::lexical_cast<std::string>(string.second)), 64
+              Utils::toHex(boost::lexical_cast<std::string>(string.second)), 64
             );
             for (auto rawString : string.first) {
-              if(Utils::isHex(rawString)) {
+              if(!Utils::isHex(rawString)) {
                 error.setCode(24); return ""; // ABI Invalid String Array
               }
               arrToAppend += Utils::padRight(rawString, 64);
