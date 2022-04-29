@@ -153,7 +153,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 # Build helper test program
 if(BUILD_TESTS)
-  add_executable(${PROJECT_NAME}-tests tests/Tests.h tests/Tests.cpp tests/main.cpp)
+  file(GLOB TESTS_HEADERS "tests/*.h")
+  file(GLOB TESTS_SOURCES "tests/*.cpp")
+  add_executable(${PROJECT_NAME}-tests ${TESTS_HEADERS} ${TESTS_SOURCES})
   target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
   target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
 endif()

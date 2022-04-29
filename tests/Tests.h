@@ -13,10 +13,7 @@
 #include <web3cpp/Contract.h>
 #include <web3cpp/Utils.h>
 
-/**
- * Helper class for unit testing.
- * Each test should be completely contained into a function of its own.
- */
+// Helper class for unit testing.
 
 class Tests {
   private:
@@ -71,6 +68,26 @@ class Tests {
         << "* Check the log file " << logFile << " for details\n"
         << "----------------------------------------\n";
     }
+
+    /**
+     * Tests start here, divided by class.
+     * Each test should be completely contained into a function of its own
+     * and output the details to the log file.
+     */
+
+    // ==============================================================
+    // UTILS
+    // ==============================================================
+
+    // Test for random hex string generation at preset sizes.
+    void generateRandomHexes();
+
+    // Test for parsing of large numbers as BigNumbers.
+    void createBigNumbers();
+
+    // ==============================================================
+    // MISC
+    // ==============================================================
 
     /**
      * Test for valid Account generation.
