@@ -41,7 +41,7 @@ class Error {
       {27, "ABI Invalid Boolean"},
       {999, "Unknown Error"}
     };
-    uint64_t code;
+    uint64_t code = 0;
     std::string message;
     bool isSet = false;
     std::mutex lock;
