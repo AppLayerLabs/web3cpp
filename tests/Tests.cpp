@@ -41,14 +41,13 @@ void Tests::loadAndTestContract() {
   std::string const addToBytesListExpected = "0x8ab94fd600000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000002aaaa0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bbbb000000000000000000000000000000000000000000000000000000000000";
   std::string const addToBytesListFourExpected = "0x8ab94fd600000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000090aaaaaaaaaaaaaaaaa0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001fbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000000000000000000000000000000020ccc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000120ddddddddddddddddddddddddddddddddddd0000000000000000000000000000";
 
-
   boost::filesystem::path contractPath(
     boost::filesystem::current_path().parent_path().string()
     + "/tests/ArrayTest.json"
   );
   json contractJson = Utils::readJSONFile(contractPath);
   Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
-  std::string addToAddressListArrStr = ArrayTest("addToAddressListArr",
+  std::string addToAddressList = ArrayTest("addToAddressListArr",
     json::array({
       json::array({
         "0x2E913a79206280B3882860B3eF4dF8204a62C8B1",
@@ -100,7 +99,7 @@ void Tests::loadAndTestContract() {
 
   if (error.getCode() != 0) {
     failed(error.what());
-  } else if (addToAddressListArrStr != addToAddressListExpected) {
+  } else if (addToAddressList != addToAddressListExpected) {
     failed("ABI doesn't match function: addToAddressListArr(address[]) two items");
   } else if (addToStringList != addToStringListExpected) {
     failed("ABI doesn't match function: addToStringListArr(string[]) two items");
@@ -116,8 +115,19 @@ void Tests::loadAndTestContract() {
 
   std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
   logStream << "* Test: " << __func__ << std::endl
-    << "* Expected Output: " << addToAddressListExpected << std::endl
-    << "* Actual Output: " << addToAddressListArrStr << std::endl
+    << "* Expected Outputs: " << std::endl
+    << "* " << addToAddressListExpected << std::endl
+    << "* " << addToStringListExpected << std::endl
+    << "* " << addToStringListFourExpected << std::endl
+    << "* " << addToBytesListExpected << std::endl
+    << "* " << addToBytesListFourExpected << std::endl
+    << "* Actual Outputs: " << std::endl
+    << "* " << addToAddressList << std::endl
+    << "* " << addToAddressList << std::endl
+    << "* " << addToStringList << std::endl
+    << "* " << addToStringListFour << std::endl
+    << "* " << addToBytesList << std::endl
+    << "* " << addToBytesListFour << std::endl
     << "* Test result: " <<
       ((curPass) ? "PASSED" : "FAILED - " + curReason)
     << std::endl << std::endl;
