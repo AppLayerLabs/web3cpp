@@ -33,18 +33,20 @@ boost::filesystem::path Utils::getDefaultDataDir() {
   #endif
 }
 
-std::string Utils::randomHex(unsigned int size) {
+std::string Utils::randomHex(unsigned int size, bool prefixed) {
   unsigned char saltBytes[size];
   RAND_bytes(saltBytes, sizeof(saltBytes));
-  return dev::toHex(
+  std::string ret = (prefixed) ? "0x" : "";
+  ret += dev::toHex(
     dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-  ).substr(0,16);
+  ).substr(0, size * 2);
+  return ret;
 }
 
 BigNumber Utils::toBN(std::string number) {
   BigNumber ret;
   std::stringstream ss;
-  if (isHex(number)) {
+  if (isHexStrict(number)) {
     ss << std::hex << number;
   } else {
     ss << number;

@@ -95,17 +95,22 @@ namespace Utils {
   boost::filesystem::path getDefaultDataDir();
 
   /**
-   * Generates a cryptographically strong pseudo-random HEX string from a given byte size.
-   * e.g. a size of 32 will result in a 32-byte HEX string,
-   * which is a 64-char string prefixed with "0x".
+   * Generates a cryptographically strong pseudo-random HEX string
+   * from a given HEX byte size (e.g. a size of 4 will result in a
+   * 4-byte HEX string like "1a2b3c4d", which is an 8-char string).
    */
-  std::string randomHex(unsigned int size);
+  std::string randomHex(unsigned int size, bool prefixed = false);
 
-  // Convert a number string to BigNumber. Works with DEC and HEX numbers.
+  /**
+   * Convert a number string to BigNumber. Works with DEC and HEX numbers.
+   * HEX numbers REQUIRE the "0x" prefix, otherwise they are treated as DEC
+   * and will be cut at the first non-number character.
+   */
   BigNumber toBN(std::string number);
 
   /**
-   * Calculates the sha3 of the input.
+   * Calculates the sha3 of the input, as per this site:
+   * https://emn178.github.io/online-tools/keccak256.html
    * To mimic the sha3 behaviour of Solidity use soliditySha3().
    * keccak256() is an alias of sha3().
    * sha3Raw() returns the hash value instead of empty if an empty string
