@@ -66,12 +66,12 @@ std::string Utils::sha3Raw(std::string string) {
 }
 
 bool Utils::isHex(std::string hex) {
-  if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); }
+  if (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") { hex = hex.substr(2); }
   return (hex.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos);
 }
 
 bool Utils::isHexStrict(std::string hex) {
-  return (hex.substr(0, 2) == "0x") ? isHex(hex) : false;
+  return (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") ? isHex(hex) : false;
 }
 
 bool Utils::isAddress(std::string address) {
@@ -90,14 +90,18 @@ bool Utils::isAddress(std::string address) {
 }
 
 std::string Utils::toLowercaseAddress(std::string address) {
-  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
+    address = address.substr(2);
+  }
   std::string ret = address;
   std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
   return "0x" + ret;
 }
 
 std::string Utils::toUppercaseAddress(std::string address) {
-  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
+    address = address.substr(2);
+  }
   std::string ret = address;
   std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
   return "0x" + ret;
@@ -106,7 +110,9 @@ std::string Utils::toUppercaseAddress(std::string address) {
 std::string Utils::toChecksumAddress(std::string address) {
   // Hash needs address to be all lower-case and without the "0x" part
   address = Utils::toLowercaseAddress(address);
-  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
+    address = address.substr(2);
+  }
   std::string hash = dev::toHex(dev::sha3(address));
   std::string ret;
   for (int i = 0; i < address.length(); i++) {
@@ -124,7 +130,9 @@ std::string Utils::toChecksumAddress(std::string address) {
 
 bool Utils::checkAddressChecksum(std::string address) {
   // Hash needs address to be all lower-case and without the "0x" part
-  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
+    address = address.substr(2);
+  }
   std::string hash = dev::toHex(dev::sha3(
     Utils::toLowercaseAddress(address).substr(2)
   ));
@@ -161,7 +169,9 @@ std::string Utils::toHex(BigNumber value) {
 }
 
 std::string Utils::stripHexPrefix(std::string str) {
-  return (!str.empty() && isHex(str) && str.substr(0, 2) == "0x") ? str.substr(2) : str;
+  return (
+    !str.empty() && isHex(str) && (str.substr(0, 2) == "0x" || str.substr(0, 2) == "0X")
+  ) ? str.substr(2) : str;
 }
 
 std::string Utils::hexToNumberString(std::string hex) {
@@ -172,7 +182,7 @@ std::string Utils::hexToNumberString(std::string hex) {
 }
 
 BigNumber Utils::hexToBigNumber(std::string hex) {
-  if (hex.substr(0,2) == "0x") { hex = hex.substr(2); } // Remove "0x"
+  if (hex.substr(0,2) == "0x" || hex.substr(0, 2) == "0X") { hex = hex.substr(2); }
   return boost::lexical_cast<HexTo<dev::u256>>(hex);
 }
 
@@ -331,7 +341,7 @@ std::string Utils::fromWei(std::string amount, int decimals) {
 std::string Utils::padLeft(
   std::string string, unsigned int characterAmount, char sign
 ) {
-  bool hasPrefix = (string.substr(0, 2) == "0x");
+  bool hasPrefix = (string.substr(0, 2) == "0x" || string.substr(0, 2) == "0X");
   if (hasPrefix) { string = string.substr(2); }
   size_t padding = (characterAmount > string.length())
     ? (characterAmount - string.length()) : 0;
@@ -348,7 +358,7 @@ std::string Utils::leftPad(
 std::string Utils::padRight(
   std::string string, unsigned int characterAmount, char sign
 ) {
-  bool hasPrefix = (string.substr(0, 2) == "0x");
+  bool hasPrefix = (string.substr(0, 2) == "0x" || string.substr(0, 2) == "0X");
   if (hasPrefix) { string = string.substr(2); }
   size_t padding = (characterAmount > string.length())
     ? (characterAmount - string.length()) : 0;
