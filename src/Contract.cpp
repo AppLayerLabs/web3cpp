@@ -82,6 +82,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
     if (isArray) {
       // Append array size... except for bytes and strings
       if (argType != Types::bytesArr && argType != Types::stringArr) {
+        array_start += (32) + 32 * arguments[index].size();
         arrToAppend += Utils::padLeft(
           Utils::toHex(boost::lexical_cast<std::string>(arguments[index].size())), 64
         );
@@ -90,7 +91,6 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
       for (auto item : arguments[index]) {
         // Uint256[]
         if (argType == Types::uint256Arr) {
-          array_start += (32) + 32 * arguments[index].size();
           if (!std::all_of(item.begin(), item.end(), ::isdigit)) {
             error.setCode(20); return ""; // ABI Invalid Uint256 Array
           }
@@ -99,7 +99,6 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
         // address[]
         if (argType == Types::addressArr) {
-          array_start += (32) + 32 * arguments[index].size();
           item = Utils::stripHexPrefix(item); // Remove "0x"
           if (!Utils::isAddress(item)) {
             error.setCode(21); return ""; // ABI Invalid Address Array
@@ -109,8 +108,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
 
         // boolean[]
         if (argType == Types::booleanArr) {
-          array_start += (32) + 32 * arguments[index].size();
-          if (item[0] != '0' || item[0] != '1') {
+          if (item[0] != '0' && item[0] != '1') {
             error.setCode(22); return ""; // ABI Invalid Boolean Array
           }
           arrToAppend += Utils::padLeft(item, 64);
@@ -282,7 +280,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
       }
       // Boolean
       if (argType == Types::boolean) {
-        if (argument[0] != '0' || argument[0] != '1') {
+        if (argument[0] != '0' && argument[0] != '1') {
           error.setCode(27); return ""; // ABI Invalid Boolean Array
         }
         ret += Utils::padLeft(argument, 64);

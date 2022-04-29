@@ -134,6 +134,54 @@
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "item1",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "item2",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "item3",
+				"type": "bool"
+			},
+			{
+				"internalType": "bytes",
+				"name": "item4",
+				"type": "bytes"
+			},
+			{
+				"internalType": "string",
+				"name": "item5",
+				"type": "string"
+			},
+			{
+				"internalType": "string[]",
+				"name": "item6",
+				"type": "string[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "item7",
+				"type": "address[]"
+			},
+			{
+				"internalType": "bytes[]",
+				"name": "item8",
+				"type": "bytes[]"
+			}
+		],
+		"name": "testAlmostAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes[]",
 				"name": "list1",
 				"type": "bytes[]"
