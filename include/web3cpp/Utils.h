@@ -110,7 +110,7 @@ namespace Utils {
 
   /**
    * Calculates the sha3 of the input, as per this site:
-   * https://emn178.github.io/online-tools/keccak256.html
+   * https://emn178.github.io/online-tools/keccak_256.html
    * To mimic the sha3 behaviour of Solidity use soliditySha3().
    * keccak256() is an alias of sha3().
    * sha3Raw() returns the hash value instead of empty if an empty string
@@ -160,7 +160,7 @@ namespace Utils {
   bool checkAddressChecksum(std::string address);
 
   /**
-   * Converts any given value to HEX.
+   * Converts any given value to HEX. Does NOT prefix with "0x".
    * Number strings will be interpreted as numbers.
    * Text strings will be interpreted as UTF-8 strings.
    */
@@ -198,8 +198,11 @@ namespace Utils {
 
   /**
    * Converts any amount to/from Wei, respectively.
-   * decimals is the number of decimals said amount has (for toWei)
+   * decimals is the number of decimals said amount has (for toWei),
    * and the number of decimals you want the amount to have (for fromWei).
+   * For example:
+   * - toWei("5", 2) implies a 2 decimal currency -> 5.00 = 500 Wei
+   * - fromWei("80000", 4) implies a 4 decimal currency -> 80000 Wei = 8.0000
    */
   std::string toWei(std::string amount, int decimals);
   std::string fromWei(std::string amount, int decimals);

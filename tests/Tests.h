@@ -80,10 +80,43 @@ class Tests {
     // ==============================================================
 
     // Test for random hex string generation at preset sizes.
-    void generateRandomHexes();
+    void testRandomHexes();
 
     // Test for parsing of large numbers as BigNumbers.
-    void createBigNumbers();
+    void testBigNumbers();
+
+    // Test for SHA3 hashing (normal and raw).
+    void testSHA3();
+
+    // Test for hex string detection.
+    void testHexes();
+
+    // Test for address detection.
+    void testAddresses();
+
+    // Test for address conversions (upper, lower and checksum).
+    void testAddressConversions();
+
+    // Test for address checksums.
+    void testAddressChecksums();
+
+    // Test for hex data conversions (number, number string and text string).
+    void testHexConversions();
+
+    // Test for hex prefix stripping.
+    void testHexStripping();
+
+    // Test for type conversions, from HEX to something.
+    //void testFromHexToTypes();
+
+    // Test for type conversions, from something to HEX.
+    //void testFromTypesToHex();
+
+    // Test for currency conversions, from Wei to fixed point and vice-versa.
+    void testWeiConversions();
+
+    // Test for HEX string padding (left and right).
+    void testHexPadding();
 
     // ==============================================================
     // MISC

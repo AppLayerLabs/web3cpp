@@ -28,8 +28,19 @@ int main(int argc, char* argv[]) {
   for (std::string item : items) {
     if (item == "utils") {
       std::cout << "Running tests from Utils" << std::endl;
-      t.generateRandomHexes();
-      t.createBigNumbers();
+      t.testRandomHexes();
+      t.testBigNumbers();
+      t.testSHA3();
+      t.testHexes();
+      t.testAddresses();
+      t.testAddressConversions();
+      t.testAddressChecksums();
+      t.testHexConversions();
+      t.testHexStripping();
+      //t.testFromHexToTypes();
+      //t.testFromTypesToHex();
+      t.testWeiConversions();
+      t.testHexPadding();
     }
   }
   t.showResults();
