@@ -5,20 +5,24 @@ int main(int argc, char* argv[]) {
   std::vector<std::string> items;
   if (argc == 1) {
     std::cout << "Usage: " << argv[0] << " all|[CLASS]..." << std::endl
-      << "Available classes: utils" << std::endl;
+      << "Available classes: utils wallet contract" << std::endl;
     return 0;
   } else if (argc == 2 && strcmp(argv[1], "all") == 0) {
-    items = {"utils"};
+    items = {"utils", "wallet", "contract"};
   } else {
     for (int i = 1; i < argc; i++) {
-      if (strcmp(argv[i], "utils") == 0) {
+      if (
+        strcmp(argv[i], "utils") == 0 ||
+        strcmp(argv[i], "wallet") == 0 ||
+        strcmp(argv[i], "contract") == 0
+      ) {
         items.push_back(argv[i]);
       }
     }
   }
   if (items.empty()) {
     std::cout << "No classes selected." << std::endl
-      << "Available classes: utils" << std::endl;
+      << "Available classes: utils wallet contract" << std::endl;
     return 0;
   }
 
@@ -26,8 +30,9 @@ int main(int argc, char* argv[]) {
   std::string password = "password";
   Tests t(password);
   for (std::string item : items) {
+    std::cout << "----------------------------------------" << std::endl;
     if (item == "utils") {
-      std::cout << "Running tests from Utils" << std::endl;
+      std::cout << "* Testing functions from Utils" << std::endl;
       t.testRandomHexes();
       t.testBigNumbers();
       t.testSHA3();
@@ -41,18 +46,16 @@ int main(int argc, char* argv[]) {
       //t.testFromTypesToHex();
       t.testWeiConversions();
       t.testHexPadding();
+    } else if (item == "wallet") {
+      std::cout << "* Testing functions from Wallet" << std::endl;
+      t.generateAccount();
+    } else if (item == "contract") {
+      std::cout << "* Testing functions from Contract" << std::endl;
+      t.loadAndTestContract();
     }
+    std::cout << "----------------------------------------" << std::endl;
   }
   t.showResults();
   return 0;
-
-  /*
-  t.generateAccount(
-    "m/44'/60'/0'/0/0",
-    "corn girl crouch desk duck save hedgehog choose kitchen unveil dragon space",
-    "testAccount",
-    "0x3E8467983bA80734654208b274EBf01264526117"
-  );
-  t.loadAndTestContract();
-  */
 }
+
