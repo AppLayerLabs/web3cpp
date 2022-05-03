@@ -194,18 +194,9 @@ std::string Utils::hexToUtf8(std::string hex) {
   }
   hex = hex.substr(2);  // Remove "0x"
 
-  // Remove 00 padding from either side
-  std::regex paddingRegex = std::regex("^(?:00)*");
-  regex_replace(hex, paddingRegex, "");
-  reverse(hex.begin(), hex.end());
-  regex_replace(hex, paddingRegex, "");
-  reverse(hex.begin(), hex.end());
-
-  std::string str = "";
-  int len = hex.length();
-  for (int i = 0; i < len; i += 2) {
-    int code = std::stoi(hex.substr(i, 2), nullptr, 16);
-    str += std::to_string(code);
+  std::string str;
+  for (int i = 0; i < hex.length(); i += 2) {
+    str += std::stoul(hex.substr(i, 2), nullptr, 16);
   }
 
   return str;
@@ -228,15 +219,15 @@ std::string Utils::hexToAscii(std::string hex) {
   return str;
 }
 
-std::vector<char> Utils::hexToBytes(std::string hex) {
+std::vector<unsigned int> Utils::hexToBytes(std::string hex) {
   if (!isHexStrict(hex)) {
     throw std::string("Error converting non-hex value to bytes: ") + hex;
   }
   hex = hex.substr(2);  // Remove "0x"
 
-  std::vector<char> bytes;
+  std::vector<unsigned int> bytes;
   for (int i = 0; i < hex.length(); i += 2) {
-    bytes.push_back((char) std::stoul(hex.substr(i, 2), nullptr, 16));
+    bytes.push_back(std::stoul(hex.substr(i, 2), nullptr, 16));
   }
   return bytes;
 }
@@ -244,12 +235,21 @@ std::vector<char> Utils::hexToBytes(std::string hex) {
 std::string Utils::utf8ToHex(std::string str) {
   std::string hex = "";
 
-  // Remove \u0000 padding from either side
-  std::regex paddingRegex = std::regex("^(?:\\u0000)*");
-  regex_replace(str, paddingRegex, "");
-  reverse(str.begin(), str.end());
-  regex_replace(str, paddingRegex, "");
-  reverse(str.begin(), str.end());
+  std::stringstream ss;
+  for (int i = 0; i < str.length(); i++) {
+    ss << std::hex << std::setfill('0') << std::setw(2) << (int) str[i];
+  }
+  hex += ss.str();
+
+  return "0x" + hex;
+}
+
+std::string Utils::stringToHex(std::string hex) {
+  return Utils::utf8ToHex(hex);
+}
+
+std::string Utils::asciiToHex(std::string str) {
+  std::string hex = "";
 
   for (int i = 0; i < str.length(); i++) {
     int code = str[i];
@@ -262,27 +262,13 @@ std::string Utils::utf8ToHex(std::string str) {
   return "0x" + hex;
 }
 
-std::string Utils::stringToHex(std::string hex) {
-  return Utils::utf8ToHex(hex);
-}
-
-std::string Utils::asciiToHex(std::string str) {
-  std::string hex = "";
-
-  std::ostringstream result;
-  result << std::setw(2) << std::setfill('0') << std::hex;
-  std::copy(hex.begin(), hex.end(), std::ostream_iterator<unsigned int>(result, ""));
-
-  return "0x" + hex;
-}
-
-std::string Utils::bytesToHex(std::vector<char> byteArray) {
+std::string Utils::bytesToHex(std::vector<unsigned int> byteArray) {
   std::string hex = "";
 
   std::ostringstream result;
   result << std::setw(2) << std::setfill('0') << std::hex;
   for (int i = 0; i < byteArray.size(); i++) {
-    result << (int) byteArray[i];
+    result << byteArray[i];
   }
   hex = result.str();
 

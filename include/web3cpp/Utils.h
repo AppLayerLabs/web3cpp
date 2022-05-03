@@ -184,7 +184,7 @@ namespace Utils {
   std::string hexToUtf8(std::string hex);
   std::string hexToString(std::string hex);
   std::string hexToAscii(std::string hex);
-  std::vector<char> hexToBytes(std::string hex);
+  std::vector<unsigned int> hexToBytes(std::string hex);
 
   /**
    * Returns the HEX representation of a given
@@ -194,7 +194,7 @@ namespace Utils {
   std::string utf8ToHex(std::string str);
   std::string stringToHex(std::string str);
   std::string asciiToHex(std::string str);
-  std::string bytesToHex(std::vector<char> byteArray);
+  std::string bytesToHex(std::vector<unsigned int> byteArray);
 
   /**
    * Converts any amount to/from Wei, respectively.

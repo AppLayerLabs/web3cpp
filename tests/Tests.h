@@ -48,13 +48,13 @@ class Tests {
         throw;
       }
       this->password = password;
-      std::cout << "Wallet created/loaded, starting tests" << std::endl;
       logStream.open(logFile, std::ofstream::out | std::ofstream::app);
       std::time_t t = std::time(nullptr);
       std::tm* tm = std::localtime(&t);
       std::stringstream timestream;
       timestream << std::put_time(tm, "%d-%m-%Y %H-%M-%S");
       logStream << "[web3cpp Test Log - " << timestream.str() << "]\n\n";
+      std::cout << "Wallet created/loaded, starting tests" << std::endl;
     }
 
     // Destructor
@@ -106,10 +106,10 @@ class Tests {
     void testHexStripping();
 
     // Test for type conversions, from HEX to something.
-    //void testFromHexToTypes();
+    void testFromHexToTypes();
 
     // Test for type conversions, from something to HEX.
-    //void testFromTypesToHex();
+    void testFromTypesToHex();
 
     // Test for currency conversions, from Wei to fixed point and vice-versa.
     void testWeiConversions();

@@ -236,7 +236,7 @@ std::string Wallet::ecRecover(
   );
   std::string out = std::string(pubkey.begin(), pubkey.end()).substr(1);
   keccak_256(hash.data(), hash.size(), (unsigned char*) out.data());
-  std::vector<char> hashVec;
+  std::vector<unsigned int> hashVec;
   for (int i = 0; i < hash.size(); i++) {
     hashVec.push_back(hash[i]);
   }

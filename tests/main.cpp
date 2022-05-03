@@ -42,8 +42,8 @@ int main(int argc, char* argv[]) {
       t.testAddressChecksums();
       t.testHexConversions();
       t.testHexStripping();
-      //t.testFromHexToTypes();
-      //t.testFromTypesToHex();
+      t.testFromHexToTypes();
+      t.testFromTypesToHex();
       t.testWeiConversions();
       t.testHexPadding();
     } else if (item == "wallet") {

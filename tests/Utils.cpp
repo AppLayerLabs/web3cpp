@@ -351,32 +351,96 @@ void Tests::testHexStripping() {
   << std::endl << std::endl;
 }
 
-/* TODO: those, the right way
 void Tests::testFromHexToTypes() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
-  std::string bnHex = "0x16A5B628C2DE92F4";
-  std::string textHex = "0x5465737420537472696e67";
-  std::string bnExp = "1631910726175986420";
-  std::string textExp = "Test String";
+  std::string bnHex = "0x16a5b628c2de92f4";
+  std::string utf8Hex = "0xa2bce697ade5";
+  std::string asciiHex = "0x5465737420537472696e67";
+  std::string bytesHex = "0x5465737420537472696e67";
+  BigNumber bnExp(1631910726175986420);
+  std::string bnStrExp = "1631910726175986420";
+  std::string utf8Exp = u8"漢字";
+  std::string asciiExp = "Test String";
+  std::vector<unsigned int> bytesExp = {
+    84, 101, 115, 116, 32, 83, 116, 114, 105, 110, 103
+  };
 
-  std::string bnStrRes = Utils::hexToNumberString(bnHex);
   BigNumber bnRes(Utils::hexToBigNumber(bnHex));
-  std::string textResUtf8 = Utils::hexToUtf8(textHex);
-  std::string textResAscii = Utils::hexToAscii(textHex);
-  std::vector<char> textResBytes = Utils::hexToBytes(textHex);
+  std::string bnStrRes = Utils::hexToNumberString(bnHex);
+  std::string utf8Res = Utils::hexToUtf8(utf8Hex);
+  std::string asciiRes = Utils::hexToAscii(asciiHex);
+  std::vector<unsigned int> bytesRes = Utils::hexToBytes(bytesHex);
 
-  std::cout << std::endl;
-  std::cout << bnStrRes << std::endl;
-  std::cout << bnRes << std::endl;
-  std::cout << textResUtf8 << std::endl;
-  std::cout << textResAscii << std::endl;
-  std::cout << textResBytes << std::endl;
+  if (
+    (bnRes != bnExp) || (bnStrRes != bnStrExp) ||
+    (utf8Res != utf8Exp) || (asciiRes != asciiExp) || (bytesRes != bytesExp)
+  ) {
+    failed("One or more results don't match");
+  } else {
+    passed();
+  }
+
+  std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+  logStream << "* Test: " << __func__ << std::endl
+    << "* Inputs: " << std::endl
+    << "* Number hex: " << bnHex << std::endl
+    << "* UTF-8 hex: " << utf8Hex << std::endl
+    << "* ASCII hex: " << asciiHex << std::endl
+    << "* Bytes hex: " << bytesHex << std::endl
+    << "* Expected outputs: " << std::endl
+    << "* Number: " << bnExp << std::endl
+    << "* Number string: " << bnStrExp << std::endl
+    << "* UTF-8 string: " << utf8Exp << std::endl
+    << "* ASCII string: " << asciiExp << std::endl
+    << "* Bytes string: " << bytesExp << std::endl
+    << "* Actual outputs: " << std::endl
+    << "* Number: " << bnRes << std::endl
+    << "* Number string: " << bnStrRes << std::endl
+    << "* UTF-8 string: " << utf8Res << std::endl
+    << "* ASCII string: " << asciiRes << std::endl
+    << "* Bytes string: " << bytesRes << std::endl
+    << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
+  << std::endl << std::endl;
 }
 
 void Tests::testFromTypesToHex() {
-  ;
+  std::cout << "* Running test: " << __func__ << "... " << std::flush;
+  std::string utf8Str = u8"漢字";
+  std::string asciiStr = "Test String";
+  std::vector<unsigned int> bytesStr = {
+    84, 101, 115, 116, 32, 83, 116, 114, 105, 110, 103
+  };
+  std::string utf8Exp = "0xa2bce697ade5";
+  std::string asciiExp = "0x5465737420537472696e67";
+  std::string bytesExp = "0x5465737420537472696e67";
+
+  std::string utf8Res = Utils::utf8ToHex(utf8Str);
+  std::string asciiRes = Utils::asciiToHex(asciiStr);
+  std::string bytesRes = Utils::bytesToHex(bytesStr);
+
+  if ((utf8Res != utf8Exp) || (asciiRes != asciiExp) || (bytesRes != bytesExp)) {
+    failed("One or more results don't match");
+  } else {
+    passed();
+  }
+
+  std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+  logStream << "* Test: " << __func__ << std::endl
+    << "* Inputs: " << std::endl
+    << "* UTF-8 string: " << utf8Str << std::endl
+    << "* ASCII string: " << asciiStr << std::endl
+    << "* Bytes string: " << bytesStr << std::endl
+    << "* Expected outputs: " << std::endl
+    << "* UTF-8 hex: " << utf8Exp << std::endl
+    << "* ASCII hex: " << asciiExp << std::endl
+    << "* Bytes hex: " << bytesExp << std::endl
+    << "* Actual outputs: " << std::endl
+    << "* UTF-8 hex: " << utf8Res << std::endl
+    << "* ASCII hex: " << asciiRes << std::endl
+    << "* Bytes hex: " << bytesRes << std::endl
+    << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
+  << std::endl << std::endl;
 }
-*/
 
 void Tests::testWeiConversions() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
