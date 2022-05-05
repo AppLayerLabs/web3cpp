@@ -354,7 +354,7 @@ void Tests::testHexStripping() {
 void Tests::testFromHexToTypes() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
   std::string bnHex = "0x16a5b628c2de92f4";
-  std::string utf8Hex = "0xa2bce697ade5";
+  std::string utf8Hex = "0xe6bca2e5ad97";
   std::string asciiHex = "0x5465737420537472696e67";
   std::string bytesHex = "0x5465737420537472696e67";
   BigNumber bnExp(1631910726175986420);
@@ -410,7 +410,8 @@ void Tests::testFromTypesToHex() {
   std::vector<unsigned int> bytesStr = {
     84, 101, 115, 116, 32, 83, 116, 114, 105, 110, 103
   };
-  std::string utf8Exp = "0xa2bce697ade5";
+
+  std::string utf8Exp = "0xe6bca2e5ad97";
   std::string asciiExp = "0x5465737420537472696e67";
   std::string bytesExp = "0x5465737420537472696e67";
 

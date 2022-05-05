@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <bitset>
 
 #include <web3cpp/Web3.h>
 #include <web3cpp/Contract.h>

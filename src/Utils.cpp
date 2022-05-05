@@ -237,7 +237,8 @@ std::string Utils::utf8ToHex(std::string str) {
 
   std::stringstream ss;
   for (int i = 0; i < str.length(); i++) {
-    ss << std::hex << std::setfill('0') << std::setw(2) << (int) str[i];
+    // You need two casts in order to properly cast char to uint.
+    ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint>(static_cast<uint8_t>(str[i]));
   }
   hex += ss.str();
 
