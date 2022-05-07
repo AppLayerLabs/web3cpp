@@ -39,6 +39,15 @@ class Error {
       {25, "ABI Invalid Uint256"},
       {26, "ABI Invalid Address"},
       {27, "ABI Invalid Boolean"},
+      {28, "Solidity Invalid Bytes Length"},
+      {29, "Solidity Invalid Address Or Checksum"},
+      {30, "Solidity Invalid Bytes"},
+      {31, "Solidity Invalid Uint"},
+      {32, "Solidity Invalid Int"},
+      {33, "Solidity Uint Is Negative"},
+      {34, "Solidity Unsupported Or Invalid Type"},
+      {35, "Solidity Unsupported Array Autodetect"},
+      {36, "Solidity Array Size Mismatch"},
       {999, "Unknown Error"}
     };
     uint64_t code = 0;

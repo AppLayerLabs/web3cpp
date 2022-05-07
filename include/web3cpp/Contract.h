@@ -20,7 +20,8 @@ using json = nlohmann::ordered_json;
 
 // TODO:
 // - Implement promievents to deal with those functions:
-//   - once(), events(), allEvents(), getPastEvents())
+//   - once(), events(), allEvents(), getPastEvents(), Method::send()
+// - Deal with mixed params on Method::call()
 
 class Contract {
   private:

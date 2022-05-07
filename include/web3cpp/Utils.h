@@ -26,6 +26,7 @@
 #include <nlohmann/json.hpp>
 #include <web3cpp/devcore/CommonIO.h>
 #include <web3cpp/devcore/SHA3.h>
+#include <web3cpp/Error.h>
 
 using json = nlohmann::ordered_json;
 using BigNumber = dev::u256;
@@ -95,6 +96,13 @@ namespace Utils {
   boost::filesystem::path getDefaultDataDir();
 
   /**
+   * Helper functions for soliditySha3() and soliditySha3Raw().
+   * Both return NULL in case of error.
+   */
+  std::string _solidityPack(std::string type, json value, int arraySize, Error &err);
+  std::string _solidityProcess(json param, Error &err);
+
+  /**
    * Generates a cryptographically strong pseudo-random HEX string
    * from a given HEX byte size (e.g. a size of 4 will result in a
    * 4-byte HEX string like "1a2b3c4d", which is an 8-char string).
@@ -123,11 +131,21 @@ namespace Utils {
   /**
    * Calculates the sha3 of given input parameters in the same way Solidity would.
    * This means arguments will be ABI converted and tightly packed before being hashed.
-   * Same details as above.
-   * TODO: decide how to deal with mixed params
+   * soliditySha3Raw() returns the hash value instead of empty if an empty
+   * string is passed, for example.
+   * Params can be any basic type, or an object like this:
+   * {type: "uint", value: "123456"} / {t: "bytes", v: "0xfff456"}
+   * Basic types are autodetected as follows:
+   * - `String` non-numerical UTF-8 string is interpreted as `string`
+   * - `String|Number|BN|HEX` positive number is interpreted as `uint256`
+   * - `String|Number|BN` negative number is interpreted as `int256`
+   * - `Boolean` as `bool`
+   * - `String` HEX string with leading `0x` is interpreted as `bytes`
+   * - `HEX` HEX number representation is interpreted as `uint256`
+   * Returns NULL in case of error.
    */
-  //std::string soliditySha3(mixed param1 [, mixed param2, ...]);
-  //std::string soliditySha3Raw(mixed param1 [, mixed param2, ...]);
+  std::string soliditySha3(json params, Error &err);
+  std::string soliditySha3Raw(json params, Error &err);
 
   /**
    * Checks if a given string is a HEX string.
