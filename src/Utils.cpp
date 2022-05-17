@@ -42,10 +42,10 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
       return NULL;
     }
     err.setCode(0);
-    return stripHexPrefix(value.get<std::string>());
+    return bytesVal;
   } else if (type == "string") {
     err.setCode(0);
-    return stripHexPrefix(utf8ToHex(value.get<std::string>()));
+    return utf8ToHex(value.get<std::string>());
   } else if (type == "bool") {
     err.setCode(0);
     return (value.get<bool>() ? "01" : "00");
@@ -56,11 +56,11 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
       return NULL;
     }
     err.setCode(0);
-    return stripHexPrefix(padLeft(toLowercaseAddress(value), ((arraySize) ? 64 : 40)));
+    return padLeft(toLowercaseAddress(value), ((arraySize > 0) ? 64 : 40));
   }
 
   int size = 0;
-  std::regex sizeRegex = std::regex("^\\D+(\\d+).*$");
+  std::regex sizeRegex = std::regex("^\\D+\\d*\\[(\\d+)\\]$");
   std::smatch sizeMatch;
   if (std::regex_search(type, sizeMatch, sizeRegex)) {
     size = std::stoi(sizeMatch[1]);
@@ -77,9 +77,9 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
       return NULL;
     }
     err.setCode(0);
-    return stripHexPrefix(padRight(value, size * 2));
+    return padRight(value, size * 2);
   } else if (type.find("uint") != std::string::npos) {
-    if (size % 8 || size < 8 || size > 256) {
+    if (size > 0 && (size % 8 || size < 8 || size > 256)) {
       err.setCode(31);
       std::cout << "Invalid uint" << size << " for " << value << std::endl;
       return NULL;
@@ -90,17 +90,17 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
       err.setCode(33);
       std::cout << "Supplied uint " << num << " is negative" << std::endl;
       return NULL;
-    } else if (size) {
+    } else if (size > 0) {
       err.setCode(0);
-      return stripHexPrefix(padLeft(Utils::toHex(num), (size / 8) * 2));
+      return padLeft(toHex(num), (size / 8) * 2);
     } else {
       err.setCode(0);
       std::stringstream ss;
       ss << num;
-      return ss.str();
+      return padLeft(toHex(ss.str()), 64);
     }
   } else if (type.find("int") != std::string::npos) {
-    if (size % 8 || size < 8 || size > 256) {
+    if (size > 0 && (size % 8 || size < 8 || size > 256)) {
       err.setCode(32);
       std::cout << "Invalid int" << size << " for " << value << std::endl;
       return NULL;
@@ -108,18 +108,19 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
     BigNumber num(value.get<int>());
     // TODO: bitLength() > size ?
     if (num < 0) {
-      ; // TODO: return stripHexPrefix(Utils::toHex(num.toTwos(size)));
-    } else if (size) {
+      ; // TODO: return Utils::toHex(num.toTwos(size));
+    } else if (size > 0) {
       err.setCode(0);
-      return stripHexPrefix(padLeft(Utils::toHex(num), (size / 8) * 2));
+      return padLeft(toHex(num), (size / 8) * 2);
     } else {
       err.setCode(0);
       std::stringstream ss;
       ss << num;
-      return ss.str();
+      return padLeft(toHex(ss.str()), 64);
     }
   } else {
-    // TODO: support all other types
+    // TODO: support all other types?
+    // fixed<M>x<N>, ufixed<M>x<N>, fixed, ufixed, function, tuples(?)
     err.setCode(34);
     std::cout << "Unsupported or invalid type: " << type << std::endl;
     return NULL;
@@ -129,76 +130,47 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
 std::string Utils::_solidityProcess(json param, Error &err) {
   std::string type;
   json value;
-  int arraySize;
+  int arraySize = 0;
 
-  if (param.is_array()) {
+  // Get the type and value of param
+  if (
+    (param.contains("type") && param.contains("value")) ||
+    (param.contains("t") && param.contains("v"))
+  ) {
+    type = (param.contains("t") ? param["t"] : param["type"]);
+    value = (param.contains("v") ? param["v"] : param["value"]);
+  } else {
     err.setCode(35);
-    std::cout << "Autodetection of array types is not supported" << std::endl;
+    std::cout << "Missing param type and/or value" << std::endl;
     return NULL;
   }
 
-  if (param.is_object()) {
-    // If type is given
-    if (
-      param.contains("type") || param.contains("value") ||
-      param.contains("t") || param.contains("v")
-    ) {
-      type = (param.contains("t") ? param["t"] : param["type"]);
-      value = (param.contains("v") ? param["v"] : param["value"]);
-    }
-  } else {
-    // Otherwise try to guess the type
-    if (param.is_boolean()) {
-      type = "bool";
-      value = param.get<bool>();
-    } else if (param.is_number()) {
-      type = ((param.get<int>() < 0) ? "int256" : "uint256");
-      value = ((type == "int256") ? param.get<int>() : param.get<unsigned int>());
-    } else if (param.is_string()) {
-      value = param.get<std::string>();
-      if (isAddress(value.get<std::string>())) {
-        type = "address";
-      } else if (
-        value.get<std::string>().find("-0x") != std::string::npos ||
-        value.get<std::string>().find("-0X") != std::string::npos
-      ) {
-        type = "int256";
-      } else if (
-        value.get<std::string>().find("0x") != std::string::npos ||
-        value.get<std::string>().find("0X") != std::string::npos
-      ) {
-        type = "bytes";
-      } else {
-        type = "string";
-      }
-    }
-    // TODO: if (not int and not uint) type is bytes ?
-  }
-
-  // TODO: if ((int or uint) and string and not /^(-)?0x/i) value = new BN(value) ?
-
   // If param is an array, get its size
-  if (value.is_array()) {
-    std::regex sizeRegex = std::regex("^\\D+(\\d+).*$");
+  if (
+    (type.find("[") != std::string::npos && type.find("]") != std::string::npos)
+    && value.is_array()
+  ) {
+    std::regex sizeRegex = std::regex("^\\D+\\d*\\[(\\d+)\\]$");
     std::smatch sizeMatch;
     if (std::regex_search(type, sizeMatch, sizeRegex)) {
       arraySize = std::stoi(sizeMatch[1]);
-      if (arraySize > 0 && value.size() != arraySize) {
+      if (arraySize != value.size()) {
         err.setCode(36);
         std::cout << type << " doesn't match the given array " << value.dump() << std::endl;
         return NULL;
-      } else {
-        arraySize = value.size();
       }
     }
   }
 
   // Encode param value into Solidity format
   std::string hexArg;
-  if (value.is_array()) {
+  if (
+    (type.find("[") != std::string::npos && type.find("]") != std::string::npos)
+    && value.is_array()
+  ) {
     for (auto& val : value) {
       Error packErr;
-      std::string packedArg = stripHexPrefix(Utils::toHex(_solidityPack(type, val, arraySize, packErr)));
+      std::string packedArg = stripHexPrefix(_solidityPack(type, val, arraySize, packErr));
       if (packErr.getCode() != 0) {
         err.setCode(packErr.getCode());
         return NULL;
@@ -207,8 +179,8 @@ std::string Utils::_solidityProcess(json param, Error &err) {
       }
     }
   } else {
-    Error packErr;
-    hexArg = stripHexPrefix(Utils::toHex(_solidityPack(type, value, arraySize, packErr)));
+    Error packErr, pe;
+    hexArg = stripHexPrefix(_solidityPack(type, value, arraySize, packErr));
     if (packErr.getCode() != 0) {
       err.setCode(packErr.getCode());
       return NULL;
@@ -240,16 +212,16 @@ BigNumber Utils::toBN(std::string number) {
   return ret;
 }
 
-std::string Utils::sha3(std::string string) {
-  return (!string.empty()) ? dev::toHex(dev::sha3(string, false)) : "";
+std::string Utils::sha3(std::string string, bool isNibble) {
+  return (!string.empty()) ? dev::toHex(dev::sha3(string, isNibble)) : "";
 }
 
-std::string Utils::keccak256(std::string string) {
-  return Utils::sha3(string);
+std::string Utils::keccak256(std::string string, bool isNibble) {
+  return Utils::sha3(string, isNibble);
 }
 
-std::string Utils::sha3Raw(std::string string) {
-  return dev::toHex(dev::sha3(string, false));
+std::string Utils::sha3Raw(std::string string, bool isNibble) {
+  return dev::toHex(dev::sha3(string, isNibble));
 }
 
 std::string Utils::soliditySha3(json params, Error &err) {
@@ -265,7 +237,7 @@ std::string Utils::soliditySha3(json params, Error &err) {
     }
   }
   err.setCode(0);
-  return "0x" + Utils::sha3(ret);
+  return "0x" + Utils::sha3(ret, true);
 }
 
 std::string Utils::soliditySha3Raw(json params, Error &err) {
@@ -281,7 +253,7 @@ std::string Utils::soliditySha3Raw(json params, Error &err) {
     }
   }
   err.setCode(0);
-  return "0x" + Utils::sha3Raw(ret);
+  return "0x" + Utils::sha3Raw(ret, true);
 }
 
 bool Utils::isHex(std::string hex) {

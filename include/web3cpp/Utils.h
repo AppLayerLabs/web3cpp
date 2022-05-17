@@ -120,28 +120,27 @@ namespace Utils {
    * Calculates the sha3 of the input, as per this site:
    * https://emn178.github.io/online-tools/keccak_256.html
    * To mimic the sha3 behaviour of Solidity use soliditySha3().
+   * isNibble, if true, tells the function to treat input as bytes (used in soliditySha3()).
    * keccak256() is an alias of sha3().
    * sha3Raw() returns the hash value instead of empty if an empty string
    * is passed, for example.
    */
-  std::string sha3(std::string string);
-  std::string keccak256(std::string string);
-  std::string sha3Raw(std::string string);
+  std::string sha3(std::string string, bool isNibble = false);
+  std::string keccak256(std::string string, bool isNibble = false);
+  std::string sha3Raw(std::string string, bool isNibble = false);
 
   /**
    * Calculates the sha3 of given input parameters in the same way Solidity would.
    * This means arguments will be ABI converted and tightly packed before being hashed.
    * soliditySha3Raw() returns the hash value instead of empty if an empty
    * string is passed, for example.
-   * Params can be any basic type, or an object like this:
-   * {type: "uint", value: "123456"} / {t: "bytes", v: "0xfff456"}
-   * Basic types are autodetected as follows:
-   * - `String` non-numerical UTF-8 string is interpreted as `string`
-   * - `String|Number|BN|HEX` positive number is interpreted as `uint256`
-   * - `String|Number|BN` negative number is interpreted as `int256`
-   * - `Boolean` as `bool`
-   * - `String` HEX string with leading `0x` is interpreted as `bytes`
-   * - `HEX` HEX number representation is interpreted as `uint256`
+   * Does NOT autodetect types. Each parameter has to be a JSON object
+   * inside "params", with "type" and "value" (or "t" and "v").
+   * Example:
+   *   json j = {
+   *     { {"type", "string"}, {"value", "234"} },
+   *     { {"t", "uint256"}, {"v", 234} }
+   *   };
    * Returns NULL in case of error.
    */
   std::string soliditySha3(json params, Error &err);

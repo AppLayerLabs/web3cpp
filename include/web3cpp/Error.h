@@ -46,7 +46,7 @@ class Error {
       {32, "Solidity Invalid Int"},
       {33, "Solidity Uint Is Negative"},
       {34, "Solidity Unsupported Or Invalid Type"},
-      {35, "Solidity Unsupported Array Autodetect"},
+      {35, "Solidity Missing Type Or Value"},
       {36, "Solidity Array Size Mismatch"},
       {999, "Unknown Error"}
     };
