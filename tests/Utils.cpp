@@ -102,6 +102,175 @@ void Tests::testSHA3() {
   << std::endl << std::endl;
 }
 
+void Tests::testSoliditySHA3() {
+  std::cout << "* Running test: " << __func__ << "... " << std::flush;
+  json j1A = {
+    { {"type", "string"}, {"value", "hello"} },
+    { {"type", "string"}, {"value", "world01"} }
+  };
+  json j1B = {
+    { {"type", "string"}, {"value", "hell"} },
+    { {"type", "string"}, {"value", "oworld"} },
+    { {"type", "uint16"}, {"value", 0x3031} }
+  };
+  json j1C = {
+    { {"type", "uint96"}, {"value", 32309054545061485574011236401} }
+  };
+  json j2 = {
+    { {"type", "uint256"}, {"value", 234564535} },
+    { {"type", "bytes"}, {"value", "0xfff23243"} },
+    { {"type", "bool"}, {"value", true} },
+    { {"type", "int256"}, {"value", -10} }
+  };
+  json j3 = {
+    { {"type", "string"}, {"value", "Hello!%"} }
+  };
+  json j4A = {
+    { {"type", "uint256"}, {"value", 234} }
+  };
+  json j4B = {
+    { {"type", "uint256"}, {"value", 0xea} }
+  };
+  json j4C = {
+    { {"type", "uint"}, {"value", 234} }
+  };
+  json j5A = {
+    { {"type", "bytes"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
+  };
+  json j5B = {
+    { {"type", "address"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
+  };
+  json j6 = {
+    { {"type", "bytes32"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
+  };
+  json j7 = {
+    { {"type", "string"}, {"value", "Hello!%"} },
+    { {"type", "int8"}, {"value", -23} },
+    { {"type", "address"}, {"value", "0x85F43D8a49eeB85d32Cf465507DD71d507100C1d"} }
+  };
+  std::string r1 = "0xfb0a9d38c4dc568cbd105866540986fabf3c08c1bfb78299ce21aa0e5c0c586b";
+  std::string r2 = "0x3e27a893dc40ef8a7f0841d96639de2f58a132be5ae466d40087a2cfa83b7179";
+  std::string r3 = "0x661136a4267dba9ccdf6bfddb7c00e714de936674c4bdb065a531cf1cb15c7fc";
+  std::string r4 = "0x61c831beab28d67d1bb40b5ae1a11e2757fa842f031a2d0bc94a7867bc5d26c2";
+  std::string r5 = "0x4e8ebbefa452077428f93c9520d3edd60594ff452a29ac7d2ccc11d47f3ab95b";
+  std::string r6 = "0x3c69a194aaf415ba5d6afca734660d0a3d45acdc05d54cd1ca89a8988e7625b4";
+  std::string r7 = "0xa13b31627c1ed7aaded5aecec71baf02fe123797fffd45e662eac8e06fbe4955";
+
+  Error e1A, e1B, e1C, e2, e3, e4A, e4B, e4C, e5A, e5B, e6, e7;
+  std::string h1A = Utils::soliditySha3(j1A, e1A);
+  std::string h1B = Utils::soliditySha3(j1B, e1B);
+  std::string h1C = Utils::soliditySha3(j1C, e1C);
+  std::string h2 = Utils::soliditySha3(j2, e2);
+  std::string h3 = Utils::soliditySha3(j3, e3);
+  std::string h4A = Utils::soliditySha3(j4A, e4A);
+  std::string h4B = Utils::soliditySha3(j4B, e4B);
+  std::string h4C = Utils::soliditySha3(j4C, e4C);
+  std::string h5A = Utils::soliditySha3(j5A, e5A);
+  std::string h5B = Utils::soliditySha3(j5B, e5B);
+  std::string h6 = Utils::soliditySha3(j6, e6);
+  std::string h7 = Utils::soliditySha3(j7, e7);
+
+  bool errOk = true;
+  if (e1A.getCode() != 0) { errOk = false; h1A = e1A.what(); }
+  if (e1B.getCode() != 0) { errOk = false; h1B = e1B.what(); }
+  if (e1C.getCode() != 0) { errOk = false; h1C = e1C.what(); }
+  if (e2.getCode() != 0) { errOk = false; h2 = e2.what(); }
+  if (e3.getCode() != 0) { errOk = false; h3 = e3.what(); }
+  if (e4A.getCode() != 0) { errOk = false; h4A = e4A.what(); }
+  if (e4B.getCode() != 0) { errOk = false; h4B = e4B.what(); }
+  if (e4C.getCode() != 0) { errOk = false; h4C = e4C.what(); }
+  if (e5A.getCode() != 0) { errOk = false; h5A = e5A.what(); }
+  if (e5B.getCode() != 0) { errOk = false; h5B = e5B.what(); }
+  if (e6.getCode() != 0) { errOk = false; h6 = e6.what(); }
+  if (e7.getCode() != 0) { errOk = false; h7 = e7.what(); }
+  if (!errOk) {
+    failed("Couldn't hash one or more inputs");
+  } else {
+    int passTotal = 12;
+    int passCount = (
+      (h1A == r1) + (h1B == r1) + (h1C == r1) + (h2 == r2) + (h3 == r3) +
+      (h4A == r4) + (h4B == r4) + (h4C == r4) + (h5A == r5) + (h5B == r5) +
+      (h6 == r6) + (h7 == r7)
+    );
+    if (passCount != passTotal) {
+      failed("One or more hashes don't match");
+    } else {
+      passed();
+    }
+  }
+
+  std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+  logStream << "* Test: " << __func__ << std::endl
+    << "* Inputs: " << std::endl
+    << "* 1A: " << j1A << std::endl
+    << "* 1B: " << j1B << std::endl
+    << "* 1C: " << j1C << std::endl
+    << "* 2: " << j2 << std::endl
+    << "* 3: " << j3 << std::endl
+    << "* 4A: " << j4A << std::endl
+    << "* 4B: " << j4B << std::endl
+    << "* 4C: " << j4C << std::endl
+    << "* 5A: " << j5A << std::endl
+    << "* 5B: " << j5B << std::endl
+    << "* 6: " << j6 << std::endl
+    << "* 7: " << j7 << std::endl
+    << "* Expected outputs:" << std::endl
+    << "* 1A: " << r1 << std::endl
+    << "* 1B: " << r1 << std::endl
+    << "* 1C: " << r1 << std::endl
+    << "* 2: " << r2 << std::endl
+    << "* 3: " << r3 << std::endl
+    << "* 4A: " << r4 << std::endl
+    << "* 4B: " << r4 << std::endl
+    << "* 4C: " << r4 << std::endl
+    << "* 5A: " << r5 << std::endl
+    << "* 5B: " << r5 << std::endl
+    << "* 6: " << r6 << std::endl
+    << "* 7: " << r7 << std::endl
+    << "* Actual outputs:" << std::endl
+    << "* 1A: " << h1A << std::endl
+    << "* 1B: " << h1B << std::endl
+    << "* 1C: " << h1C << std::endl
+    << "* 2: " << h2 << std::endl
+    << "* 3: " << h3 << std::endl
+    << "* 4A: " << h4A << std::endl
+    << "* 4B: " << h4B << std::endl
+    << "* 4C: " << h4C << std::endl
+    << "* 5A: " << h5A << std::endl
+    << "* 5B: " << h5B << std::endl
+    << "* 6: " << h6 << std::endl
+    << "* 7: " << h7 << std::endl
+    << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
+  << std::endl << std::endl;
+}
+
+void Tests::testSoliditySHA3Raw() {
+  std::cout << "* Running test: " << __func__ << "... " << std::flush;
+  json jZero = {
+    { {"type", "string"}, {"value", ""} }
+  };
+  std::string zeroHash = "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
+
+  Error e;
+  std::string zeroHashRes = Utils::soliditySha3Raw(jZero, e);
+  if (e.getCode() != 0) {
+    zeroHashRes = e.what();
+    failed("Couldn't hash input");
+  } else if (zeroHashRes != zeroHash) {
+    failed("Zero hash doesn't match");
+  } else {
+    passed();
+  }
+
+  std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+  logStream << "* Test: " << __func__ << std::endl
+    << "* Input: (empty)" << std::endl
+    << "* Expected output: " << zeroHash << std::endl
+    << "* Actual output: " << zeroHashRes << std::endl
+    << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
+  << std::endl << std::endl;
+}
+
 void Tests::testHexes() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
   std::vector<std::string> hexStrings = {

@@ -36,6 +36,8 @@ int main(int argc, char* argv[]) {
       t.testRandomHexes();
       t.testBigNumbers();
       t.testSHA3();
+      t.testSoliditySHA3();
+      t.testSoliditySHA3Raw();
       t.testHexes();
       t.testAddresses();
       t.testAddressConversions();

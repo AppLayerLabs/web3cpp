@@ -71,7 +71,7 @@ std::string Utils::_solidityPack(std::string type, json value, int arraySize, Er
       ; // TODO: support bytes[]
     }
     if (arraySize) size = 32; // Must be 32 byte slices when in an array
-    if (size < 1 || size > 32 || size < (stripHexPrefix(value).length() / 2)) {
+    if (size > 0 && (size < 1 || size > 32 || size < (stripHexPrefix(value).length() / 2))) {
       err.setCode(30);
       std::cout << "Invalid bytes" << size << " for " << value << std::endl;
       return NULL;

@@ -88,8 +88,11 @@ class Tests {
     // Test for SHA3 hashing (normal and raw).
     void testSHA3();
 
-    // TODO: the above but for Solidity
-    //void testSoliditySHA3();
+    // Test for Solidity SHA3 hashing (normal only).
+    void testSoliditySHA3();
+
+    // Test for Solidity SHA3 hashing (raw only).
+    void testSoliditySHA3Raw();
 
     // Test for hex string detection.
     void testHexes();
