@@ -33,104 +33,131 @@ boost::filesystem::path Utils::getDefaultDataDir() {
   #endif
 }
 
-std::string Utils::_solidityPack(std::string type, json value, int arraySize, Error &err) {
-  if (type == "bytes") {
-    std::string bytesVal = stripHexPrefix(value.get<std::string>());
-    if (bytesVal.length() % 2 != 0) {
-      err.setCode(28);
-      std::cout << "Invalid bytes character length: " << bytesVal.length() << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    return bytesVal;
-  } else if (type == "string") {
+std::string Utils::_solidityPack(std::string type, json value, Error &err) {
+  // Non-numbered types
+  if (type == "string") {
     err.setCode(0);
     return utf8ToHex(value.get<std::string>());
-  } else if (type == "bool") {
+  }
+  if (type == "bool") {
     err.setCode(0);
     return (value.get<bool>() ? "01" : "00");
-  } else if (type == "address") {
-    if (!isAddress(value.get<std::string>())) {
+  }
+  if (type == "address") {
+    std::string addStr = value.get<std::string>();
+    if (!isAddress(addStr)) {
       err.setCode(29);
-      std::cout << value.get<std::string>() << " is not a valid address, or the checksum is invalid" << std::endl;
+      std::cout << addStr << " is not a valid address, or the checksum is invalid" << std::endl;
       return NULL;
     }
     err.setCode(0);
-    return padLeft(toLowercaseAddress(value), ((arraySize > 0) ? 64 : 40));
+    return toLowercaseAddress(addStr);
+  }
+  if (type == "bytes") {
+    std::string bytesStr = stripHexPrefix(value.get<std::string>());
+    if (bytesStr.length() % 2 != 0) {
+      err.setCode(28);
+      std::cout << "Invalid bytes character length: " << bytesStr.length() << std::endl;
+      return NULL;
+    }
+    err.setCode(0);
+    return bytesStr;
+  }
+  if (type == "uint" || type == "int") {
+    return toHex(value.get<int>()); // TODO: check if int is enough
   }
 
   int size = 0;
-  std::regex sizeRegex = std::regex("^\\D+\\d*\\[(\\d+)\\]$");
+  std::regex sizeRegex = std::regex("\\d+$");
   std::smatch sizeMatch;
   if (std::regex_search(type, sizeMatch, sizeRegex)) {
-    size = std::stoi(sizeMatch[1]);
+    std::string matchRes = sizeMatch.str(0);
+    type = type.substr(0, type.find(matchRes));
+    size = std::stoi(matchRes);
   }
 
-  if (type.find("bytes") != std::string::npos) {
-    if (!size) {
-      ; // TODO: support bytes[]
-    }
-    if (arraySize) size = 32; // Must be 32 byte slices when in an array
-    if (size > 0 && (size < 1 || size > 32 || size < (stripHexPrefix(value).length() / 2))) {
+  // Numbered types
+  if (type == "bytes" && size > 0) {
+    std::string bytesStr = stripHexPrefix(value.get<std::string>());
+    if (size > 32) {
       err.setCode(30);
-      std::cout << "Invalid bytes" << size << " for " << value << std::endl;
+      std::cout << "Invalid bytes" << size << " for " << bytesStr << std::endl;
       return NULL;
     }
     err.setCode(0);
-    return padRight(value, size * 2);
-  } else if (type.find("uint") != std::string::npos) {
-    if (size > 0 && (size % 8 || size < 8 || size > 256)) {
+    return bytesStr;
+  }
+  if (type == "uint" && size > 0) {
+    if (size < 8 || size > 256 || size % 8 != 0) {
       err.setCode(31);
       std::cout << "Invalid uint" << size << " for " << value << std::endl;
       return NULL;
     }
-    BigNumber num(value.get<int>());
-    // TODO: bitLength() ?
+    BigNumber num(value.get<int>()); // TODO: check if int is enough
     if (num < 0) {
       err.setCode(33);
       std::cout << "Supplied uint " << num << " is negative" << std::endl;
       return NULL;
-    } else if (size > 0) {
-      err.setCode(0);
-      return padLeft(toHex(num), (size / 8) * 2);
-    } else {
-      err.setCode(0);
-      std::stringstream ss;
-      ss << num;
-      return padLeft(toHex(ss.str()), 64);
     }
-  } else if (type.find("int") != std::string::npos) {
-    if (size > 0 && (size % 8 || size < 8 || size > 256)) {
+    err.setCode(0);
+    std::stringstream ss;
+    ss << num;
+    return toHex(ss.str());
+  }
+  if (type == "int" && size > 0) {
+    if (size < 8 || size > 256 || size % 8 != 0) {
       err.setCode(32);
       std::cout << "Invalid int" << size << " for " << value << std::endl;
       return NULL;
     }
-    BigNumber num(value.get<int>());
-    // TODO: bitLength() > size ?
+    BigNumber num(value.get<int>());  // TODO: check if int is enough
     if (num < 0) {
       ; // TODO: return Utils::toHex(num.toTwos(size));
-    } else if (size > 0) {
-      err.setCode(0);
-      return padLeft(toHex(num), (size / 8) * 2);
-    } else {
-      err.setCode(0);
-      std::stringstream ss;
-      ss << num;
-      return padLeft(toHex(ss.str()), 64);
     }
-  } else {
-    // TODO: support all other types?
-    // fixed<M>x<N>, ufixed<M>x<N>, fixed, ufixed, function, tuples(?)
-    err.setCode(34);
-    std::cout << "Unsupported or invalid type: " << type << std::endl;
+    err.setCode(0);
+    std::stringstream ss;
+    ss << num;
+    return toHex(ss.str());
+  }
+  err.setCode(34);
+  std::cout << "Unsupported or invalid type: " << type << std::endl;
+  return NULL;
+}
+
+std::string Utils::_solidityPackArray(std::string type, json value, Error &err) {
+  // Check if array is dynamic (size = 0) or fixed (size > 0)
+  int size = 0;
+  std::regex sizeRegex = std::regex("\\[(\\d+)\\]$");
+  std::smatch sizeMatch;
+  if (std::regex_search(type, sizeMatch, sizeRegex)) {
+    std::string matchRes = sizeMatch.str(0);
+    size = std::stoi(matchRes);
+  }
+  if (size != value.size()) {
+    err.setCode(36);
+    std::cout << type << " doesn't match the given array " << value.dump() << std::endl;
     return NULL;
   }
+
+  std::string ret;
+  for (auto& val : value) {
+    Error packErr;
+    std::string valType = type.substr(0, type.find("["));
+    std::string packedArg = stripHexPrefix(_solidityPack(valType, val, packErr));
+    if (packErr.getCode() != 0) {
+      err.setCode(packErr.getCode());
+      return NULL;
+    } else {
+      // TODO: padding per type
+      ret += packedArg;
+    }
+  }
+  return ret;
 }
 
 std::string Utils::_solidityProcess(json param, Error &err) {
   std::string type;
   json value;
-  int arraySize = 0;
 
   // Get the type and value of param
   if (
@@ -145,46 +172,16 @@ std::string Utils::_solidityProcess(json param, Error &err) {
     return NULL;
   }
 
-  // If param is an array, get its size
-  if (
-    (type.find("[") != std::string::npos && type.find("]") != std::string::npos)
-    && value.is_array()
-  ) {
-    std::regex sizeRegex = std::regex("^\\D+\\d*\\[(\\d+)\\]$");
-    std::smatch sizeMatch;
-    if (std::regex_search(type, sizeMatch, sizeRegex)) {
-      arraySize = std::stoi(sizeMatch[1]);
-      if (arraySize != value.size()) {
-        err.setCode(36);
-        std::cout << type << " doesn't match the given array " << value.dump() << std::endl;
-        return NULL;
-      }
-    }
-  }
-
   // Encode param value into Solidity format
-  std::string hexArg;
-  if (
-    (type.find("[") != std::string::npos && type.find("]") != std::string::npos)
-    && value.is_array()
-  ) {
-    for (auto& val : value) {
-      Error packErr;
-      std::string packedArg = stripHexPrefix(_solidityPack(type, val, arraySize, packErr));
-      if (packErr.getCode() != 0) {
-        err.setCode(packErr.getCode());
-        return NULL;
-      } else {
-        hexArg += packedArg;
-      }
-    }
-  } else {
-    Error packErr, pe;
-    hexArg = stripHexPrefix(_solidityPack(type, value, arraySize, packErr));
-    if (packErr.getCode() != 0) {
-      err.setCode(packErr.getCode());
-      return NULL;
-    }
+  std::regex arrRegex = std::regex("\\[(\\d+)?\\]");
+  std::smatch arrMatch;
+  Error packErr;
+  std::string hexArg = (std::regex_search(type, arrMatch, arrRegex))
+    ? stripHexPrefix(_solidityPackArray(type, value, packErr))
+    : stripHexPrefix(_solidityPack(type, value, packErr));
+  if (packErr.getCode() != 0) {
+    err.setCode(packErr.getCode());
+    return NULL;
   }
   err.setCode(0);
   return hexArg;

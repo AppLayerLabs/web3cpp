@@ -97,9 +97,10 @@ namespace Utils {
 
   /**
    * Helper functions for soliditySha3() and soliditySha3Raw().
-   * Both return NULL in case of error.
+   * All of them return NULL in case of error.
    */
-  std::string _solidityPack(std::string type, json value, int arraySize, Error &err);
+  std::string _solidityPack(std::string type, json value, Error &err);
+  std::string _solidityPackArray(std::string type, json value, Error &err);
   std::string _solidityProcess(json param, Error &err);
 
   /**
@@ -141,6 +142,9 @@ namespace Utils {
    *     { {"type", "string"}, {"value", "234"} },
    *     { {"t", "uint256"}, {"v", 234} }
    *   };
+   * Process logic follows Solidity's non-standard packed mode. Details at:
+   * https://docs.soliditylang.org/en/latest/abi-spec.html#non-standard-packed-mode
+   * Supported types are: int, uint, bytes, string, address, bool
    * Returns NULL in case of error.
    */
   std::string soliditySha3(json params, Error &err);
