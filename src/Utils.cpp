@@ -35,6 +35,10 @@ boost::filesystem::path Utils::getDefaultDataDir() {
 
 std::string Utils::_solidityPack(std::string type, json value, Error &err) {
   // Non-numbered types
+  if (type == "uint") {
+    BigNumber bn(value.get<std::string>());
+    return toHex(bn);
+  }
   if (type == "string") {
     err.setCode(0);
     return utf8ToHex(value.get<std::string>());
@@ -63,9 +67,6 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
     err.setCode(0);
     return bytesStr;
   }
-  if (type == "uint" || type == "int") {
-    return toHex(value.get<int>()); // TODO: check if int is enough
-  }
 
   int size = 0;
   std::regex sizeRegex = std::regex("\\d+$");
@@ -77,6 +78,21 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
   }
 
   // Numbered types
+  if (type == "uint" && size > 0) {
+    if (size < 8 || size > 256 || size % 8 != 0) {
+      err.setCode(31);
+      std::cout << "Invalid uint" << size << " for " << value << std::endl;
+      return NULL;
+    }
+    if (value.get<std::string>().find("-") != std::string::npos) {
+      err.setCode(33);
+      std::cout << "Supplied uint " << value.get<std::string>() << " is negative" << std::endl;
+      return NULL;
+    }
+    err.setCode(0);
+    BigNumber num(value.get<std::string>());
+    return toHex(num);
+  }
   if (type == "bytes" && size > 0) {
     std::string bytesStr = stripHexPrefix(value.get<std::string>());
     if (size > 32) {
@@ -86,38 +102,6 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
     }
     err.setCode(0);
     return bytesStr;
-  }
-  if (type == "uint" && size > 0) {
-    if (size < 8 || size > 256 || size % 8 != 0) {
-      err.setCode(31);
-      std::cout << "Invalid uint" << size << " for " << value << std::endl;
-      return NULL;
-    }
-    BigNumber num(value.get<int>()); // TODO: check if int is enough
-    if (num < 0) {
-      err.setCode(33);
-      std::cout << "Supplied uint " << num << " is negative" << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    std::stringstream ss;
-    ss << num;
-    return toHex(ss.str());
-  }
-  if (type == "int" && size > 0) {
-    if (size < 8 || size > 256 || size % 8 != 0) {
-      err.setCode(32);
-      std::cout << "Invalid int" << size << " for " << value << std::endl;
-      return NULL;
-    }
-    BigNumber num(value.get<int>());  // TODO: check if int is enough
-    if (num < 0) {
-      ; // TODO: return Utils::toHex(num.toTwos(size));
-    }
-    err.setCode(0);
-    std::stringstream ss;
-    ss << num;
-    return toHex(ss.str());
   }
   err.setCode(34);
   std::cout << "Unsupported or invalid type: " << type << std::endl;

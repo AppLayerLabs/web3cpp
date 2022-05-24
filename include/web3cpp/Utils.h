@@ -140,11 +140,12 @@ namespace Utils {
    * Example:
    *   json j = {
    *     { {"type", "string"}, {"value", "234"} },
-   *     { {"t", "uint256"}, {"v", 234} }
+   *     { {"t", "uint256"}, {"v", "234"} },
+   *     { {"t", "bool"}, {"v", true} }
    *   };
    * Process logic follows Solidity's non-standard packed mode. Details at:
    * https://docs.soliditylang.org/en/latest/abi-spec.html#non-standard-packed-mode
-   * Supported types are: int, uint, bytes, string, address, bool
+   * Supported types are: uint<8..256>, bytes<1..32>, string, address, bool.
    * Returns NULL in case of error.
    */
   std::string soliditySha3(json params, Error &err);

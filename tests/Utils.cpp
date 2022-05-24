@@ -111,28 +111,28 @@ void Tests::testSoliditySHA3() {
   json j1B = {
     { {"type", "string"}, {"value", "hell"} },
     { {"type", "string"}, {"value", "oworld"} },
-    { {"type", "uint16"}, {"value", 0x3031} }
+    { {"type", "uint16"}, {"value", "0x3031"} }
   };
   json j1C = {
-    { {"type", "uint96"}, {"value", 32309054545061485574011236401} }
+    { {"type", "uint96"}, {"value", "32309054545061485574011236401"} }
   };
   json j2 = {
-    { {"type", "uint256"}, {"value", 234564535} },
+    { {"type", "uint256"}, {"value", "234564535"} },
     { {"type", "bytes"}, {"value", "0xfff23243"} },
     { {"type", "bool"}, {"value", true} },
-    { {"type", "int256"}, {"value", -10} }
+    { {"type", "int256"}, {"value", "-10"} }
   };
   json j3 = {
     { {"type", "string"}, {"value", "Hello!%"} }
   };
   json j4A = {
-    { {"type", "uint256"}, {"value", 234} }
+    { {"type", "uint256"}, {"value", "234"} }
   };
   json j4B = {
-    { {"type", "uint256"}, {"value", 0xea} }
+    { {"type", "uint256"}, {"value", "0xea"} }
   };
   json j4C = {
-    { {"type", "uint"}, {"value", 234} }
+    { {"type", "uint"}, {"value", "234"} }
   };
   json j5A = {
     { {"type", "bytes"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
@@ -145,7 +145,7 @@ void Tests::testSoliditySHA3() {
   };
   json j7 = {
     { {"type", "string"}, {"value", "Hello!%"} },
-    { {"type", "int8"}, {"value", -23} },
+    { {"type", "int8"}, {"value", "-23"} },
     { {"type", "address"}, {"value", "0x85F43D8a49eeB85d32Cf465507DD71d507100C1d"} }
   };
   std::string r1 = "0xfb0a9d38c4dc568cbd105866540986fabf3c08c1bfb78299ce21aa0e5c0c586b";
