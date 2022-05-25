@@ -117,7 +117,7 @@ std::string Utils::_solidityPackArray(std::string type, json value, Error &err) 
     std::string matchRes = sizeMatch.str(0);
     size = std::stoi(matchRes);
   }
-  if (size != value.size()) {
+  if (size > 0 && size != value.size()) {
     err.setCode(36);
     std::cout << type << " doesn't match the given array " << value.dump() << std::endl;
     return NULL;
@@ -132,8 +132,15 @@ std::string Utils::_solidityPackArray(std::string type, json value, Error &err) 
       err.setCode(packErr.getCode());
       return NULL;
     } else {
-      // TODO: padding per type
-      ret += packedArg;
+      // Array elements are always padded as 32 hex bytes each.
+      // For uint, bool and address, padding is on the left.
+      // For string and bytes, padding is on the right.
+      if (valType == "uint" || valType == "bool" || valType == "address") {
+        ret += padLeft(packedArg, 64);
+      } else if (valType == "string" || valType == "bytes") {
+        ret += padRight(packedArg, 64);
+      }
+      std::cout << ret << std::endl << std::endl;
     }
   }
   return ret;
