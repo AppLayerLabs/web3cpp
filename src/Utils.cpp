@@ -1,4 +1,5 @@
 #include <web3cpp/Utils.h>
+#include <web3cpp/Solidity.h>
 
 std::mutex storageLock;
 
@@ -37,15 +38,15 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
   // Non-numbered types
   if (type == "uint") {
     BigNumber bn(value.get<std::string>());
-    return toHex(bn);
+    return padLeft(toHex(bn), 64);
   }
   if (type == "string") {
     err.setCode(0);
-    return utf8ToHex(value.get<std::string>());
+    return padRight(utf8ToHex(value.get<std::string>()), 64);
   }
   if (type == "bool") {
     err.setCode(0);
-    return (value.get<bool>() ? "01" : "00");
+    return (value.get<bool>() ? padLeft("01", 64) : padLeft("00", 64));
   }
   if (type == "address") {
     std::string addStr = value.get<std::string>();
@@ -55,7 +56,7 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
       return NULL;
     }
     err.setCode(0);
-    return toLowercaseAddress(addStr);
+    return padLeft(toLowercaseAddress(addStr), 64);
   }
   if (type == "bytes") {
     std::string bytesStr = stripHexPrefix(value.get<std::string>());
@@ -65,7 +66,7 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
       return NULL;
     }
     err.setCode(0);
-    return bytesStr;
+    return padRight(bytesStr, 64);
   }
 
   int size = 0;
@@ -91,7 +92,7 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
     }
     err.setCode(0);
     BigNumber num(value.get<std::string>());
-    return toHex(num);
+    return padLeft(toHex(num), 64);
   }
   if (type == "bytes" && size > 0) {
     std::string bytesStr = stripHexPrefix(value.get<std::string>());
@@ -101,7 +102,7 @@ std::string Utils::_solidityPack(std::string type, json value, Error &err) {
       return NULL;
     }
     err.setCode(0);
-    return bytesStr;
+    return padRight(bytesStr, 64);
   }
   err.setCode(34);
   std::cout << "Unsupported or invalid type: " << type << std::endl;
@@ -132,9 +133,6 @@ std::string Utils::_solidityPackArray(std::string type, json value, Error &err) 
       err.setCode(packErr.getCode());
       return NULL;
     } else {
-      // Array elements are always padded as 32 hex bytes each.
-      // For uint, bool and address, padding is on the left.
-      // For string and bytes, padding is on the right.
       if (valType == "uint" || valType == "bool" || valType == "address") {
         ret += padLeft(packedArg, 64);
       } else if (valType == "string" || valType == "bytes") {

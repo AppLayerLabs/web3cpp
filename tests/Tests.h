@@ -12,6 +12,7 @@
 
 #include <web3cpp/Web3.h>
 #include <web3cpp/Contract.h>
+#include <web3cpp/Solidity.h>
 #include <web3cpp/Utils.h>
 
 // Helper class for unit testing.
@@ -74,6 +75,8 @@ class Tests {
      * Each test should be completely contained into a function of its own
      * and output the details to the log file.
      */
+
+    // TODO: Solidity tests
 
     // ==============================================================
     // UTILS
@@ -138,10 +141,7 @@ class Tests {
     // CONTRACT
     // ==============================================================
 
-    /**
-     * Test for proper Contract loading and ABI manipulation.
-     * Inputs: none
-     */
+    // Test for proper Contract loading and ABI manipulation.
     void loadAndTestContract();
 };
 

@@ -102,59 +102,46 @@ void Tests::testSHA3() {
   << std::endl << std::endl;
 }
 
+/*
 void Tests::testSoliditySHA3() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
-  json j1A = {
-    { {"type", "string"}, {"value", "hello"} },
-    { {"type", "string"}, {"value", "world01"} }
-  };
-  json j1B = {
-    { {"type", "string"}, {"value", "hell"} },
-    { {"type", "string"}, {"value", "oworld"} },
-    { {"type", "uint16"}, {"value", "0x3031"} }
-  };
-  json j1C = {
-    { {"type", "uint96"}, {"value", "32309054545061485574011236401"} }
-  };
-  json j2 = {
-    { {"type", "uint256"}, {"value", "234564535"} },
-    { {"type", "bytes"}, {"value", "0xfff23243"} },
-    { {"type", "bool"}, {"value", true} },
-    { {"type", "int256"}, {"value", "-10"} }
-  };
-  json j3 = {
-    { {"type", "string"}, {"value", "Hello!%"} }
-  };
-  json j4A = {
-    { {"type", "uint256"}, {"value", "234"} }
-  };
-  json j4B = {
-    { {"type", "uint256"}, {"value", "0xea"} }
-  };
-  json j4C = {
-    { {"type", "uint"}, {"value", "234"} }
-  };
-  json j5A = {
-    { {"type", "bytes"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
-  };
-  json j5B = {
-    { {"type", "address"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
-  };
-  json j6 = {
-    { {"type", "bytes32"}, {"value", "0x407D73d8a49eeb85D32Cf465507dd71d507100c1"} }
-  };
-  json j7 = {
-    { {"type", "string"}, {"value", "Hello!%"} },
-    { {"type", "int8"}, {"value", "-23"} },
-    { {"type", "address"}, {"value", "0x85F43D8a49eeB85d32Cf465507DD71d507100C1d"} }
-  };
-  std::string r1 = "0xfb0a9d38c4dc568cbd105866540986fabf3c08c1bfb78299ce21aa0e5c0c586b";
-  std::string r2 = "0x3e27a893dc40ef8a7f0841d96639de2f58a132be5ae466d40087a2cfa83b7179";
-  std::string r3 = "0x661136a4267dba9ccdf6bfddb7c00e714de936674c4bdb065a531cf1cb15c7fc";
-  std::string r4 = "0x61c831beab28d67d1bb40b5ae1a11e2757fa842f031a2d0bc94a7867bc5d26c2";
-  std::string r5 = "0x4e8ebbefa452077428f93c9520d3edd60594ff452a29ac7d2ccc11d47f3ab95b";
-  std::string r6 = "0x3c69a194aaf415ba5d6afca734660d0a3d45acdc05d54cd1ca89a8988e7625b4";
-  std::string r7 = "0xa13b31627c1ed7aaded5aecec71baf02fe123797fffd45e662eac8e06fbe4955";
+  json j1A = { {"type", "uint256"}, {"value", "129831751235123"} };
+  json j1B = { {"type", "address"}, {"value", "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8"} };
+  json j1C = { {"type", "bool"}, {"value", true} };
+  json j1D = { {"type", "bytes"}, {"value", "0xaaaa"} };
+  json j1E = { {"type", "string"}, {"value", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget porttitor tortor, et tincidunt nibh. Aenean erat quam, maximus id gravida sit amet, rhoncus sed nulla. Curabitur maximus tellus diam, vel vulputate sapien maximus vitae. Duis consectetur, felis at efficitur consectetur, tortor nisl bibendum mauris, eget venenatis augue justo et orciSimple "} };
+  json j2A = { {"type", "uint256[]"}, {"value", {
+    // ...
+  }}};
+  json j2B = { {"type", "address[]"}, {"value", {
+    "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8",
+    "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8",
+    "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8"
+  }}};
+  json j2C = { {"type", "bool[]"}, {"value", {
+    // ...
+  }}};
+  json j2D = { {"type", "bytes[]"}, {"value", {
+    "0xaaa",
+    "0xbbb",
+    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }}};
+  json j2E = { {"type", "string[]"}, {"value", {
+    "aaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "ccc"
+  }}};
+
+  std::string r1A = "0x23ca82fd08978ec8bdedfb49a8c82cc8bd1f2f1e6734f39e7d54bfe13dc36c25";
+  std::string r1B = "0x512f675e26efc88a1dba5491171ed07ca7bdec44d0822a65eeeb06b3f8c636d0";
+  std::string r1C = "0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6";
+  std::string r1D = "0xd69a7fe744d274f77aadbee2739de42fcd2fa333337de675727937e3cad5bb77";
+  std::string r1E = "0xe45cef14cb78752441492c1a0d7a89fe7a643fbc8d9a204d14a5526870a2c012";
+  std::string r2A = "0x";
+  std::string r2B = "0xb936902b161c1344a2b5a9b9e87a0ac807ecc569844403cf41fd78d9a01f5451";
+  std::string r2C = "0x";
+  std::string r2D = "0xc2223977caa88504241d4197cdb9e0ebf4ea498463d0fd6e51d80fb26425c380";
+  std::string r2E = "0x33cdc4b381534e45e8fdc57c990d35d3143af04501fcfe1178d3dbf9c606f2de";
 
   Error e1A, e1B, e1C, e2, e3, e4A, e4B, e4C, e5A, e5B, e6, e7;
   std::string h1A = Utils::soliditySha3(j1A, e1A);
@@ -243,6 +230,7 @@ void Tests::testSoliditySHA3() {
     << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
   << std::endl << std::endl;
 }
+*/
 
 void Tests::testSoliditySHA3Raw() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;

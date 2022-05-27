@@ -1,0 +1,90 @@
+[
+	{
+		"inputs": [{"internalType": "uint256", "name": "item", "type": "uint256"}],
+		"name": "testUint256",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "address", "name": "item", "type": "address"}],
+		"name": "testAddress",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "bool", "name": "item", "type": "bool"}],
+		"name": "testBool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "bytes", "name": "item", "type": "bytes"}],
+		"name": "testBytes",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "string", "name": "item", "type": "string"}],
+		"name": "testString",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "uint256[]", "name": "item", "type": "uint256[]"}],
+		"name": "testUint256Array",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "address[]", "name": "item", "type": "address[]"}],
+		"name": "testAddressArray",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "bool[]", "name": "item", "type": "bool[]"}],
+		"name": "testBoolArray",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "bytes[]", "name": "item", "type": "bytes[]"}],
+		"name": "testBytesArray",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [{"internalType": "string[]", "name": "item", "type": "string[]"}],
+		"name": "testStringArray",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{ "internalType": "uint256", "name": "item1", "type": "uint256" },
+			{ "internalType": "address", "name": "item2", "type": "address" },
+			{ "internalType": "bool", "name": "item3", "type": "bool" },
+			{	"internalType": "bytes", "name": "item4",	"type": "bytes" },
+			{	"internalType": "string", "name": "item5", "type": "string" },
+			{ "internalType": "uint256[]", "name": "item6", "type": "uint256[]" },
+			{ "internalType": "address[]", "name": "item7", "type": "address[]" },
+			{ "internalType": "bool[]", "name": "item8", "type": "bool[]" },
+			{	"internalType": "bytes[]", "name": "item9",	"type": "bytes[]" },
+			{	"internalType": "string[]", "name": "item10", "type": "string[]" }
+		],
+		"name": "testAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]

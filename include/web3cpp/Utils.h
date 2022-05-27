@@ -135,6 +135,7 @@ namespace Utils {
    * This means arguments will be ABI converted and tightly packed before being hashed.
    * soliditySha3Raw() returns the hash value instead of empty if an empty
    * string is passed, for example.
+   * Check Solidity.h for more details.
    * Does NOT autodetect types. Each parameter has to be a JSON object
    * inside "params", with "type" and "value" (or "t" and "v").
    * Example:
@@ -143,10 +144,8 @@ namespace Utils {
    *     { {"t", "uint256"}, {"v", "234"} },
    *     { {"t", "bool"}, {"v", true} }
    *   };
-   * Process logic follows Solidity's non-standard packed mode. Details at:
-   * https://docs.soliditylang.org/en/latest/abi-spec.html#non-standard-packed-mode
-   * Supported types are: uint<8..256>, bytes<1..32>, string, address, bool.
    * Returns NULL in case of error.
+   * TODO: redo this using Solidity class
    */
   std::string soliditySha3(json params, Error &err);
   std::string soliditySha3Raw(json params, Error &err);
