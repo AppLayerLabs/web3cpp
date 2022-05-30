@@ -234,7 +234,7 @@ std::string Solidity::packMulti(json args, Error &err, std::string func) {
   std::string ret = "0x";
   if (!func.empty()) {
     Error funcErr;
-    if (!checkType("function", {func}, funcErr)) {
+    if (!checkType("function", func, funcErr)) {
       err.setCode(funcErr.getCode()); return "";
     }
     ret += packFunction(func);

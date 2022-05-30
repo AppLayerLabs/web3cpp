@@ -55,6 +55,42 @@ bool Contract::isTypeArray(Types const &type) {
   );
 }
 
+std::string Contract::operator() (json arguments, std::string function, Error &error) {
+  if (!methods.count(function)) { error.setCode(16); return ""; } // ABI Functor Not Found
+  if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
+  if (arguments.size() != methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
+
+  // Streamline all types from function into a string
+  std::vector<std::string> funcTypes;
+  for (Types t : methods[function]) {
+    switch (t) {
+      case Types::uint256: funcTypes.push_back("uint256"); break;
+      case Types::uint256Arr: funcTypes.push_back("uint256[]"); break;
+      case Types::address: funcTypes.push_back("address"); break;
+      case Types::addressArr: funcTypes.push_back("address[]"); break;
+      case Types::boolean: funcTypes.push_back("bool"); break;
+      case Types::booleanArr: funcTypes.push_back("bool[]"); break;
+      case Types::bytes: funcTypes.push_back("bytes"); break;
+      case Types::bytesArr: funcTypes.push_back("bytes[]"); break;
+      case Types::string: funcTypes.push_back("string"); break;
+      case Types::stringArr: funcTypes.push_back("string[]"); break;
+    }
+  }
+
+  // Mount the function header and JSON arguments manually,
+  // with the proper formatting both need to go through packMulti()
+  std::string func = function + "(";
+  json args;
+  for (int i = 0; i < funcTypes.size(); i++) {
+    func += funcTypes[i] + ",";
+    args.push_back({{"t", funcTypes[i]}, {"v", arguments[i]}});
+  }
+  func.pop_back();  // Remove last ","
+  func += ")";
+
+  return Solidity::packMulti(args, error, func);
+}
+
 std::string Contract::operator() (std::string function, json arguments, Error &error) {
   // Check if function exists.
   //std::cout << arguments.dump() << std::endl;
@@ -165,7 +201,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
             );
             // Offset by next item size + 32 bytes used to determine item size..
             // Round it to upper (nearest upwards 32 multiple).
-            bytesOffSet += (32) + bytes.second; 
+            bytesOffSet += (32) + bytes.second;
             dev::bigfloat division = dev::bigfloat(bytesOffSet) / dev::bigfloat(32);
             dev::bigfloat multiplication = boost::multiprecision::ceil(division);
             bytesOffSet = (32) * boost::lexical_cast<uint64_t>(multiplication);
@@ -236,7 +272,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
             );
             // Offset by next item size + 32 bytes used to determine item size..
             // Round it to upper (nearest upwards 32 multiple).
-            bytesOffSet += (32) + string.second; 
+            bytesOffSet += (32) + string.second;
             dev::bigfloat division = dev::bigfloat(bytesOffSet) / dev::bigfloat(32);
             dev::bigfloat multiplication = boost::multiprecision::ceil(division);
             bytesOffSet = (32) * boost::lexical_cast<uint64_t>(multiplication);
@@ -300,7 +336,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
         uint64_t multiplication = boost::lexical_cast<uint64_t>(boost::multiprecision::ceil(division));
         argument = Utils::padRight(argument, (64 * multiplication), '0');
         tmpStr += argument;
-        
+
         array_start += 32 + (32 * multiplication);
         arrToAppend += tmpStr;
       }
@@ -316,7 +352,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
         uint64_t multiplication = boost::lexical_cast<uint64_t>(boost::multiprecision::ceil(division));
         argument = Utils::padRight(argument, (64 * multiplication), '0');
         tmpStr += argument;
-        
+
         array_start += 32 + (32 * multiplication);
         arrToAppend += tmpStr;
       }

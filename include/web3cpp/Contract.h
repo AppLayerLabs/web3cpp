@@ -12,6 +12,7 @@
 
 #include <web3cpp/Utils.h>
 #include <web3cpp/Error.h>
+#include <web3cpp/Solidity.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::ordered_json;
@@ -87,10 +88,17 @@ class Contract {
     // object is a transaction object.
     //object deploy(json options); // data, arguments
 
-    // ABI constructor from arguments.
+    // ABI constructor from arguments. Uses the custom Solidity class.
+    // Pay attention to the arg order! "args, func" = this one.
+    std::string operator() (json arguments, std::string function, Error &error);
+
+    // ABI constructor from arguments (old/fallback/legacy).
+    // Use this one if something funky happens with the one above.
+    // Pay attention to the arg order! "func, args" = this one.
+    // -----
     // ALL ARGUMENTS ARE PARSED AS STRINGS INSIDE THE JSON!
-    // Always used ordered_json!
-    // Example json:
+    // Always use ordered_json!
+    // Example:
     // Function(uint256, address[], uint256)
     // [
     //   "5123815123858123",
