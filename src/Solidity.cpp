@@ -2,7 +2,28 @@
 
 bool Solidity::checkType(std::string type, json value, Error &err) {
   if (type == "function") {
-    err.setCode(0); return true; // TODO: missing error code and logic
+    // Check both "funcName()" and every type inside the "()"
+    std::string hdr = value.get<std::string>();
+    if (hdr.find("(") == std::string::npos || hdr.find(")") == std::string::npos) {
+      err.setCode(30); return false; // ABI Invalid Function
+    }
+    hdr.erase(0, hdr.find("(") + 1);
+    hdr.replace(hdr.find(")"), 1, ",");
+    int pos;
+    while ((pos = hdr.find(",")) != std::string::npos) {
+      std::string hdrType = hdr.substr(0, pos);
+      if (
+        hdrType != "uint256" && hdrType != "address" &&
+        hdrType != "bool" && hdrType != "bytes" &&
+        hdrType != "string" && hdrType != "uint256[]" &&
+        hdrType != "address[]" && hdrType != "bool[]" &&
+        hdrType != "bytes[]" && hdrType != "string[]"
+      ) {
+        err.setCode(30); return false; // ABI Invalid Function
+      }
+      hdr.erase(0, pos + 1);
+    }
+    err.setCode(0); return true;
   } else if (type == "uint256") {
     std::string it = value.get<std::string>();
     if (!std::all_of(it.begin(), it.end(), ::isdigit)) {
@@ -22,9 +43,16 @@ bool Solidity::checkType(std::string type, json value, Error &err) {
     }
     err.setCode(0); return true;
   } else if (type == "bytes") {
-    err.setCode(0); return true; // TODO: missing error code
+    if (!Utils::isHex(value.get<std::string>())) {
+      err.setCode(28); return false; // ABI Invalid Bytes
+    }
+    err.setCode(0); return true;
   } else if (type == "string") {
-    err.setCode(0); return true; // TODO: missing error code
+    std::string it = Utils::utf8ToHex(value.get<std::string>());
+    if (!Utils::isHex(it)) {
+      err.setCode(29); return false; // ABI Invalid String
+    }
+    err.setCode(0); return true;
   } else if (type == "uint256[]") {
     for (json item : value) {
       std::string it = item.get<std::string>();
