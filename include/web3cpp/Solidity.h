@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <web3cpp/Error.h>
 #include <web3cpp/Utils.h>
 
 /**
@@ -39,33 +40,22 @@
  */
 
 namespace Solidity {
+  bool checkType(std::string type, json value, Error &err);
+
   std::string packFunction(std::string func);
-
   std::string packUint(std::string num);
-  std::string packUint(BigNumber num);
-
   std::string packAddress(std::string add);
-
-  std::string packBool(bool b);
   std::string packBool(std::string b);
-
   std::string packBytes(std::string hex);
-
   std::string packString(std::string str);
 
   std::string packUintArray(std::vector<std::string> numV);
-  std::string packUintArray(std::vector<BigNumber> numV);
-
   std::string packAddressArray(std::vector<std::string> addV);
-
-  std::string packBoolArray(std::vector<bool> bV);
   std::string packBoolArray(std::vector<std::string> bV);
-
   std::string packBytesArray(std::vector<std::string> hexV);
-
   std::string packStringArray(std::vector<std::string> strV);
 
-  std::string packMulti(json args, std::string func = "");
+  std::string packMulti(json args, Error &err, std::string func = "");
 };
 
 #endif  // SOLIDITY_H

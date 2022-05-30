@@ -1,5 +1,73 @@
 #include <web3cpp/Solidity.h>
 
+bool Solidity::checkType(std::string type, json value, Error &err) {
+  if (type == "function") {
+    err.setCode(0); return true; // TODO: missing error code and logic
+  } else if (type == "uint256") {
+    std::string it = value.get<std::string>();
+    if (!std::all_of(it.begin(), it.end(), ::isdigit)) {
+      err.setCode(25); return false; // ABI Invalid Uint256
+    }
+    err.setCode(0); return true;
+  } else if (type == "address") {
+    std::string it = value.get<std::string>();
+    if (!Utils::isAddress(it)) {
+      err.setCode(26); return false; // ABI Invalid Address
+    }
+    err.setCode(0); return true;
+  } else if (type == "bool") {
+    std::string it = value.get<std::string>();
+    if (it != "0" && it != "1" && it != "true" && it != "false") {
+      err.setCode(27); return false; // ABI Invalid Boolean
+    }
+    err.setCode(0); return true;
+  } else if (type == "bytes") {
+    err.setCode(0); return true; // TODO: missing error code
+  } else if (type == "string") {
+    err.setCode(0); return true; // TODO: missing error code
+  } else if (type == "uint256[]") {
+    for (json item : value) {
+      std::string it = item.get<std::string>();
+      if (!std::all_of(it.begin(), it.end(), ::isdigit)) {
+        err.setCode(20); return false; // ABI Invalid Uint256 Array
+      }
+    }
+    err.setCode(0); return true;
+  } else if (type == "address[]") {
+    for (json item : value) {
+      std::string it = item.get<std::string>();
+      if (!Utils::isAddress(it)) {
+        err.setCode(21); return false; // ABI Invalid Address Array
+      }
+    }
+    err.setCode(0); return true;
+  } else if (type == "bool[]") {
+    for (json item : value) {
+      std::string it = item.get<std::string>();
+      if (it != "0" && it != "1" && it != "true" && it != "false") {
+        err.setCode(22); return false; // ABI Invalid Boolean Array
+      }
+    }
+    err.setCode(0); return true;
+  } else if (type == "bytes[]") {
+    for (json item : value) {
+      if (!Utils::isHex(item)) {
+        err.setCode(23); return false; // ABI Invalid Bytes Array
+      }
+    }
+    err.setCode(0); return true;
+  } else if (type == "string[]") {
+    for (json item : value) {
+      std::string it = Utils::utf8ToHex(item.get<std::string>());
+      if (!Utils::isHex(it)) {
+        err.setCode(24); return false; // ABI Invalid String Array
+      }
+    }
+    err.setCode(0); return true;
+  }
+  err.setCode(31); return false;  // Solidity Unsupported Or Invalid Type
+}
+
 std::string Solidity::packFunction(std::string func) {
   return dev::toHex(dev::sha3(func)).substr(0, 8);
 }
@@ -8,18 +76,10 @@ std::string Solidity::packUint(std::string num) {
   return Utils::padLeft(Utils::toHex(num), 64);
 }
 
-std::string Solidity::packUint(BigNumber num) {
-  return Utils::padLeft(Utils::toHex(num), 64);
-}
-
 std::string Solidity::packAddress(std::string add) {
   return Utils::padLeft(
     Utils::stripHexPrefix(Utils::toLowercaseAddress(add))
   , 64);
-}
-
-std::string Solidity::packBool(bool b) {
-  return Utils::padLeft(((b) ? "1" : "0"), 64);
 }
 
 std::string Solidity::packBool(std::string b) {
@@ -60,16 +120,6 @@ std::string Solidity::packUintArray(std::vector<std::string> numV) {
   return arrOffset + arrSize + arrData;
 }
 
-std::string Solidity::packUintArray(std::vector<BigNumber> numV) {
-  std::string arrOffset, arrSize, arrData = "";
-  arrOffset = Utils::padLeft(Utils::toHex(32), 64);
-  arrSize = Utils::padLeft(Utils::toHex(numV.size()), 64);
-  for (BigNumber num : numV) {
-    arrData += Utils::padLeft(Utils::toHex(num), 64);
-  }
-  return arrOffset + arrSize + arrData;
-}
-
 std::string Solidity::packAddressArray(std::vector<std::string> addV) {
   std::string arrOffset, arrSize, arrData = "";
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
@@ -82,16 +132,6 @@ std::string Solidity::packAddressArray(std::vector<std::string> addV) {
   return arrOffset + arrSize + arrData;
 }
 
-std::string Solidity::packBoolArray(std::vector<bool> bV) {
-  std::string arrOffset, arrSize, arrData = "";
-  arrOffset = Utils::padLeft(Utils::toHex(32), 64);
-  arrSize = Utils::padLeft(Utils::toHex(bV.size()), 64);
-  for (bool b : bV) {
-    arrData += Utils::padLeft(((b) ? "1" : "0"), 64);
-  }
-  return arrOffset + arrSize + arrData;
-}
-
 std::string Solidity::packBoolArray(std::vector<std::string> bV) {
   std::string arrOffset, arrSize, arrData = "";
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
@@ -99,7 +139,7 @@ std::string Solidity::packBoolArray(std::vector<std::string> bV) {
   for (std::string b : bV) {
     if (b == "true") b = "1";
     else if (b == "false") b = "0";
-    arrData+= Utils::padLeft(b, 64);
+    arrData += Utils::padLeft(b, 64);
   }
   return arrOffset + arrSize + arrData;
 }
@@ -161,18 +201,38 @@ std::string Solidity::packStringArray(std::vector<std::string> strV) {
   return ret;
 }
 
-std::string Solidity::packMulti(json args, std::string func) {
-  std::string ret = "0x" + (
-    (!func.empty()) ? dev::toHex(dev::sha3(func)).substr(0, 8) : ""
-  );
+std::string Solidity::packMulti(json args, Error &err, std::string func) {
+  // Handle function ID first if it exists
+  std::string ret = "0x";
+  if (!func.empty()) {
+    Error funcErr;
+    if (!checkType("function", {func}, funcErr)) {
+      err.setCode(funcErr.getCode()); return "";
+    }
+    ret += packFunction(func);
+  }
   uint64_t nextOffset = 32 * args.size();
   std::string arrToAppend = "";
 
   for (json arg : args) {
-    // TODO: error handling for "type"/"t" and "value"/"v"
-    std::string type = (arg.contains("t") ? arg["t"] : arg["type"]);
-    json value = (arg.contains("v") ? arg["v"] : arg["value"]);
+    // Get type and value, and check if both are valid
+    std::string type;
+    json value;
+    Error argErr;
+    if (
+      (arg.contains("type") && arg.contains("value")) ||
+      (arg.contains("t") && arg.contains("v"))
+    ) {
+      type = (arg.contains("t") ? arg["t"] : arg["type"]);
+      value = (arg.contains("v") ? arg["v"] : arg["value"]);
+    } else {
+      err.setCode(32); return "";  // Solidity Missing Type Or Value
+    }
+    if (!checkType(type, value, argErr)) {
+      err.setCode(argErr.getCode()); return "";
+    }
 
+    // Parse value according to type
     if (type.find("[") != std::string::npos) {  // Type is array
       std::string arrType = type.substr(0, type.find("["));
       ret += Utils::padLeft(Utils::toHex(nextOffset), 64);  // Array offset
@@ -180,34 +240,27 @@ std::string Solidity::packMulti(json args, std::string func) {
         nextOffset += 64 * arg.size();  // In chars
       }
       if (arrType == "uint256") {
-        // TODO: error handling
         arrToAppend += packUintArray(value.get<std::vector<std::string>>()).substr(64);
       } else if (arrType == "address") {
-        // TODO: error handling
         arrToAppend += packAddressArray(value.get<std::vector<std::string>>()).substr(64);
       } else if (arrType == "bool") {
-        // TODO: error handling
         arrToAppend += packBoolArray(value.get<std::vector<std::string>>()).substr(64);
       } else if (arrType == "bytes" || arrType == "string") {
-        // TODO: error handling
         std::string packed = (arrType == "bytes")
           ? packBytesArray(value.get<std::vector<std::string>>()).substr(64)
           : packStringArray(value.get<std::vector<std::string>>()).substr(64);
-        nextOffset += 32 * (packed.length() / 64); // In bytes
+        nextOffset += 32 * (packed.length() / 64); // Offset in bytes, packed in chars
         arrToAppend += packed;
       }
     } else {  // Type is not array
+      std::string val = value.get<std::string>();
       if (type == "uint256") {
-        // TODO: error handling
-        ret += packUint(value.get<std::string>());
+        ret += packUint(val);
       } else if (type == "address") {
-        // TODO: error handling
-        ret += packAddress(value.get<std::string>());
+        ret += packAddress(val);
       } else if (type == "bool") {
-        // TODO: error handling
-        ret += packBool(value.get<std::string>());
+        ret += packBool(val);
       } else if (type == "bytes" || type == "string") {
-        // TODO: error handling
         ret += Utils::padLeft(Utils::toHex(nextOffset), 64);
         std::string packed = (type == "bytes")
           ? packBytes(value).substr(64) : packString(value).substr(64);
@@ -217,6 +270,7 @@ std::string Solidity::packMulti(json args, std::string func) {
     }
   }
 
+  err.setCode(0);
   ret += arrToAppend;
   return ret;
 }

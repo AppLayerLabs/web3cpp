@@ -97,14 +97,6 @@ namespace Utils {
   boost::filesystem::path getDefaultDataDir();
 
   /**
-   * Helper functions for soliditySha3() and soliditySha3Raw().
-   * All of them return NULL in case of error.
-   */
-  std::string _solidityPack(std::string type, json value, Error &err);
-  std::string _solidityPackArray(std::string type, json value, Error &err);
-  std::string _solidityProcess(json param, Error &err);
-
-  /**
    * Rounds up a number to its nearest multiple.
    * e.g. roundUp(65,64) = 128
    * Adapted from https://stackoverflow.com/a/3407254
@@ -143,17 +135,9 @@ namespace Utils {
    * This means arguments will be ABI converted and tightly packed before being hashed.
    * soliditySha3Raw() returns the hash value instead of empty if an empty
    * string is passed, for example.
-   * Check Solidity.h for more details.
-   * Does NOT autodetect types. Each parameter has to be a JSON object
-   * inside "params", with "type" and "value" (or "t" and "v").
-   * Example:
-   *   json j = {
-   *     { {"type", "string"}, {"value", "234"} },
-   *     { {"t", "uint256"}, {"v", "234"} },
-   *     { {"t", "bool"}, {"v", true} }
-   *   };
+   * Check Solidity.h for more details on formatting.
+   * Does NOT autodetect types.
    * Returns NULL in case of error.
-   * TODO: redo this using Solidity class
    */
   std::string soliditySha3(json params, Error &err);
   std::string soliditySha3Raw(json params, Error &err);

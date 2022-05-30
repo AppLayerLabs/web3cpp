@@ -34,148 +34,6 @@ boost::filesystem::path Utils::getDefaultDataDir() {
   #endif
 }
 
-std::string Utils::_solidityPack(std::string type, json value, Error &err) {
-  // Non-numbered types
-  if (type == "uint") {
-    BigNumber bn(value.get<std::string>());
-    return padLeft(toHex(bn), 64);
-  }
-  if (type == "string") {
-    err.setCode(0);
-    return padRight(utf8ToHex(value.get<std::string>()), 64);
-  }
-  if (type == "bool") {
-    err.setCode(0);
-    return (value.get<bool>() ? padLeft("01", 64) : padLeft("00", 64));
-  }
-  if (type == "address") {
-    std::string addStr = value.get<std::string>();
-    if (!isAddress(addStr)) {
-      err.setCode(29);
-      std::cout << addStr << " is not a valid address, or the checksum is invalid" << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    return padLeft(toLowercaseAddress(addStr), 64);
-  }
-  if (type == "bytes") {
-    std::string bytesStr = stripHexPrefix(value.get<std::string>());
-    if (bytesStr.length() % 2 != 0) {
-      err.setCode(28);
-      std::cout << "Invalid bytes character length: " << bytesStr.length() << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    return padRight(bytesStr, 64);
-  }
-
-  int size = 0;
-  std::regex sizeRegex = std::regex("\\d+$");
-  std::smatch sizeMatch;
-  if (std::regex_search(type, sizeMatch, sizeRegex)) {
-    std::string matchRes = sizeMatch.str(0);
-    type = type.substr(0, type.find(matchRes));
-    size = std::stoi(matchRes);
-  }
-
-  // Numbered types
-  if (type == "uint" && size > 0) {
-    if (size < 8 || size > 256 || size % 8 != 0) {
-      err.setCode(31);
-      std::cout << "Invalid uint" << size << " for " << value << std::endl;
-      return NULL;
-    }
-    if (value.get<std::string>().find("-") != std::string::npos) {
-      err.setCode(33);
-      std::cout << "Supplied uint " << value.get<std::string>() << " is negative" << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    BigNumber num(value.get<std::string>());
-    return padLeft(toHex(num), 64);
-  }
-  if (type == "bytes" && size > 0) {
-    std::string bytesStr = stripHexPrefix(value.get<std::string>());
-    if (size > 32) {
-      err.setCode(30);
-      std::cout << "Invalid bytes" << size << " for " << bytesStr << std::endl;
-      return NULL;
-    }
-    err.setCode(0);
-    return padRight(bytesStr, 64);
-  }
-  err.setCode(34);
-  std::cout << "Unsupported or invalid type: " << type << std::endl;
-  return NULL;
-}
-
-std::string Utils::_solidityPackArray(std::string type, json value, Error &err) {
-  // Check if array is dynamic (size = 0) or fixed (size > 0)
-  int size = 0;
-  std::regex sizeRegex = std::regex("\\[(\\d+)\\]$");
-  std::smatch sizeMatch;
-  if (std::regex_search(type, sizeMatch, sizeRegex)) {
-    std::string matchRes = sizeMatch.str(0);
-    size = std::stoi(matchRes);
-  }
-  if (size > 0 && size != value.size()) {
-    err.setCode(36);
-    std::cout << type << " doesn't match the given array " << value.dump() << std::endl;
-    return NULL;
-  }
-
-  std::string ret;
-  for (auto& val : value) {
-    Error packErr;
-    std::string valType = type.substr(0, type.find("["));
-    std::string packedArg = stripHexPrefix(_solidityPack(valType, val, packErr));
-    if (packErr.getCode() != 0) {
-      err.setCode(packErr.getCode());
-      return NULL;
-    } else {
-      if (valType == "uint" || valType == "bool" || valType == "address") {
-        ret += padLeft(packedArg, 64);
-      } else if (valType == "string" || valType == "bytes") {
-        ret += padRight(packedArg, 64);
-      }
-      std::cout << ret << std::endl << std::endl;
-    }
-  }
-  return ret;
-}
-
-std::string Utils::_solidityProcess(json param, Error &err) {
-  std::string type;
-  json value;
-
-  // Get the type and value of param
-  if (
-    (param.contains("type") && param.contains("value")) ||
-    (param.contains("t") && param.contains("v"))
-  ) {
-    type = (param.contains("t") ? param["t"] : param["type"]);
-    value = (param.contains("v") ? param["v"] : param["value"]);
-  } else {
-    err.setCode(35);
-    std::cout << "Missing param type and/or value" << std::endl;
-    return NULL;
-  }
-
-  // Encode param value into Solidity format
-  std::regex arrRegex = std::regex("\\[(\\d+)?\\]");
-  std::smatch arrMatch;
-  Error packErr;
-  std::string hexArg = (std::regex_search(type, arrMatch, arrRegex))
-    ? stripHexPrefix(_solidityPackArray(type, value, packErr))
-    : stripHexPrefix(_solidityPack(type, value, packErr));
-  if (packErr.getCode() != 0) {
-    err.setCode(packErr.getCode());
-    return NULL;
-  }
-  err.setCode(0);
-  return hexArg;
-}
-
 uint64_t Utils::roundUp(uint64_t num, uint64_t mul) {
   return (mul != 0 && num % mul != 0) ? (num + mul - (num % mul)) : num;
 }
@@ -215,35 +73,13 @@ std::string Utils::sha3Raw(std::string string, bool isNibble) {
 }
 
 std::string Utils::soliditySha3(json params, Error &err) {
-  std::string ret;
-  for (auto& param : params) {
-    Error paramErr;
-    std::string paramRet = _solidityProcess(param, paramErr);
-    if (paramErr.getCode() != 0) {
-      err.setCode(paramErr.getCode());
-      return NULL;
-    } else {
-      ret += paramRet;
-    }
-  }
-  err.setCode(0);
-  return "0x" + Utils::sha3(ret, true);
+  std::string ret = Utils::stripHexPrefix(Solidity::packMulti(params, err));
+  return ((err.getCode() == 0) ? "0x" + Utils::sha3(ret, true) : NULL);
 }
 
 std::string Utils::soliditySha3Raw(json params, Error &err) {
-  std::string ret;
-  for (auto& param : params) {
-    Error paramErr;
-    std::string paramRet = _solidityProcess(param, paramErr);
-    if (paramErr.getCode() != 0) {
-      err.setCode(paramErr.getCode());
-      return NULL;
-    } else {
-      ret += paramRet;
-    }
-  }
-  err.setCode(0);
-  return "0x" + Utils::sha3Raw(ret, true);
+  std::string ret = Utils::stripHexPrefix(Solidity::packMulti(params, err));
+  return ((err.getCode() == 0) ? "0x" + Utils::sha3Raw(ret, true) : NULL);
 }
 
 bool Utils::isHex(std::string hex) {
