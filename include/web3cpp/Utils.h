@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <mutex>
@@ -102,6 +103,13 @@ namespace Utils {
   std::string _solidityPack(std::string type, json value, Error &err);
   std::string _solidityPackArray(std::string type, json value, Error &err);
   std::string _solidityProcess(json param, Error &err);
+
+  /**
+   * Rounds up a number to its nearest multiple.
+   * e.g. roundUp(65,64) = 128
+   * Adapted from https://stackoverflow.com/a/3407254
+   */
+  uint64_t roundUp(uint64_t num, uint64_t mul);
 
   /**
    * Generates a cryptographically strong pseudo-random HEX string

@@ -19,17 +19,13 @@ std::string Solidity::packAddress(std::string add) {
 }
 
 std::string Solidity::packBool(bool b) {
-  return Utils::padLeft(((b) ? "01" : "00"), 64);
+  return Utils::padLeft(((b) ? "1" : "0"), 64);
 }
 
 std::string Solidity::packBool(std::string b) {
-  std::string boolHex = "";
-  if (b == "1" || b == "true") {
-    boolHex = "01";
-  } else if (b == "0" || b == "false") {
-    boolHex = "00";
-  }
-  return Utils::padLeft(boolHex, 64);
+  if (b == "true") b = "1";
+  else if (b == "false") b = "0";
+  return Utils::padLeft(b, 64);
 }
 
 std::string Solidity::packBytes(std::string hex) {
@@ -91,7 +87,7 @@ std::string Solidity::packBoolArray(std::vector<bool> bV) {
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
   arrSize = Utils::padLeft(Utils::toHex(bV.size()), 64);
   for (bool b : bV) {
-    arrData += Utils::padLeft(((b) ? "01" : "00"), 64);
+    arrData += Utils::padLeft(((b) ? "1" : "0"), 64);
   }
   return arrOffset + arrSize + arrData;
 }
@@ -101,11 +97,9 @@ std::string Solidity::packBoolArray(std::vector<std::string> bV) {
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
   arrSize = Utils::padLeft(Utils::toHex(bV.size()), 64);
   for (std::string b : bV) {
-    if (b == "1" || b == "true") {
-      arrData += Utils::padLeft("01", 64);
-    } else if (b == "0" || b == "false") {
-      arrData += Utils::padLeft("00", 64);
-    }
+    if (b == "true") b = "1";
+    else if (b == "false") b = "0";
+    arrData+= Utils::padLeft(b, 64);
   }
   return arrOffset + arrSize + arrData;
 }
@@ -164,6 +158,66 @@ std::string Solidity::packStringArray(std::vector<std::string> strV) {
   for (int i = 0; i < strV.size(); i++) {
     ret += strLength[i] + strData[i];
   }
+  return ret;
+}
+
+std::string Solidity::packMulti(json args, std::string func) {
+  std::string ret = "0x" + (
+    (!func.empty()) ? dev::toHex(dev::sha3(func)).substr(0, 8) : ""
+  );
+  uint64_t nextOffset = 32 * args.size();
+  std::string arrToAppend = "";
+
+  for (json arg : args) {
+    // TODO: error handling for "type"/"t" and "value"/"v"
+    std::string type = (arg.contains("t") ? arg["t"] : arg["type"]);
+    json value = (arg.contains("v") ? arg["v"] : arg["value"]);
+
+    if (type.find("[") != std::string::npos) {  // Type is array
+      std::string arrType = type.substr(0, type.find("["));
+      ret += Utils::padLeft(Utils::toHex(nextOffset), 64);  // Array offset
+      if (arrType != "bytes" && arrType != "string") {
+        nextOffset += 64 * arg.size();  // In chars
+      }
+      if (arrType == "uint256") {
+        // TODO: error handling
+        arrToAppend += packUintArray(value.get<std::vector<std::string>>()).substr(64);
+      } else if (arrType == "address") {
+        // TODO: error handling
+        arrToAppend += packAddressArray(value.get<std::vector<std::string>>()).substr(64);
+      } else if (arrType == "bool") {
+        // TODO: error handling
+        arrToAppend += packBoolArray(value.get<std::vector<std::string>>()).substr(64);
+      } else if (arrType == "bytes" || arrType == "string") {
+        // TODO: error handling
+        std::string packed = (arrType == "bytes")
+          ? packBytesArray(value.get<std::vector<std::string>>()).substr(64)
+          : packStringArray(value.get<std::vector<std::string>>()).substr(64);
+        nextOffset += 32 * (packed.length() / 64); // In bytes
+        arrToAppend += packed;
+      }
+    } else {  // Type is not array
+      if (type == "uint256") {
+        // TODO: error handling
+        ret += packUint(value.get<std::string>());
+      } else if (type == "address") {
+        // TODO: error handling
+        ret += packAddress(value.get<std::string>());
+      } else if (type == "bool") {
+        // TODO: error handling
+        ret += packBool(value.get<std::string>());
+      } else if (type == "bytes" || type == "string") {
+        // TODO: error handling
+        ret += Utils::padLeft(Utils::toHex(nextOffset), 64);
+        std::string packed = (type == "bytes")
+          ? packBytes(value).substr(64) : packString(value).substr(64);
+        nextOffset += 32 * (packed.length() / 64);
+        arrToAppend += packed;
+      }
+    }
+  }
+
+  ret += arrToAppend;
   return ret;
 }
 

@@ -176,6 +176,10 @@ std::string Utils::_solidityProcess(json param, Error &err) {
   return hexArg;
 }
 
+uint64_t Utils::roundUp(uint64_t num, uint64_t mul) {
+  return (mul != 0 && num % mul != 0) ? (num + mul - (num % mul)) : num;
+}
+
 std::string Utils::randomHex(unsigned int size, bool prefixed) {
   unsigned char saltBytes[size];
   RAND_bytes(saltBytes, sizeof(saltBytes));
