@@ -139,7 +139,9 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
           if (!Utils::isAddress(item)) {
             error.setCode(21); return ""; // ABI Invalid Address Array
           }
-          arrToAppend += Utils::padLeft(item, 64);
+          arrToAppend += Utils::padLeft(
+            Utils::stripHexPrefix(Utils::toLowercaseAddress(item))
+          , 64);
         }
 
         // boolean[]
@@ -312,7 +314,9 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
         if (!Utils::isAddress(argument)) {
           error.setCode(26); return ""; // ABI Invalid Address Array
         }
-        ret += Utils::padLeft(argument, 64);
+        ret += Utils::padLeft(
+          Utils::stripHexPrefix(Utils::toLowercaseAddress(argument))
+        , 64);
       }
       // Boolean
       if (argType == Types::boolean) {
