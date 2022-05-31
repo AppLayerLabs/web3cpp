@@ -76,7 +76,28 @@ class Tests {
      * and output the details to the log file.
      */
 
-    // TODO: Solidity tests
+    // ==============================================================
+    // SOLIDITY
+    // ==============================================================
+
+    // Test for checking the validity of each supported type.
+    void testTypeChecks();
+
+    // Tests for packing each supported type individually.
+    void testFunction();
+    void testUint();
+    void testAddress();
+    void testBool();
+    void testBytes();
+    void testString();
+    void testUintArray();
+    void testAddressArray();
+    void testBoolArray();
+    void testBytesArray();
+    void testStringArray();
+
+    // Test for encoding a complete ABI.
+    void testMulti();
 
     // ==============================================================
     // UTILS
@@ -142,7 +163,10 @@ class Tests {
     // ==============================================================
 
     // Test for proper Contract loading and ABI manipulation.
-    void loadAndTestContract();
+    // "Legacy" tests the older method, "Normal" tests the newer one.
+    // Check Contract.h for more details.
+    void loadAndTestContractLegacy();
+    void loadAndTestContractNormal();
 };
 
 #endif // TESTS_H

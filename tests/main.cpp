@@ -5,13 +5,14 @@ int main(int argc, char* argv[]) {
   std::vector<std::string> items;
   if (argc == 1) {
     std::cout << "Usage: " << argv[0] << " all|[CLASS]..." << std::endl
-      << "Available classes: utils wallet contract" << std::endl;
+      << "Available classes: solidity utils wallet contract" << std::endl;
     return 0;
   } else if (argc == 2 && strcmp(argv[1], "all") == 0) {
-    items = {"utils", "wallet", "contract"};
+    items = {"solidity", "utils", "wallet", "contract"};
   } else {
     for (int i = 1; i < argc; i++) {
       if (
+        strcmp(argv[i], "solidity") == 0 ||
         strcmp(argv[i], "utils") == 0 ||
         strcmp(argv[i], "wallet") == 0 ||
         strcmp(argv[i], "contract") == 0
@@ -22,7 +23,7 @@ int main(int argc, char* argv[]) {
   }
   if (items.empty()) {
     std::cout << "No classes selected." << std::endl
-      << "Available classes: utils wallet contract" << std::endl;
+      << "Available classes: solidity utils wallet contract" << std::endl;
     return 0;
   }
 
@@ -31,7 +32,22 @@ int main(int argc, char* argv[]) {
   Tests t(password);
   for (std::string item : items) {
     std::cout << "----------------------------------------" << std::endl;
-    if (item == "utils") {
+    if (item == "solidity") {
+      std::cout << "* Testing functions from Solidity" << std::endl;
+      t.testTypeChecks();
+      t.testFunction();
+      t.testUint();
+      t.testAddress();
+      t.testBool();
+      t.testBytes();
+      t.testString();
+      t.testUintArray();
+      t.testAddressArray();
+      t.testBoolArray();
+      t.testBytesArray();
+      t.testStringArray();
+      t.testMulti();
+    } else if (item == "utils") {
       std::cout << "* Testing functions from Utils" << std::endl;
       t.testRandomHexes();
       t.testBigNumbers();
@@ -53,7 +69,8 @@ int main(int argc, char* argv[]) {
       t.generateAccount();
     } else if (item == "contract") {
       std::cout << "* Testing functions from Contract" << std::endl;
-      t.loadAndTestContract();
+      t.loadAndTestContractLegacy();
+      t.loadAndTestContractNormal();
     }
     std::cout << "----------------------------------------" << std::endl;
   }
