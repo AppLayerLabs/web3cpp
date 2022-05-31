@@ -102,16 +102,15 @@ void Tests::testSHA3() {
   << std::endl << std::endl;
 }
 
-/*
 void Tests::testSoliditySHA3() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
   json j1A = { {"type", "uint256"}, {"value", "129831751235123"} };
   json j1B = { {"type", "address"}, {"value", "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8"} };
-  json j1C = { {"type", "bool"}, {"value", true} };
+  json j1C = { {"type", "bool"}, {"value", "true"} };
   json j1D = { {"type", "bytes"}, {"value", "0xaaaa"} };
   json j1E = { {"type", "string"}, {"value", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget porttitor tortor, et tincidunt nibh. Aenean erat quam, maximus id gravida sit amet, rhoncus sed nulla. Curabitur maximus tellus diam, vel vulputate sapien maximus vitae. Duis consectetur, felis at efficitur consectetur, tortor nisl bibendum mauris, eget venenatis augue justo et orciSimple "} };
   json j2A = { {"type", "uint256[]"}, {"value", {
-    // ...
+    "56982562956398", "32456239756329", "432985637983"
   }}};
   json j2B = { {"type", "address[]"}, {"value", {
     "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8",
@@ -119,7 +118,7 @@ void Tests::testSoliditySHA3() {
     "0xc4ea73d428ab6589c36905d0f0b01f3051740ff8"
   }}};
   json j2C = { {"type", "bool[]"}, {"value", {
-    // ...
+    "true", "false", "0", "1"
   }}};
   json j2D = { {"type", "bytes[]"}, {"value", {
     "0xaaa",
@@ -135,49 +134,44 @@ void Tests::testSoliditySHA3() {
   std::string r1A = "0x23ca82fd08978ec8bdedfb49a8c82cc8bd1f2f1e6734f39e7d54bfe13dc36c25";
   std::string r1B = "0x512f675e26efc88a1dba5491171ed07ca7bdec44d0822a65eeeb06b3f8c636d0";
   std::string r1C = "0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6";
-  std::string r1D = "0xd69a7fe744d274f77aadbee2739de42fcd2fa333337de675727937e3cad5bb77";
-  std::string r1E = "0xe45cef14cb78752441492c1a0d7a89fe7a643fbc8d9a204d14a5526870a2c012";
-  std::string r2A = "0x";
-  std::string r2B = "0xb936902b161c1344a2b5a9b9e87a0ac807ecc569844403cf41fd78d9a01f5451";
-  std::string r2C = "0x";
-  std::string r2D = "0xc2223977caa88504241d4197cdb9e0ebf4ea498463d0fd6e51d80fb26425c380";
-  std::string r2E = "0x33cdc4b381534e45e8fdc57c990d35d3143af04501fcfe1178d3dbf9c606f2de";
+  std::string r1D = "0x785afe2f11b7ad91f27a14f605ff28694ce75d51df9fa82d5a178448893ee6cb";
+  std::string r1E = "0x5be763b4d237e94da1a94efdeb0d27d702ec7d90d7226307c3961dc9168796dd";
+  std::string r2A = "0x2b3bdb7963d9b3933a75696003efcfd204e9fed6ad8ac5fb5f1d0fc30f581e14";
+  std::string r2B = "0xce8b8dd445113f4f9c65f28b9b7c283c4a9e509210b167af48bb84afa92b90e7";
+  std::string r2C = "0xf546bb86c6f0591cc041d7b8f9edfc99f3e78d2bee777276081f2061d5970909";
+  std::string r2D = "0x0dc9e533a18a0ab469b42a579e67be5d6753a2a22cecc68fc383ff90d40ba15e";
+  std::string r2E = "0xaf4852f412ee1759755a9ab487583bc13ba55368dcee85053dadc7b1a62e9a8c";
 
-  Error e1A, e1B, e1C, e2, e3, e4A, e4B, e4C, e5A, e5B, e6, e7;
+  Error e1A, e1B, e1C, e1D, e1E, e2A, e2B, e2C, e2D, e2E;
   std::string h1A = Utils::soliditySha3(j1A, e1A);
   std::string h1B = Utils::soliditySha3(j1B, e1B);
   std::string h1C = Utils::soliditySha3(j1C, e1C);
-  std::string h2 = Utils::soliditySha3(j2, e2);
-  std::string h3 = Utils::soliditySha3(j3, e3);
-  std::string h4A = Utils::soliditySha3(j4A, e4A);
-  std::string h4B = Utils::soliditySha3(j4B, e4B);
-  std::string h4C = Utils::soliditySha3(j4C, e4C);
-  std::string h5A = Utils::soliditySha3(j5A, e5A);
-  std::string h5B = Utils::soliditySha3(j5B, e5B);
-  std::string h6 = Utils::soliditySha3(j6, e6);
-  std::string h7 = Utils::soliditySha3(j7, e7);
+  std::string h1D = Utils::soliditySha3(j1D, e1D);
+  std::string h1E = Utils::soliditySha3(j1E, e1E);
+  std::string h2A = Utils::soliditySha3(j2A, e2A);
+  std::string h2B = Utils::soliditySha3(j2B, e2B);
+  std::string h2C = Utils::soliditySha3(j2C, e2C);
+  std::string h2D = Utils::soliditySha3(j2D, e2D);
+  std::string h2E = Utils::soliditySha3(j2E, e2E);
 
   bool errOk = true;
   if (e1A.getCode() != 0) { errOk = false; h1A = e1A.what(); }
   if (e1B.getCode() != 0) { errOk = false; h1B = e1B.what(); }
   if (e1C.getCode() != 0) { errOk = false; h1C = e1C.what(); }
-  if (e2.getCode() != 0) { errOk = false; h2 = e2.what(); }
-  if (e3.getCode() != 0) { errOk = false; h3 = e3.what(); }
-  if (e4A.getCode() != 0) { errOk = false; h4A = e4A.what(); }
-  if (e4B.getCode() != 0) { errOk = false; h4B = e4B.what(); }
-  if (e4C.getCode() != 0) { errOk = false; h4C = e4C.what(); }
-  if (e5A.getCode() != 0) { errOk = false; h5A = e5A.what(); }
-  if (e5B.getCode() != 0) { errOk = false; h5B = e5B.what(); }
-  if (e6.getCode() != 0) { errOk = false; h6 = e6.what(); }
-  if (e7.getCode() != 0) { errOk = false; h7 = e7.what(); }
+  if (e1D.getCode() != 0) { errOk = false; h1D = e1D.what(); }
+  if (e1E.getCode() != 0) { errOk = false; h1E = e1E.what(); }
+  if (e2A.getCode() != 0) { errOk = false; h2A = e2A.what(); }
+  if (e2B.getCode() != 0) { errOk = false; h2B = e2B.what(); }
+  if (e2C.getCode() != 0) { errOk = false; h2C = e2C.what(); }
+  if (e2D.getCode() != 0) { errOk = false; h2D = e2D.what(); }
+  if (e2E.getCode() != 0) { errOk = false; h2E = e2E.what(); }
   if (!errOk) {
     failed("Couldn't hash one or more inputs");
   } else {
-    int passTotal = 12;
+    int passTotal = 10;
     int passCount = (
-      (h1A == r1) + (h1B == r1) + (h1C == r1) + (h2 == r2) + (h3 == r3) +
-      (h4A == r4) + (h4B == r4) + (h4C == r4) + (h5A == r5) + (h5B == r5) +
-      (h6 == r6) + (h7 == r7)
+      (h1A == r1A) + (h1B == r1B) + (h1C == r1C) + (h1D == r1D) + (h1E == r1E) +
+      (h2A == r2A) + (h2B == r2B) + (h2C == r2C) + (h2D == r2D) + (h2E == r2E)
     );
     if (passCount != passTotal) {
       failed("One or more hashes don't match");
@@ -192,52 +186,43 @@ void Tests::testSoliditySHA3() {
     << "* 1A: " << j1A << std::endl
     << "* 1B: " << j1B << std::endl
     << "* 1C: " << j1C << std::endl
-    << "* 2: " << j2 << std::endl
-    << "* 3: " << j3 << std::endl
-    << "* 4A: " << j4A << std::endl
-    << "* 4B: " << j4B << std::endl
-    << "* 4C: " << j4C << std::endl
-    << "* 5A: " << j5A << std::endl
-    << "* 5B: " << j5B << std::endl
-    << "* 6: " << j6 << std::endl
-    << "* 7: " << j7 << std::endl
+    << "* 1D: " << j1D << std::endl
+    << "* 1E: " << j1E << std::endl
+    << "* 2A: " << j2A << std::endl
+    << "* 2B: " << j2B << std::endl
+    << "* 2C: " << j2C << std::endl
+    << "* 2D: " << j2D << std::endl
+    << "* 2E: " << j2E << std::endl
     << "* Expected outputs:" << std::endl
-    << "* 1A: " << r1 << std::endl
-    << "* 1B: " << r1 << std::endl
-    << "* 1C: " << r1 << std::endl
-    << "* 2: " << r2 << std::endl
-    << "* 3: " << r3 << std::endl
-    << "* 4A: " << r4 << std::endl
-    << "* 4B: " << r4 << std::endl
-    << "* 4C: " << r4 << std::endl
-    << "* 5A: " << r5 << std::endl
-    << "* 5B: " << r5 << std::endl
-    << "* 6: " << r6 << std::endl
-    << "* 7: " << r7 << std::endl
+    << "* 1A: " << r1A << std::endl
+    << "* 1B: " << r1B << std::endl
+    << "* 1C: " << r1C << std::endl
+    << "* 1D: " << r1D << std::endl
+    << "* 1E: " << r1E << std::endl
+    << "* 2A: " << r2A << std::endl
+    << "* 2B: " << r2B << std::endl
+    << "* 2C: " << r2C << std::endl
+    << "* 2D: " << r2D << std::endl
+    << "* 2E: " << r2E << std::endl
     << "* Actual outputs:" << std::endl
     << "* 1A: " << h1A << std::endl
     << "* 1B: " << h1B << std::endl
     << "* 1C: " << h1C << std::endl
-    << "* 2: " << h2 << std::endl
-    << "* 3: " << h3 << std::endl
-    << "* 4A: " << h4A << std::endl
-    << "* 4B: " << h4B << std::endl
-    << "* 4C: " << h4C << std::endl
-    << "* 5A: " << h5A << std::endl
-    << "* 5B: " << h5B << std::endl
-    << "* 6: " << h6 << std::endl
-    << "* 7: " << h7 << std::endl
+    << "* 1D: " << h1D << std::endl
+    << "* 1E: " << h1E << std::endl
+    << "* 2A: " << h2A << std::endl
+    << "* 2B: " << h2B << std::endl
+    << "* 2C: " << h2C << std::endl
+    << "* 2D: " << h2D << std::endl
+    << "* 2E: " << h2E << std::endl
     << "* Test result: " << ((curPass) ? "PASSED" : "FAILED - " + curReason)
   << std::endl << std::endl;
 }
-*/
 
 void Tests::testSoliditySHA3Raw() {
   std::cout << "* Running test: " << __func__ << "... " << std::flush;
-  json jZero = {
-    { {"type", "string"}, {"value", ""} }
-  };
-  std::string zeroHash = "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
+  json jZero = { {"type", "string"}, {"value", ""} };
+  std::string zeroHash = "0x5380ea0b298eb1aa6da7e38c8e5d4fa6839b22f7d6bf259874a6cf7d25cce827";
 
   Error e;
   std::string zeroHashRes = Utils::soliditySha3Raw(jZero, e);

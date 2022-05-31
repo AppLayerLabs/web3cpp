@@ -74,12 +74,12 @@ std::string Utils::sha3Raw(std::string string, bool isNibble) {
 
 std::string Utils::soliditySha3(json params, Error &err) {
   std::string ret = Utils::stripHexPrefix(Solidity::packMulti(params, err));
-  return ((err.getCode() == 0) ? "0x" + Utils::sha3(ret, true) : NULL);
+  return ((err.getCode() == 0) ? "0x" + Utils::sha3(ret, true) : "");
 }
 
 std::string Utils::soliditySha3Raw(json params, Error &err) {
   std::string ret = Utils::stripHexPrefix(Solidity::packMulti(params, err));
-  return ((err.getCode() == 0) ? "0x" + Utils::sha3Raw(ret, true) : NULL);
+  return ((err.getCode() == 0) ? "0x" + Utils::sha3Raw(ret, true) : "");
 }
 
 bool Utils::isHex(std::string hex) {

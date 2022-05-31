@@ -93,7 +93,7 @@ bool Solidity::checkType(std::string type, json value, Error &err) {
     }
     err.setCode(0); return true;
   }
-  err.setCode(31); return false;  // Solidity Unsupported Or Invalid Type
+  err.setCode(31); return false;  // ABI Unsupported Or Invalid Type
 }
 
 std::string Solidity::packFunction(std::string func) {
@@ -242,58 +242,102 @@ std::string Solidity::packMulti(json args, Error &err, std::string func) {
   uint64_t nextOffset = 32 * args.size();
   std::string arrToAppend = "";
 
-  for (json arg : args) {
+  // Treat singular and multiple types differently
+  // (one is a single object, the other is an array)
+  if (!args.is_array()) {
     // Get type and value, and check if both are valid
     std::string type;
     json value;
     Error argErr;
     if (
-      (arg.contains("type") && arg.contains("value")) ||
-      (arg.contains("t") && arg.contains("v"))
+      (args.contains("type") && args.contains("value")) ||
+      (args.contains("t") && args.contains("v"))
     ) {
-      type = (arg.contains("t") ? arg["t"] : arg["type"]);
-      value = (arg.contains("v") ? arg["v"] : arg["value"]);
+      type = (args.contains("t") ? args["t"] : args["type"]);
+      value = (args.contains("v") ? args["v"] : args["value"]);
     } else {
-      err.setCode(32); return "";  // Solidity Missing Type Or Value
+      err.setCode(32); return "";  // ABI Missing Type Or Value
     }
     if (!checkType(type, value, argErr)) {
       err.setCode(argErr.getCode()); return "";
     }
 
     // Parse value according to type
-    if (type.find("[") != std::string::npos) {  // Type is array
-      std::string arrType = type.substr(0, type.find("["));
-      ret += Utils::padLeft(Utils::toHex(nextOffset), 64);  // Array offset
-      if (arrType != "bytes" && arrType != "string") {
-        nextOffset += 64 * arg.size();  // In chars
+    if (type == "uint256[]") {
+      ret += packUintArray(value.get<std::vector<std::string>>());
+    } else if (type == "address[]") {
+      ret += packAddressArray(value.get<std::vector<std::string>>());
+    } else if (type == "bool[]") {
+      ret += packBoolArray(value.get<std::vector<std::string>>());
+    } else if (type == "bytes[]") {
+      ret += packBytesArray(value.get<std::vector<std::string>>());
+    } else if (type == "string[]") {
+      ret += packStringArray(value.get<std::vector<std::string>>());
+    } else if (type == "uint256") {
+      ret += packUint(value.get<std::string>());
+    } else if (type == "address") {
+      ret += packAddress(value.get<std::string>());
+    } else if (type == "bool") {
+      ret += packBool(value.get<std::string>());
+    } else if (type == "bytes") {
+      ret += packBytes(value.get<std::string>());
+    } else if (type == "string") {
+      ret += packString(value.get<std::string>());
+    }
+  } else {
+    for (json arg : args) {
+      // Get type and value, and check if both are valid
+      std::string type;
+      json value;
+      Error argErr;
+      if (
+        (arg.contains("type") && arg.contains("value")) ||
+        (arg.contains("t") && arg.contains("v"))
+      ) {
+        type = (arg.contains("t") ? arg["t"] : arg["type"]);
+        value = (arg.contains("v") ? arg["v"] : arg["value"]);
+      } else {
+        err.setCode(32); return "";  // ABI Missing Type Or Value
       }
-      if (arrType == "uint256") {
-        arrToAppend += packUintArray(value.get<std::vector<std::string>>()).substr(64);
-      } else if (arrType == "address") {
-        arrToAppend += packAddressArray(value.get<std::vector<std::string>>()).substr(64);
-      } else if (arrType == "bool") {
-        arrToAppend += packBoolArray(value.get<std::vector<std::string>>()).substr(64);
-      } else if (arrType == "bytes" || arrType == "string") {
-        std::string packed = (arrType == "bytes")
-          ? packBytesArray(value.get<std::vector<std::string>>()).substr(64)
-          : packStringArray(value.get<std::vector<std::string>>()).substr(64);
-        nextOffset += 32 * (packed.length() / 64); // Offset in bytes, packed in chars
-        arrToAppend += packed;
+      if (!checkType(type, value, argErr)) {
+        err.setCode(argErr.getCode()); return "";
       }
-    } else {  // Type is not array
-      std::string val = value.get<std::string>();
-      if (type == "uint256") {
-        ret += packUint(val);
-      } else if (type == "address") {
-        ret += packAddress(val);
-      } else if (type == "bool") {
-        ret += packBool(val);
-      } else if (type == "bytes" || type == "string") {
-        ret += Utils::padLeft(Utils::toHex(nextOffset), 64);
-        std::string packed = (type == "bytes")
-          ? packBytes(value).substr(64) : packString(value).substr(64);
-        nextOffset += 32 * (packed.length() / 64);
-        arrToAppend += packed;
+
+      // Parse value according to type
+      if (type.find("[") != std::string::npos) {  // Type is array
+        std::string arrType = type.substr(0, type.find("["));
+        ret += Utils::padLeft(Utils::toHex(nextOffset), 64);  // Array offset
+        if (arrType != "bytes" && arrType != "string") {
+          nextOffset += 64 * arg.size();  // In chars
+        }
+        if (arrType == "uint256") {
+          arrToAppend += packUintArray(value.get<std::vector<std::string>>()).substr(64);
+        } else if (arrType == "address") {
+          arrToAppend += packAddressArray(value.get<std::vector<std::string>>()).substr(64);
+        } else if (arrType == "bool") {
+          arrToAppend += packBoolArray(value.get<std::vector<std::string>>()).substr(64);
+        } else if (arrType == "bytes" || arrType == "string") {
+          std::string packed = (arrType == "bytes")
+            ? packBytesArray(value.get<std::vector<std::string>>()).substr(64)
+            : packStringArray(value.get<std::vector<std::string>>()).substr(64);
+          nextOffset += 32 * (packed.length() / 64); // Offset in bytes, packed in chars
+          arrToAppend += packed;
+        }
+      } else {  // Type is not array
+        std::string val = value.get<std::string>();
+        if (type == "uint256") {
+          ret += packUint(val);
+        } else if (type == "address") {
+          ret += packAddress(val);
+        } else if (type == "bool") {
+          ret += packBool(val);
+        } else if (type == "bytes" || type == "string") {
+          ret += Utils::padLeft(Utils::toHex(nextOffset), 64);
+          std::string packed = (type == "bytes")
+            ? packBytes(value).substr(64) : packString(value).substr(64);
+          nextOffset += 32 * (packed.length() / 64);
+          arrToAppend += packed;
+        }
       }
     }
   }

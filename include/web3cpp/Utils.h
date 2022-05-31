@@ -137,7 +137,7 @@ namespace Utils {
    * string is passed, for example.
    * Check Solidity.h for more details on formatting.
    * Does NOT autodetect types.
-   * Returns NULL in case of error.
+   * Returns an empty string in case of error.
    */
   std::string soliditySha3(json params, Error &err);
   std::string soliditySha3Raw(json params, Error &err);
