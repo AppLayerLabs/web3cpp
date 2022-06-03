@@ -21,8 +21,7 @@ using json = nlohmann::ordered_json;
 
 // TODO:
 // - Implement promievents to deal with those functions:
-//   - once(), events(), allEvents(), getPastEvents(), Method::send()
-// - Deal with mixed params on Method::call()
+//   - once(), events(), allEvents(), getPastEvents()
 
 class Contract {
   private:
@@ -33,24 +32,9 @@ class Contract {
       bytes, bytesArr,
       string, stringArr
     };
-
-    std::string encodeABI(
-      std::vector<Types> argumentTypes, std::vector<std::string> arguments
-    );
     bool isTypeArray(Types const &type);
 
   public:
-    class Method {
-      public:
-        json arguments;  // JSON array
-        //std::future<mixed> call(json options, BigNumber defaultBlock = Eth.defaultBlock); // from, gasPrice, gas
-        //promievent send(json options); // from, gasPrice, gas, value, nonce
-        std::future<BigNumber> estimateGas(json options); // from, gas, value
-        std::string encodeABI();
-        std::future<json> createAccessList(json options, std::string block); // from, gas
-        std::future<json> createAccessList(json options, BigNumber block); // from, gas
-    };
-
     class Options {
       public:
         std::string address;  // "to" address
@@ -82,11 +66,6 @@ class Contract {
 
     // Clones the current contract instance.
     Contract clone();
-
-    // Deploys the contract to the blockchain.
-    // After successful deployment it will resolve to a new contract instance.
-    // object is a transaction object.
-    //object deploy(json options); // data, arguments
 
     // ABI constructor from arguments. Uses the custom Solidity class.
     // Pay attention to the arg order! "args, func" = this one.

@@ -24,9 +24,6 @@ class Web3 {
     Web3(Utils::Provider provider) : Web3(&provider, NULL) {}
     Web3(boost::filesystem::path path): Web3(NULL, &path) {}
 
-    // Getter for provider.
-    Utils::Provider* getProvider() { return &this->defaultProvider; }
-
     // Current version of the library.
     std::string version;
 
@@ -34,20 +31,10 @@ class Web3 {
     Eth eth;
     Wallet wallet;
 
-    // Current available providers.
-    std::vector<Utils::Provider> providers;
-
-    // When using Web3 in a compatible browser, it will be set as the current
-    // native provider by that browser, otherwise as NULL.
-    Utils::Provider givenProvider;
-
-    // Current provider, or NULL if not set.
-    Utils::Provider currentProvider;
-
-    // Changes the provider for the given module.
-    // When called on the umbrella class it will also set the provider for
-    // ALL sub modules EXCEPT bzz, which needs a separate provider at all times.
-    bool setProvider(Utils::Provider myProvider);
+    // Getter/Setter for library-wide provider.
+    // ALL sub modules that use providers should point to this one.
+    Utils::Provider* getProvider() { return &this->defaultProvider; }
+    void setProvider(Utils::Provider p) { this->defaultProvider = p; }
 };
 
 #endif  // WEB3_H

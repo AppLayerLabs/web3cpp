@@ -43,49 +43,6 @@ class Eth {
     // Can be overriden in some functions' last parameters.
     std::string defaultBlock = "latest";
 
-    // Default hardfork used for signing transactions locally.
-    std::string defaultHardfork = "fuji";
-
-    // Default chain used for signing transactions locally.
-    std::string defaultChain = "mainnet";
-
-    // Default common property for signing transactions locally.
-    // "Common" is a JSON object.
-    //Common defaultCommon;
-
-    // Amount of new blocks to wait for until first confirmation happens,
-    // otherwise issue a timeout.
-    // Used over socket-based connections.
-    unsigned int transactionBlockTimeout = 50;
-
-    // Amount of seconds to wait for "newBlockHeaders" event before
-    // falling back to polling to fetch transaction receipts.
-    // Used over socket-based connections and Contract instances.
-    unsigned int blockHeaderTimeout = 10;
-
-    // Number of blocks required until a transaction is considered confirmed.
-    unsigned int transactionConfirmationBlocks = 24;
-
-    // Number of seconds to wait for a receipt which confirms that
-    // a transaction was mined by the network.
-    // If this times out, the transaction may still be pending.
-    // Used over HTTP connections.
-    unsigned int transactionPollingTimeout = 750;
-
-    // Number of milliseconds between Web3 calls for a receipt which confirms
-    // that a transaction was mined by the network.
-    // Docs say "seconds" but default value and implementations use milliseconds.
-    unsigned int transactionPollingInterval = 1000;
-
-    // If enabled, returns the revert reason string on methods like
-    // sendTransaction() and call().
-    bool handleRevert = false;
-
-    // Threshold above which a warning about the number of event listeners
-    // attached to a provider which supports socket subscriptions will be
-    // written to the console.
-    unsigned int maxListenersWarningThreshold = 100;
-
     // Returns the protocol version of the node.
     std::future<std::string> getProtocolVersion();
 
@@ -115,19 +72,19 @@ class Eth {
     // Returns the Wei balance of an address at a given block,
     // or an empty string in case of error.
     std::future<std::string> getBalance(
-      std::string address, std::string defaultBlock
+      std::string address, std::string defaultBlock = ""
     );
 
     // Returns the value in storage at a specific position of an address.
     std::future<std::string> getStorageAt(
-      std::string address, std::string position, std::string defaultBlock
+      std::string address, std::string position, std::string defaultBlock = ""
     );
     std::future<std::string> getStorageAt(
-      std::string address, BigNumber position, std::string defaultBlock
+      std::string address, BigNumber position, std::string defaultBlock = ""
     );
 
     // Returns the code at a specific address.
-    std::future<std::string> getCode(std::string address, std::string defaultBlock);
+    std::future<std::string> getCode(std::string address, std::string defaultBlock = "");
 
     // Returns a block matching the given block number or hash.
     // If returnTransactionObjects is true, the returned block will contain
@@ -174,7 +131,7 @@ class Eth {
 
     // Returns the number of transactions sent from the given address.
     std::future<std::string> getTransactionCount(
-      std::string address, std::string defaultBlock
+      std::string address, std::string defaultBlock = ""
     );
 
     // Signs data using a specific account.
@@ -188,7 +145,7 @@ class Eth {
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    std::future<std::string> call(json callObject, std::string defaultBlock);
+    std::future<std::string> call(json callObject, std::string defaultBlock = "");
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.

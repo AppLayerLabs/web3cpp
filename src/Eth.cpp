@@ -105,7 +105,9 @@ std::future<std::string> Eth::getBalance(
 ) {
   return std::async([=]{
     Error err;
-    std::string rpcStr = RPC::eth_getBalance(address, defaultBlock, err).dump();
+    std::string rpcStr = RPC::eth_getBalance(address,
+      ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
+    err).dump();
     if (err.getCode() != 0) {
       std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
       return std::string("");
@@ -124,9 +126,9 @@ std::future<std::string> Eth::getStorageAt(
 ) {
   return std::async([=]{
     Error err;
-    std::string rpcStr = RPC::eth_getStorageAt(
-      address, position, defaultBlock, err
-    ).dump();
+    std::string rpcStr = RPC::eth_getStorageAt(address, position,
+      ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
+    err).dump();
     if (err.getCode() != 0) {
       std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
       return std::string("");
@@ -151,7 +153,9 @@ std::future<std::string> Eth::getStorageAt(
 std::future<std::string> Eth::getCode(std::string address, std::string defaultBlock) {
   return std::async([=]{
     Error err;
-    std::string rpcStr = RPC::eth_getCode(address, defaultBlock, err).dump();
+    std::string rpcStr = RPC::eth_getCode(address,
+      ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
+    err).dump();
     if (err.getCode() != 0) {
       std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
       return std::string("");
@@ -322,9 +326,9 @@ std::future<std::string> Eth::getTransactionCount(
 ) {
   return std::async([=]{
     Error err;
-    std::string rpcStr = RPC::eth_getTransactionCount(
-      address, defaultBlock, err
-    ).dump();
+    std::string rpcStr = RPC::eth_getTransactionCount(address,
+      ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
+    err).dump();
     if (err.getCode() != 0) {
       std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
       return std::string("");
@@ -375,7 +379,9 @@ std::future<json> Eth::signTransaction(json txObj) {
 std::future<std::string> Eth::call(json callObject, std::string defaultBlock) {
   return std::async([=]{
     Error err;
-    std::string rpcStr = RPC::eth_call(callObject, defaultBlock, err).dump();
+    std::string rpcStr = RPC::eth_call(callObject,
+      ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
+    err).dump();
     if (err.getCode() != 0) {
       std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
       return std::string("");
