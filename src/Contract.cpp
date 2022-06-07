@@ -1,12 +1,56 @@
 #include <web3cpp/Contract.h>
 
 Contract::Contract(json jsonInterface, std::string address, json options) {
-  // Parse options
-  if (options == NULL) {
-    this->options.jsonInterface = jsonInterface;
-    this->options.address = address;
-  } else {
-    ; // TODO: parse options
+  // Set option defaults, then parse custom options if given
+  this->options.jsonInterface = jsonInterface;
+  this->options.address = address;
+  this->options.data = "";
+  this->options.from = "";
+  this->options.gasPrice = "";
+  this->options.gas = "";
+  this->options.handleRevert = false;
+  this->options.transactionBlockTimeout = 50;
+  this->options.transactionConfirmationBlocks = 24;
+  this->options.transactionPollingTimeout = 750;
+  this->options.chain = "mainnet";
+  this->options.hardfork = "fuji";
+  if (options != NULL) {
+    if (options.count("jsonInterface")) {
+      this->options.jsonInterface = options["jsonInterface"];
+    }
+    if (options.count("address")) {
+      this->options.address = options["address"].get<std::string>();
+    }
+    if (options.count("data")) {
+      this->options.data = options["data"].get<std::string>();
+    }
+    if (options.count("from")) {
+      this->options.from = options["from"].get<std::string>();
+    }
+    if (options.count("gasPrice")) {
+      this->options.gasPrice = options["gasPrice"].get<std::string>();
+    }
+    if (options.count("gas")) {
+      this->options.gas = options["gas"].get<std::string>();
+    }
+    if (options.count("handleRevert")) {
+      this->options.handleRevert = options["handleRevert"].get<bool>();
+    }
+    if (options.count("transactionBlockTimeout")) {
+      this->options.transactionBlockTimeout = options["transactionBlockTimeout"].get<unsigned int>();
+    }
+    if (options.count("transactionConfirmationBlocks")) {
+      this->options.transactionConfirmationBlocks = options["transactionConfirmationBlocks"].get<unsigned int>();
+    }
+    if (options.count("transactionPollingTimeout")) {
+      this->options.transactionPollingTimeout = options["transactionPollingTimeout"].get<unsigned int>();
+    }
+    if (options.count("chain")) {
+      this->options.chain = options["chain"].get<std::string>();
+    }
+    if (options.count("hardfork")) {
+      this->options.hardfork = options["hardfork"].get<std::string>();
+    }
   }
 
   // Parse contract
@@ -53,6 +97,23 @@ bool Contract::isTypeArray(Types const &type) {
     type == Types::booleanArr || type == Types::bytesArr ||
     type == Types::stringArr
   );
+}
+
+Contract Contract::clone() {
+  json opts;
+  opts["jsonInterface"] = this->options.jsonInterface;
+  opts["address"] = this->options.address;
+  opts["data"] = this->options.data;
+  opts["from"] = this->options.from;
+  opts["gasPrice"] = this->options.gasPrice;
+  opts["gas"] = this->options.gas;
+  opts["handleRevert"] = this->options.handleRevert;
+  opts["transactionBlockTimeout"] = this->options.transactionBlockTimeout;
+  opts["transactionConfirmationBlocks"] = this->options.transactionConfirmationBlocks;
+  opts["transactionPollingTimeout"] = this->options.transactionPollingTimeout;
+  opts["chain"] = this->options.chain;
+  opts["hardfork"] = this->options.hardfork;
+  return Contract(this->options.jsonInterface, this->options.address, opts);
 }
 
 std::string Contract::operator() (json arguments, std::string function, Error &error) {

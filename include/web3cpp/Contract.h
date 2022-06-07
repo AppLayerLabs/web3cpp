@@ -37,19 +37,18 @@ class Contract {
   public:
     class Options {
       public:
-        std::string address;  // "to" address
         json jsonInterface; // JSON array
+        std::string address;  // "to" address
         std::string data;
         std::string from;
         std::string gasPrice;
-        BigNumber gas;
+        std::string gas;
         bool handleRevert;
         unsigned int transactionBlockTimeout;
         unsigned int transactionConfirmationBlocks;
         unsigned int transactionPollingTimeout;
         std::string chain;
         std::string hardfork;
-        std::string common;
     };
 
     // Constructor.
