@@ -24,11 +24,11 @@ std::vector<std::pair<std::string,std::string>> BIP39::generateAccountsFromSeed(
   std::vector<std::pair<std::string,std::string>> ret;
   for (int64_t i = 0; i < 10; ++i, ++index) {
     std::string address;
-    std::string derivPath = derivPath + boost::lexical_cast<std::string>(index);
-    bip3x::HDKey rootKey = BIP39::createKey(seed, derivPath);
+    std::string deriv = derivPath + boost::lexical_cast<std::string>(index);
+    bip3x::HDKey rootKey = BIP39::createKey(seed, deriv);
     dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
     address += "0x" + k.address().hex();
-    ret.push_back(std::make_pair(address, derivPath));
+    ret.push_back(std::make_pair(address, deriv));
   }
   return ret;
 }

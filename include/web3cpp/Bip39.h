@@ -40,12 +40,13 @@ namespace BIP39 {
 
   /**
    * Generate a list with 10 Accounts based on a given seed and a starting index.
-   * Returns a vector with the addresses.
    * derivPath should not include last digit, example:
-   * "m/44'/60'/0'/"
-   * return a vector of pairs, where first = address and second = path.
+   * "m/44'/60'/0'/0/"
+   * Returns a vector of pairs - first = address, second = path.
    */
-  std::vector<std::pair<std::string,std::string>> generateAccountsFromSeed(std::string &phrase, std::string derivPath, int64_t start);
+  std::vector<std::pair<std::string,std::string>> generateAccountsFromSeed(
+    std::string &phrase, std::string derivPath, int64_t start
+  );
 }
 
 #endif  // BIP3X_H

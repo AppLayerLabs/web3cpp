@@ -77,6 +77,22 @@ class Tests {
      */
 
     // ==============================================================
+    // BIP39
+    // ==============================================================
+
+    // Test for generating a new mnemonic.
+    void testMnemonicGeneration();
+
+    // Test for generating a key pair based on a mnemonic and derivation path.
+    void testKeyPairGeneration();
+
+    // Test for checking valid words for mnemonics.
+    void testMnemonicWordValidity();
+
+    // Test for generating addresses from a given seed, derivation path and index.
+    void testMnemonicAddressGeneration();
+
+    // ==============================================================
     // SOLIDITY
     // ==============================================================
 
