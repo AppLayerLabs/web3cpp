@@ -125,7 +125,7 @@ bool Wallet::importPrivKey(
   if (key != oldKey) { error.setCode(1); return false; } // Incorrect Password.
 
   // Create the encrypted key
-  json encryptedKey = json::parse((secret.ref(), password));
+  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
   encryptedKey["address"] = Utils::toLowercaseAddress(
     "0x" + dev::toHex(dev::toAddress(secret))
   );
