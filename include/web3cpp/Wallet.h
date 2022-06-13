@@ -64,7 +64,7 @@ class Wallet {
     void passHandler() {
       while (true) {
         std::time_t now = std::time(nullptr);
-        if (now > this->_passEnd) break;
+        if (now >= this->_passEnd) break;
         std::this_thread::sleep_for(std::chrono::seconds(1));
       }
       this->_password = "";
@@ -149,7 +149,7 @@ class Wallet {
      * Usable with ecRecover().
      */
     std::string sign(
-      std::string dataToSign, std::string address, std::string password, Error &err
+      std::string dataToSign, std::string address, std::string password
     );
 
     /**
@@ -183,13 +183,15 @@ class Wallet {
     // after said value counts down to 0.
     void storePassword(std::string password, unsigned int seconds = 0);
     void clearPassword();
+    bool isPasswordStored();
 
-    // Returns a list of addresses controlled by the node, and the
-    // details for a specific address, respectively.
-    // If no address is found, getAccountDetails() returns an empty
-    // Account object.
+    // Returns a list of addresses controlled by the node,
+    // the details for a specific address, and the raw details in JSON
+    // for a specific address, respectively.
+    // If no address is found, returns an empty Account or JSON object.
     std::vector<std::string> getAccounts();
     Account getAccountDetails(std::string address);
+    json getAccountRawDetails(std::string address); 
 };
 
 #endif  // WALLET_H

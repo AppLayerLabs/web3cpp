@@ -77,7 +77,11 @@ int main(int argc, char* argv[]) {
       t.testHexPadding();
     } else if (item == "wallet") {
       std::cout << "* Testing functions from Wallet" << std::endl;
-      t.generateAccount();
+      //t.generateAccount();
+      //t.handlePasswordCheck();
+      //t.handlePasswordStorageAuto();
+      //t.handlePasswordStorageManual();
+      t.signAndRecoverMessage();
     } else if (item == "contract") {
       std::cout << "* Testing functions from Contract" << std::endl;
       t.loadAndTestContractLegacy();

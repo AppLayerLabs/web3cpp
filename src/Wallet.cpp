@@ -125,7 +125,7 @@ bool Wallet::importPrivKey(
   if (key != oldKey) { error.setCode(1); return false; } // Incorrect Password.
 
   // Create the encrypted key
-  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
+  json encryptedKey = json::parse((secret.ref(), password));
   encryptedKey["address"] = Utils::toLowercaseAddress(
     "0x" + dev::toHex(dev::toAddress(secret))
   );
@@ -177,18 +177,17 @@ dev::eth::TransactionSkeleton Wallet::buildTransaction(
 }
 
 std::string Wallet::sign(
-  std::string dataToSign, std::string address, std::string password, Error &err
+  std::string dataToSign, std::string address, std::string password
 ) {
   // EIP-712 requires us to hash the message before signing
   address = Utils::toLowercaseAddress(address);
-  Secret s(dev::toHex(Cipher::decrypt(address, password, err)));
-  std::string signedData = std::string("\x19") + "Ethereum Signed Message:\n"
+  json accRaw = getAccountRawDetails(address);
+  Secret s(dev::SecretStore::decrypt(accRaw.dump(), password));
+  std::string signableData = std::string("\x19") + "Ethereum Signed Message:\n"
     + boost::lexical_cast<std::string>(dataToSign.size()) + dataToSign;
-  dev::h256 messageHash(dev::toHex(dev::sha3(signedData, false)));
+  dev::h256 messageHash(dev::toHex(dev::sha3(signableData, false)));
   dev::h520 signature = dev::sign(s, messageHash);
-  dev::SignatureStruct sigStruct = *(dev::SignatureStruct const*)&signature;
-  sigStruct.v = sigStruct.v + 27;
-  return std::string("0x") + dev::toHex(dev::Signature(sigStruct));
+  return std::string("0x") + dev::toHex(signature);
 }
 
 std::string Wallet::ecRecover(
@@ -198,49 +197,44 @@ std::string Wallet::ecRecover(
   if (signature.substr(0, 2) == "0x" || signature.substr(0, 2) == "0X") {
     signature = signature.substr(2); // Remove "0x"
   }
-  std::string r = signature.substr(0, 64);  // 32 hex bytes (64 chars - 0-64)
-  std::string s = signature.substr(65, 64); // 32 hex bytes (64 chars - 65-128)
+  // TODO: check why r and s are unused
+  //std::string r = signature.substr(0, 64);  // 32 hex bytes (64 chars - 0-64)
+  //std::string s = signature.substr(65, 64); // 32 hex bytes (64 chars - 65-128)
   std::string v = signature.substr(128, 2); // 1 hex byte (2 chars - 129-130)
 
-  // Set up the context for secp256k1 and parse the signature
+  // Hash the data that was signed
+  std::string data = std::string("\x19") + "Ethereum Signed Message:\n"
+    + boost::lexical_cast<std::string>(dataThatWasSigned.size())
+    + dataThatWasSigned;
+  dev::h256 messageHash(dev::toHex(dev::sha3(data, false)));
+
+  // Set up the context, recoverable signature and raw public key for secp256k1
   secp256k1_context* ctx = secp256k1_context_create(
     SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY
   );
   secp256k1_ecdsa_recoverable_signature rawSig;
+  secp256k1_pubkey rawPubkey;
+
+  // Parse the signature compact, then recover the raw public key
   if (!secp256k1_ecdsa_recoverable_signature_parse_compact(
-    ctx, &rawSig, (unsigned char*) signature.data(), std::stoi(v)
+    ctx, &rawSig, (unsigned char*) signature.c_str(), std::stoi(v)
   )) {
     std::cout << "Cannot parse compact" << std::endl;
     return "";
   }
-
-  // Hash the data that was signed, wrap it and hash it again
-  std::array<uint8_t, 32> hash;
-  keccak_256(hash.data(), hash.size(), (unsigned char*) dataThatWasSigned.data());
-  dataThatWasSigned = std::string("\x19") + "Ethereum Signed Message:\n32"
-    + std::string(hash.begin(), hash.end());
-  keccak_256(hash.data(), hash.size(), (unsigned char*) dataThatWasSigned.data());
-
-  // Recover the raw public key based on the hash data and signature
-  secp256k1_pubkey rawPubkey;
-  if (!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, hash.data())) {  // 32 bit hash
+  if (!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, messageHash.data())) {  // 32 bit hash
     std::cout << "Cannot recover public key" << std::endl;
     return "";
   }
 
-  // Serialize the public key and hash out the address
+  // Serialize the public key
   std::array<uint8_t, 65> pubkey;
-  size_t biglen = 65;
+  size_t pubsize = pubkey.size();
   secp256k1_ec_pubkey_serialize(
-    ctx, pubkey.data(), &biglen, &rawPubkey, SECP256K1_EC_UNCOMPRESSED
+    ctx, pubkey.data(), &pubsize, &rawPubkey, SECP256K1_EC_UNCOMPRESSED
   );
-  std::string out = std::string(pubkey.begin(), pubkey.end()).substr(1);
-  keccak_256(hash.data(), hash.size(), (unsigned char*) out.data());
-  std::vector<unsigned int> hashVec;
-  for (int i = 0; i < hash.size(); i++) {
-    hashVec.push_back(hash[i]);
-  }
-  return std::string("0x") + Utils::bytesToHex(hashVec).substr(24);
+  dev::Public p{&pubkey[1], Public::ConstructFromPointer};
+  return "0x" + dev::toHex(dev::toAddress(p));
 }
 
 std::string Wallet::signTransaction(
@@ -294,6 +288,10 @@ void Wallet::clearPassword() {
   this->_passEnd = 0; // This ensures the thread will be terminated
 }
 
+bool Wallet::isPasswordStored() {
+  return !this->_password.empty();
+}
+
 std::vector<std::string> Wallet::getAccounts() {
   std::vector<std::string> ret;
   std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
@@ -320,5 +318,18 @@ Account Wallet::getAccountDetails(std::string address) {
     }
   }
   return Account();
+}
+
+json Wallet::getAccountRawDetails(std::string address) {
+  json ret;
+  address = Utils::toLowercaseAddress(address);
+  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
+  for (std::pair<std::string, std::string> acc : accs) {
+    if (acc.first == address) {
+      ret = json::parse(acc.second);
+      break;
+    }
+  }
+  return ret;
 }
 

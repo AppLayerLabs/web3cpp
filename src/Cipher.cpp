@@ -14,7 +14,7 @@ std::string Cipher::encrypt(std::string const& plainText, std::string const& pas
   {
     json params;
     params["iv"] = toHex(iv.ref());
-    ret["cipherparams"] = params.dump();
+    ret["cipherparams"] = params;
   }
 
   // Create cipher text and MAC.

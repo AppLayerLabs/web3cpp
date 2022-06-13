@@ -1,14 +1,15 @@
 #ifndef TESTS_H
 #define TESTS_H
 
+#include <bitset>
 #include <chrono>
 #include <ctime>
 #include <fstream>
 #include <future>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
-#include <bitset>
 
 #include <web3cpp/Web3.h>
 #include <web3cpp/Contract.h>
@@ -180,6 +181,18 @@ class Tests {
      * Created test Account is automatically deleted at the end of the test.
      */
     void generateAccount();
+
+    // Tests for password check and storage/clearing, respectively.
+    void handlePasswordCheck();
+    void handlePasswordStorageAuto();
+    void handlePasswordStorageManual();
+
+    /**
+     * Test for signing and recovering a signed message.
+     * Require at least ONE existing Account, which is created automatically
+     * if it doesn't exist. Test WILL fail if this part fails too.
+     */
+    void signAndRecoverMessage();
 
     // ==============================================================
     // CONTRACT
