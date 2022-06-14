@@ -193,47 +193,16 @@ std::string Wallet::sign(
 std::string Wallet::ecRecover(
   std::string dataThatWasSigned, std::string signature
 ) {
-  // Split signature into r/s/v
+  // Aleth does some stupidly arcane magic to make this work, better use it for now
   if (signature.substr(0, 2) == "0x" || signature.substr(0, 2) == "0X") {
     signature = signature.substr(2); // Remove "0x"
   }
-  // TODO: check why r and s are unused
-  //std::string r = signature.substr(0, 64);  // 32 hex bytes (64 chars - 0-64)
-  //std::string s = signature.substr(65, 64); // 32 hex bytes (64 chars - 65-128)
-  std::string v = signature.substr(128, 2); // 1 hex byte (2 chars - 129-130)
-
-  // Hash the data that was signed
   std::string data = std::string("\x19") + "Ethereum Signed Message:\n"
     + boost::lexical_cast<std::string>(dataThatWasSigned.size())
     + dataThatWasSigned;
   dev::h256 messageHash(dev::toHex(dev::sha3(data, false)));
-
-  // Set up the context, recoverable signature and raw public key for secp256k1
-  secp256k1_context* ctx = secp256k1_context_create(
-    SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY
-  );
-  secp256k1_ecdsa_recoverable_signature rawSig;
-  secp256k1_pubkey rawPubkey;
-
-  // Parse the signature compact, then recover the raw public key
-  if (!secp256k1_ecdsa_recoverable_signature_parse_compact(
-    ctx, &rawSig, (unsigned char*) signature.c_str(), std::stoi(v)
-  )) {
-    std::cout << "Cannot parse compact" << std::endl;
-    return "";
-  }
-  if (!secp256k1_ecdsa_recover(ctx, &rawPubkey, &rawSig, messageHash.data())) {  // 32 bit hash
-    std::cout << "Cannot recover public key" << std::endl;
-    return "";
-  }
-
-  // Serialize the public key
-  std::array<uint8_t, 65> pubkey;
-  size_t pubsize = pubkey.size();
-  secp256k1_ec_pubkey_serialize(
-    ctx, pubkey.data(), &pubsize, &rawPubkey, SECP256K1_EC_UNCOMPRESSED
-  );
-  dev::Public p{&pubkey[1], Public::ConstructFromPointer};
+  dev::h520 sig = dev::FixedHash<65>(signature);
+  dev::Public p = dev::recover(sig, messageHash);
   return "0x" + dev::toHex(dev::toAddress(p));
 }
 

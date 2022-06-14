@@ -191,7 +191,7 @@ class Wallet {
     // If no address is found, returns an empty Account or JSON object.
     std::vector<std::string> getAccounts();
     Account getAccountDetails(std::string address);
-    json getAccountRawDetails(std::string address); 
+    json getAccountRawDetails(std::string address);
 };
 
 #endif  // WALLET_H
