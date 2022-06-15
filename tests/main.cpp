@@ -5,15 +5,16 @@ int main(int argc, char* argv[]) {
   std::vector<std::string> items;
   if (argc == 1) {
     std::cout << "Usage: " << argv[0] << " all|[CLASS]..." << std::endl
-      << "Available classes: bip39 database solidity utils wallet contract" << std::endl;
+      << "Available classes: bip39 database net solidity utils wallet contract" << std::endl;
     return 0;
   } else if (argc == 2 && strcmp(argv[1], "all") == 0) {
-    items = {"bip39", "database", "solidity", "utils", "wallet", "contract"};
+    items = {"bip39", "database", "net", "solidity", "utils", "wallet", "contract"};
   } else {
     for (int i = 1; i < argc; i++) {
       if (
         strcmp(argv[i], "bip39") == 0 ||
         strcmp(argv[i], "database") == 0 ||
+        strcmp(argv[i], "net") == 0 ||
         strcmp(argv[i], "solidity") == 0 ||
         strcmp(argv[i], "utils") == 0 ||
         strcmp(argv[i], "wallet") == 0 ||
@@ -25,7 +26,7 @@ int main(int argc, char* argv[]) {
   }
   if (items.empty()) {
     std::cout << "No classes selected." << std::endl
-      << "Available classes: bip39 database solidity utils wallet contract" << std::endl;
+      << "Available classes: bip39 database net solidity utils wallet contract" << std::endl;
     return 0;
   }
 
@@ -43,6 +44,10 @@ int main(int argc, char* argv[]) {
     } else if (item == "database") {
       std::cout << "* Testing functions from Database" << std::endl;
       t.testDatabaseCRUD();
+    } else if (item == "net") {
+      std::cout << "* Testing functions from Net" << std::endl;
+      t.testHTTPRequest();
+      t.testCustomHTTPRequest();
     } else if (item == "solidity") {
       std::cout << "* Testing functions from Solidity" << std::endl;
       t.testTypeChecks();

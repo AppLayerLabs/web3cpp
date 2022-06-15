@@ -101,6 +101,14 @@ class Tests {
     void testDatabaseCRUD();
 
     // ==============================================================
+    // NET
+    // ==============================================================
+
+    // Test for normal and custom HTTP requests, respectively.
+    void testHTTPRequest();
+    void testCustomHTTPRequest();
+
+    // ==============================================================
     // SOLIDITY
     // ==============================================================
 
