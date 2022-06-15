@@ -104,9 +104,17 @@ class Tests {
     // NET
     // ==============================================================
 
-    // Test for normal and custom HTTP requests, respectively.
+    // Tests for normal and custom HTTP requests, respectively.
     void testHTTPRequest();
     void testCustomHTTPRequest();
+
+    // ==============================================================
+    // CIPHER
+    // ==============================================================
+
+    // Tests for encrypting and decrypting data (normal and legacy).
+    void testCipherNormal();
+    void testCipherLegacy();
 
     // ==============================================================
     // SOLIDITY

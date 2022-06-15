@@ -4,16 +4,15 @@ std::string Cipher::encrypt(std::string const& plainText, std::string const& pas
   // Derive the key.
   // operator+ for vectors are defined inside a dev namespace on CommonData.h
   using namespace dev;
-  dev::KDF _kdf = dev::KDF::Scrypt;
   json ret;
-  dev::bytesSec derivedKey = dev::deriveNewKey(password, _kdf, ret);
+  dev::bytesSec derivedKey = dev::deriveNewKey(password, dev::KDF::Scrypt, ret);
   if (derivedKey.empty()) { error.setCode(7); return ""; } // Key Derivation Failed
   ret["cipher"] = "aes-128-ctr";
   dev::SecureFixedHash<16> key(derivedKey, dev::h128::AlignLeft);
   dev::h128 iv = dev::h128::random();
   {
     json params;
-    params["iv"] = toHex(iv.ref());
+    params["iv"] = dev::toHex(iv.ref());
     ret["cipherparams"] = params;
   }
 
@@ -35,10 +34,10 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
   dev::bytesSec derivedKey;
   if (o["kdf"].get<std::string>() == "pbkdf2") {
     json params = o["kdfparams"];
-    if (params["prf"].get<std::string>() == "hmac-sha256") {
+    if (params["prf"].get<std::string>() != "hmac-sha256") {
       // cwarn << "Unknown PRF for PBKDF2" << params["prf"].get<std::string() << "not supported.";
       error.setCode(7); // Key Derivation Error
-      return dev::toHex(bytesSec().ref());
+      return bytesSec().ref().toString();
     }
     unsigned int iterations = params["c"].get<int>();
     dev::bytes salt = dev::fromHex(params["salt"].get<std::string>());
@@ -52,14 +51,14 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
   } else {
     // cwarn << "Unknown KDF" << o["kdf"].get<std::string>() << "not supported.";
     error.setCode(7); // Key Derivation Error
-    return dev::toHex(bytesSec().ref());
+    return bytesSec().ref().toString();
   }
 
   // Check if derived key has the correct length.
   if (derivedKey.size() < 32 && !(o.count("compat") && o["compat"].get<std::string>() == "2")) {
     // cwarn << "Derived key's length too short (<32 bytes)";
     error.setCode(13); // Key Derivation Invalid Length
-    return dev::toHex(bytesSec().ref());
+    return bytesSec().ref().toString();
   }
   dev::bytes cipherBytes = dev::fromHex(o["ciphertext"].get<std::string>());
 
@@ -72,7 +71,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
     if (mac != macExp) {
       // cwarn << "Invalid key - MAC mismatch; expected" << dev::toString(macExp) << ", got" << dev::toString(mac);
       error.setCode(14); // Key Decryption MAC Mismatch
-      return dev::toHex(bytesSec().ref());
+      return bytesSec().ref().toString();
     }
   } else if (o.count("sillymac")) {
     dev::h256 mac(o["sillymac"].get<std::string>());
@@ -83,7 +82,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
     if (mac != macExp) {
       // cwarn << "Invalid key - MAC mismatch; expected" << dev::toString(macExp) << ", got" << dev::toString(mac);
       error.setCode(14); // Key Decryption MAC Mismatch
-      return dev::toHex(bytesSec().ref());
+      return bytesSec().ref().toString();
     }
   }
   // else
@@ -98,17 +97,29 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
         dev::sha3Secure(derivedKey.ref().cropped(derivedKey.size() - 16)), dev::h128::AlignRight
       );
       error.setCode(0);
-      return dev::toHex(dev::decryptSymNoAuth(key, iv, &cipherBytes).ref());
+      return dev::decryptSymNoAuth(key, iv, &cipherBytes).ref().toString();
     } else {
       error.setCode(0);
-      return dev::toHex(dev::decryptSymNoAuth(
+      return dev::decryptSymNoAuth(
         dev::SecureFixedHash<16>(derivedKey, dev::h128::AlignRight), iv, &cipherBytes
-      ).ref());
+      ).ref().toString();
     }
   } else {
     // cwarn << "Unknown cipher" << o["cipher"].get<std::string>() << "not supported.";
     error.setCode(15); // Key Decryption Failed
-    return dev::toHex(bytesSec().ref());
+    return bytesSec().ref().toString();
   }
+}
+
+std::string Cipher::encryptAleth(
+  std::string const& plainText, std::string const& password
+) {
+  return dev::SecretStore::encrypt(plainText, password);
+}
+
+std::string Cipher::decryptAleth(
+  std::string const& cipherText, std::string const& password
+) {
+  return dev::SecretStore::decrypt(cipherText, password).ref().toString();
 }
 
