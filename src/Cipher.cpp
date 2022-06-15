@@ -25,6 +25,7 @@ std::string Cipher::encrypt(std::string const& plainText, std::string const& pas
   dev::h256 mac = dev::sha3(derivedKey.ref().cropped(16, 16).toBytes() + cipherText);
   ret["mac"] = dev::toHex(mac.ref());
 
+  error.setCode(0);
   return ret.dump();
 }
 
@@ -96,8 +97,10 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
       dev::SecureFixedHash<16> key(
         dev::sha3Secure(derivedKey.ref().cropped(derivedKey.size() - 16)), dev::h128::AlignRight
       );
+      error.setCode(0);
       return dev::toHex(dev::decryptSymNoAuth(key, iv, &cipherBytes).ref());
     } else {
+      error.setCode(0);
       return dev::toHex(dev::decryptSymNoAuth(
         dev::SecureFixedHash<16>(derivedKey, dev::h128::AlignRight), iv, &cipherBytes
       ).ref());
