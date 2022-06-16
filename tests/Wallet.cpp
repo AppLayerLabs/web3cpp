@@ -160,11 +160,15 @@ void Tests::signAndRecoverMessage() {
   msg = "Test Message";
   acc = web3->wallet.getAccounts().at(0);
   sig = web3->wallet.sign(msg, acc, this->password);
-  rec = web3->wallet.ecRecover(msg, sig);
-  if (rec != acc) {
-    failed("Recovered address doesn't match the one used for signing");
+  if (!Utils::isHexStrict(sig)) {
+    failed("Signing failed");
   } else {
-    passed();
+    rec = web3->wallet.ecRecover(msg, sig);
+    if (rec != acc) {
+      failed("Recovered address doesn't match the one used for signing");
+    } else {
+      passed();
+    }
   }
 
   std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;

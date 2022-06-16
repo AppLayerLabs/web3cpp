@@ -29,7 +29,12 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Use exactly as many bytes for the cipher as needed.
   auto seedPhrase = BIP39::createNewMnemonic();
   json seedJson;
-  seedJson = json::parse(Cipher::encrypt(seedPhrase.raw, password, error));
+  Error encErr;
+  seedJson = json::parse(Cipher::encrypt(seedPhrase.raw, password, encErr));
+  if (encErr.getCode() != 0) {
+    error.setCode(encErr.getCode());
+    return false;
+  }
   boost::filesystem::path tmpPath = seedPhraseFile();
   Utils::writeJSONFile(seedJson, tmpPath);
 
@@ -44,7 +49,15 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
 }
 
 bool Wallet::loadWallet(std::string const &password, Error &error) {
-  if (!boost::filesystem::exists(walletExistsPath())) { createNewWallet(password, error); }
+  // Create the wallet if it doesn't exist already
+  if (!boost::filesystem::exists(walletExistsPath())) {
+    Error createErr;
+    if (!createNewWallet(password, createErr)) {
+      error.setCode(createErr.getCode());
+      return false;
+    }
+  }
+
   // Check if password is correct
   json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
   auto originalKey = dev::fromHex(walletInfo["key"]);
@@ -56,6 +69,7 @@ bool Wallet::loadWallet(std::string const &password, Error &error) {
     this->passSalt = dev::h256::random();
     this->passHash = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
     _isLoaded = true;
+    error.setCode(0);
     return true;
   } else {
     error.setCode(1); // Incorrect Password.
@@ -85,8 +99,9 @@ std::string Wallet::createAccount(
     // Load the seed phrase from JSON.
     boost::filesystem::path tmpPath = seedPhraseFile();
     json seedJson = Utils::readJSONFile(tmpPath);
-    auto decrypt = dev::SecretStore::decrypt(seedJson.dump(), password);
-    seedPhrase = decrypt.ref().toString();
+    Error decErr;
+    seedPhrase = Cipher::decrypt(seedJson.dump(), password, decErr);
+    if (decErr.getCode() != 0) { error.setCode(decErr.getCode()); return ""; }
   } else {
     // Use the provided custom seed phrase.
     seedPhrase = seed;
@@ -125,7 +140,12 @@ bool Wallet::importPrivKey(
   if (key != oldKey) { error.setCode(1); return false; } // Incorrect Password.
 
   // Create the encrypted key
-  json encryptedKey = json::parse(dev::SecretStore::encrypt(secret.ref(), password));
+  Error encErr;
+  json encryptedKey = json::parse(Cipher::encrypt(secret.ref().toString(), password, encErr));
+  if (encErr.getCode() != 0) {
+    error.setCode(encErr.getCode());
+    return false;
+  }
   encryptedKey["address"] = Utils::toLowercaseAddress(
     "0x" + dev::toHex(dev::toAddress(secret))
   );
@@ -182,7 +202,10 @@ std::string Wallet::sign(
   // EIP-712 requires us to hash the message before signing
   address = Utils::toLowercaseAddress(address);
   json accRaw = getAccountRawDetails(address);
-  Secret s(dev::SecretStore::decrypt(accRaw.dump(), password));
+  Error decErr;
+  std::string dec = Cipher::decrypt(accRaw.dump(), password, decErr);
+  if (decErr.getCode() != 0) return decErr.what();
+  Secret s(dev::toHex(dec));
   std::string signableData = std::string("\x19") + "Ethereum Signed Message:\n"
     + boost::lexical_cast<std::string>(dataToSign.size()) + dataToSign;
   dev::h256 messageHash(dev::toHex(dev::sha3(signableData, false)));

@@ -146,6 +146,7 @@ class Wallet {
 
     /**
      * Signs a data string as an "Ethereum Signed Message" (EIP-712 compliant).
+     * Returns the hex signature, or an error message on failure.
      * Usable with ecRecover().
      */
     std::string sign(
