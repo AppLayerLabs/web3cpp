@@ -101,7 +101,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
     } else {
       error.setCode(0);
       return dev::decryptSymNoAuth(
-        dev::SecureFixedHash<16>(derivedKey, dev::h128::AlignRight), iv, &cipherBytes
+        dev::SecureFixedHash<16>(derivedKey, dev::h128::AlignLeft), iv, &cipherBytes
       ).ref().toString();
     }
   } else {
