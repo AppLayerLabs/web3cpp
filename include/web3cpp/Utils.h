@@ -47,44 +47,12 @@ struct HexTo {
   }
 };
 
-// Module that provides utility functions.
-// https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
+/**
+ * Namespace that provides utility functions.
+ * https://web3js.readthedocs.io/en/v1.7.0/web3-utils.html
+ */
 
 namespace Utils {
-  // Struct that contains information about a provider.
-  struct Provider {
-    std::string networkName;
-    std::string rpcUrl;
-    std::string rpcTarget;
-    uint64_t rpcPort;
-    uint64_t chainID;
-    std::string currencySymbol;
-    std::string blockExplorerUrl;
-    std::mutex mutable ProviderLock;
-
-    Provider() {
-      // Default to AVAX.
-      networkName = "Avalanche Mainnet";
-      rpcUrl = "api.avax.network";
-      rpcTarget = "/ext/bc/C/rpc";
-      rpcPort = 443;
-      chainID = 43114;
-      currencySymbol = "AVAX";
-      blockExplorerUrl = "";
-    }
-
-    Provider& operator=(Provider const &prev) {
-      networkName = prev.networkName;
-      rpcUrl = prev.rpcUrl;
-      rpcTarget = prev.rpcTarget;
-      rpcPort = prev.rpcPort;
-      chainID = prev.chainID;
-      currencySymbol = prev.currencySymbol;
-      blockExplorerUrl = prev.blockExplorerUrl;
-      return *this;
-    }
-  };
-
   /**
    * Handle the web3cpp history storage directory.
    * Default data dir paths are as follows:

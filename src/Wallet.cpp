@@ -189,7 +189,7 @@ dev::eth::TransactionSkeleton Wallet::buildTransaction(
     ret.nonce = nonce;
     ret.gas = gasLimit;
     ret.gasPrice = gasPrice;
-    ret.chainId = this->provider->chainID;
+    ret.chainId = this->provider->getChainId();
   } catch (const std::exception &e) {
     throw std::string("buildTransaction error: ") + e.what();
   }

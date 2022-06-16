@@ -6,21 +6,21 @@
 #include <boost/certify/https_verification.hpp>
 
 std::string Net::HTTPRequest(
-  Utils::Provider *provider, RequestTypes requestType, std::string reqBody
+  Provider *provider, RequestTypes requestType, std::string reqBody
 ) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
   namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
   namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
-  // Lock mutex and get information from it.
-  provider->ProviderLock.lock();
-  std::string url = provider->rpcUrl;
-  std::string target = provider->rpcTarget;
-  std::string port = boost::lexical_cast<std::string>(provider->rpcPort);
-  provider->ProviderLock.unlock();
+  // Lock Provider mutex and get information from it.
+  provider->lock.lock();
+  std::string host = provider->getHost();
+  std::string target = provider->getTarget();
+  std::string port = boost::lexical_cast<std::string>(provider->getPort());
+  provider->lock.unlock();
   // Uncomment to see request details
-  //std::cout << "url: " << url << std::endl;
+  //std::cout << "host: " << host << std::endl;
   //std::cout << "target: " << target << std::endl;
   //std::cout << "port: " << port << std::endl;
   //std::cout << "reqBody: " << reqBody << std::endl;
@@ -40,8 +40,8 @@ std::string Net::HTTPRequest(
     ssl::stream<tcp::socket> stream{ioc, ctx};
 
     // Set SNI Hostname (many hosts need this to handshake successfully)
-    boost::certify::sni_hostname(stream, url, ec);
-    auto const results = resolver.resolve(url, port);
+    boost::certify::sni_hostname(stream, host, ec);
+    auto const results = resolver.resolve(host, port);
 
     // Connect and Handshake
     boost::asio::connect(stream.next_layer(), results.begin(), results.end());
@@ -52,13 +52,13 @@ std::string Net::HTTPRequest(
       (requestType == RequestTypes::POST) ? http::verb::post : http::verb::get, target, 11
     };
     if (requestType == RequestTypes::GET) {
-      req.set(http::field::host, url);
+      req.set(http::field::host, host);
       req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
       req.set(http::field::content_type, "application/json");
       req.body() = reqBody;
       req.prepare_payload();
     } else if (requestType == RequestTypes::POST) {
-      req.set(http::field::host, url);
+      req.set(http::field::host, host);
       req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
       req.set(http::field::accept, "application/json");
       req.set(http::field::content_type, "application/json");

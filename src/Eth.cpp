@@ -464,7 +464,7 @@ std::future<bool> Eth::submitWork(
 }
 
 uint64_t Eth::getChainId() {
-  return this->provider->chainID;
+  return this->provider->getChainId();
 }
 
 std::string Eth::getNodeInfo() {

@@ -27,6 +27,7 @@
 #include <web3cpp/DB.h>
 #include <web3cpp/Cipher.h>
 #include <web3cpp/Bip39.h>
+#include <web3cpp/Provider.h>
 
 using json = nlohmann::ordered_json;
 
@@ -42,7 +43,7 @@ class Wallet {
 
     // Wallet path, provider, Account list and internal databases.
     boost::filesystem::path path;
-    Utils::Provider* provider;
+    Provider* provider;
     Database infoDB;
     Database accountDB;
     Database transactionDB;
@@ -77,7 +78,7 @@ class Wallet {
 
   public:
     // Constructor.
-    Wallet(Utils::Provider* _provider, boost::filesystem::path _path)
+    Wallet(Provider* _provider, boost::filesystem::path _path)
       : provider(_provider), path(_path),
         infoDB("walletInfo", walletFolder()),
         accountDB("accounts", walletFolder()),
@@ -85,7 +86,7 @@ class Wallet {
     {};
 
     // Getter for provider.
-    Utils::Provider* getProvider() { return this->provider; }
+    Provider* getProvider() { return this->provider; }
 
     /**
      * Load a wallet with the given password.

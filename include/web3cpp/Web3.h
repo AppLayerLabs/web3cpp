@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include <web3cpp/Eth.h>
+#include <web3cpp/Provider.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/Wallet.h>
 
@@ -16,12 +17,12 @@
 class Web3 {
   private:
     boost::filesystem::path defaultPath;
-    Utils::Provider defaultProvider;
+    Provider defaultProvider;
 
   public:
     // Constructor and overloads.
-    Web3(Utils::Provider *provider = NULL, boost::filesystem::path *path = NULL);
-    Web3(Utils::Provider provider) : Web3(&provider, NULL) {}
+    Web3(Provider *provider = NULL, boost::filesystem::path *path = NULL);
+    Web3(Provider provider) : Web3(&provider, NULL) {}
     Web3(boost::filesystem::path path): Web3(NULL, &path) {}
 
     // Current version of the library.
@@ -33,8 +34,8 @@ class Web3 {
 
     // Getter/Setter for library-wide provider.
     // ALL sub modules that use providers should point to this one.
-    Utils::Provider* getProvider() { return &this->defaultProvider; }
-    void setProvider(Utils::Provider p) { this->defaultProvider = p; }
+    Provider* getProvider() { return &this->defaultProvider; }
+    void setProvider(Provider p) { this->defaultProvider = p; }
 };
 
 #endif  // WEB3_H

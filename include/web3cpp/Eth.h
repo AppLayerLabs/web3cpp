@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 
 #include <web3cpp/Net.h>
+#include <web3cpp/Provider.h>
 #include <web3cpp/RPC.h>
 #include <web3cpp/Utils.h>
 
@@ -26,14 +27,14 @@ using json = nlohmann::ordered_json;
 
 class Eth {
   private:
-    Utils::Provider *provider;
+    Provider *provider;
 
   public:
     // Constructor.
-    Eth(Utils::Provider* _provider) : provider(_provider) {};
+    Eth(Provider* _provider) : provider(_provider) {};
 
     // Getter for provider.
-    Utils::Provider* getProvider() { return this->provider; }
+    Provider* getProvider() { return this->provider; }
 
     // Default address used as the default "from" property, if no "from"
     // property is specified in functions like sendTransaction() or call().

@@ -7,6 +7,7 @@
 
 #include <web3cpp/DB.h>
 #include <web3cpp/Net.h>
+#include <web3cpp/Provider.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/RPC.h>
 #include <nlohmann/json.hpp>
@@ -27,7 +28,7 @@ class Account {
     std::string _derivationPath;
     uint64_t _nonce;
     bool _isLedger;
-    Utils::Provider *provider;
+    Provider *provider;
     std::atomic<bool> ready;
     mutable std::mutex accountLock;
 
@@ -38,7 +39,7 @@ class Account {
     // Constructor.
     Account(
       boost::filesystem::path walletPath, std::string name, std::string __address,
-      std::string __derivationPath, bool __isLedger, Utils::Provider *_provider
+      std::string __derivationPath, bool __isLedger, Provider *_provider
     );
 
     // Copy constructor.

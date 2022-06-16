@@ -13,6 +13,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
+#include <web3cpp/Provider.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/root_certificates.h>
 #include <web3cpp/Error.h>
@@ -22,7 +23,7 @@
 namespace Net {
   enum RequestTypes { POST, GET };
   std::string HTTPRequest(
-    Utils::Provider *provider, RequestTypes requestType, std::string reqBody
+    Provider *provider, RequestTypes requestType, std::string reqBody
   );
   std::string customHTTPRequest(
     std::string reqBody, std::string host, std::string port,
