@@ -20,7 +20,7 @@ std::future<BigNumber> Account::balance() {
     Error error;
     BigNumber ret;
     std::string balanceRequestStr = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::GET,
+      this->provider, Net::RequestTypes::POST,
       RPC::eth_getBalance(this->_address, "latest", error).dump()
     );
     if (error.getCode() != 0) {
