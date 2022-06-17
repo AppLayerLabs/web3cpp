@@ -23,7 +23,7 @@ class Web3 {
     // Constructor and overloads.
     Web3(Provider *provider = NULL, boost::filesystem::path *path = NULL);
     Web3(Provider provider) : Web3(&provider, NULL) {}
-    Web3(boost::filesystem::path path): Web3(NULL, &path) {}
+    Web3(boost::filesystem::path path) : Web3(NULL, &path) {}
 
     // Current version of the library.
     std::string version;

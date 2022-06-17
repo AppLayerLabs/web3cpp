@@ -24,9 +24,9 @@ class Tests {
     std::string password;
     std::ofstream logStream;
 
-    // Log file name and test wallet folder name
+    // Log file and test wallet folder
     std::string logFile = "web3cpp-test-log.txt";
-    std::string walletFolder = "web3cpp-test-wallet";
+    boost::filesystem::path walletFolder = "web3cpp-test-wallet";
 
     // Counters for passed/failed tests, error reason (if any),
     // and functions for controlling those
@@ -43,8 +43,8 @@ class Tests {
 
     // Constructor
     Tests(std::string &password) {
-      std::cout << "Creating/Loading wallet..." << std::endl;
-      web3 = new Web3(walletFolder);
+      std::cout << "Creating/Loading wallet... " << std::flush;
+      web3 = new Web3(new Provider("avax-c-test"), &walletFolder);
       Error error;
       if (!web3->wallet.loadWallet(password, error)) {
         std::cout << std::string("Could not load wallet: ") << error.what() << std::endl;
@@ -57,7 +57,9 @@ class Tests {
       std::stringstream timestream;
       timestream << std::put_time(tm, "%d-%m-%Y %H-%M-%S");
       logStream << "[web3cpp Test Log - " << timestream.str() << "]\n\n";
-      std::cout << "Wallet created/loaded, starting tests" << std::endl;
+      std::cout << "Ready!" << std::endl;
+      std::cout << "Using provider: " << web3->getProvider()->getName() << std::endl;
+      std::cout << "Starting tests..." << std::endl;
     }
 
     // Destructor
