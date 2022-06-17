@@ -142,7 +142,7 @@ class Wallet {
     dev::eth::TransactionSkeleton buildTransaction(
       std::string from, std::string to, BigNumber value,
       BigNumber gasLimit, BigNumber gasPrice, std::string dataHex,
-      int nonce, Error error, bool creation = false
+      int nonce, Error &error, bool creation = false
     );
 
     /**

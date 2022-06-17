@@ -177,7 +177,7 @@ bool Wallet::deleteAccount(std::string address) {
 dev::eth::TransactionSkeleton Wallet::buildTransaction(
   std::string from, std::string to,
   BigNumber value, BigNumber gasLimit, BigNumber gasPrice,
-  std::string dataHex, int nonce, Error error, bool creation
+  std::string dataHex, int nonce, Error &error, bool creation
 ) {
   dev::eth::TransactionSkeleton ret;
   try {
