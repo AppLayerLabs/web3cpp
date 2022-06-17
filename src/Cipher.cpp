@@ -57,7 +57,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
   // Check if derived key has the correct length.
   if (derivedKey.size() < 32 && !(o.count("compat") && o["compat"].get<std::string>() == "2")) {
     // cwarn << "Derived key's length too short (<32 bytes)";
-    error.setCode(13); // Key Derivation Invalid Length
+    error.setCode(14); // Key Derivation Invalid Length
     return bytesSec().ref().toString();
   }
   dev::bytes cipherBytes = dev::fromHex(o["ciphertext"].get<std::string>());
@@ -70,7 +70,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
       : dev::sha3(derivedKey.ref().cropped(16, 16).toBytes() + cipherBytes);
     if (mac != macExp) {
       // cwarn << "Invalid key - MAC mismatch; expected" << dev::toString(macExp) << ", got" << dev::toString(mac);
-      error.setCode(14); // Key Decryption MAC Mismatch
+      error.setCode(15); // Key Decryption MAC Mismatch
       return bytesSec().ref().toString();
     }
   } else if (o.count("sillymac")) {
@@ -81,7 +81,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
     );
     if (mac != macExp) {
       // cwarn << "Invalid key - MAC mismatch; expected" << dev::toString(macExp) << ", got" << dev::toString(mac);
-      error.setCode(14); // Key Decryption MAC Mismatch
+      error.setCode(15); // Key Decryption MAC Mismatch
       return bytesSec().ref().toString();
     }
   }
@@ -106,7 +106,7 @@ std::string Cipher::decrypt(std::string const& cipherText, std::string const& pa
     }
   } else {
     // cwarn << "Unknown cipher" << o["cipher"].get<std::string>() << "not supported.";
-    error.setCode(15); // Key Decryption Failed
+    error.setCode(16); // Key Decryption Failed
     return bytesSec().ref().toString();
   }
 }

@@ -177,7 +177,7 @@ bool Wallet::deleteAccount(std::string address) {
 dev::eth::TransactionSkeleton Wallet::buildTransaction(
   std::string from, std::string to,
   BigNumber value, BigNumber gasLimit, BigNumber gasPrice,
-  std::string dataHex, int nonce, bool creation
+  std::string dataHex, int nonce, Error error, bool creation
 ) {
   dev::eth::TransactionSkeleton ret;
   try {
@@ -191,8 +191,10 @@ dev::eth::TransactionSkeleton Wallet::buildTransaction(
     ret.gasPrice = gasPrice;
     ret.chainId = this->provider->getChainId();
   } catch (std::exception &e) {
-    throw std::string("buildTransaction error: ") + e.what();
+    error.setCode(11);  // Transaction Build Error
+    return ret;
   }
+  error.setCode(0);
   return ret;
 }
 
@@ -246,7 +248,7 @@ std::string Wallet::signTransaction(
     err.setCode(0);
     return txHexBuffer.str();
   } catch (std::exception &e) {
-    err.setCode(11); return ""; // Transaction Sign Error
+    err.setCode(12); return ""; // Transaction Sign Error
   }
 }
 

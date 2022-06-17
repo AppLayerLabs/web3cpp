@@ -117,7 +117,7 @@ Contract Contract::clone() {
 }
 
 std::string Contract::operator() (json arguments, std::string function, Error &error) {
-  if (!methods.count(function)) { error.setCode(16); return ""; } // ABI Functor Not Found
+  if (!methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
   if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
   if (arguments.size() != methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
 
@@ -156,7 +156,7 @@ std::string Contract::operator() (std::string function, json arguments, Error &e
   // Check if function exists.
   //std::cout << arguments.dump() << std::endl;
   std::string ret = "0x";
-  if (!methods.count(function)) { error.setCode(16); return ""; } // ABI Functor Not Found
+  if (!methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
   if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
   if (arguments.size() != methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
 
