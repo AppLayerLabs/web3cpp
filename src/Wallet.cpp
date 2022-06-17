@@ -190,7 +190,7 @@ dev::eth::TransactionSkeleton Wallet::buildTransaction(
     ret.gas = gasLimit;
     ret.gasPrice = gasPrice;
     ret.chainId = this->provider->getChainId();
-  } catch (const std::exception &e) {
+  } catch (std::exception &e) {
     throw std::string("buildTransaction error: ") + e.what();
   }
   return ret;
@@ -232,16 +232,17 @@ std::string Wallet::ecRecover(
 std::string Wallet::signTransaction(
   dev::eth::TransactionSkeleton txObj, std::string password, Error &err
 ) {
-  Secret s(dev::toHex(Cipher::decrypt(dev::toString(txObj.from), password, err)));
+  Secret s(dev::toHex(txObj.from));
   std::stringstream txHexBuffer;
   try {
     dev::eth::TransactionBase t(txObj);
     t.setNonce(txObj.nonce);
     t.sign(s);
     txHexBuffer << dev::toHex(t.rlp());
-  } catch (...) {
+  } catch (std::exception &e) {
     err.setCode(11);  // Transaction Sign Error
   }
+  err.setCode(0);
   return txHexBuffer.str();
 }
 
