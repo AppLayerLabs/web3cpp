@@ -192,6 +192,7 @@ std::string Utils::stripHexPrefix(std::string str) {
 }
 
 std::string Utils::hexToNumberString(std::string hex) {
+  if (hex.substr(0,2) != "0x" || hex.substr(0, 2) != "0X") { hex.insert(0, "0x"); }
   BigNumber bn = toBN(hex);
   std::stringstream ss;
   ss << bn;
