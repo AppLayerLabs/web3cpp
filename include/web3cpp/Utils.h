@@ -184,9 +184,12 @@ namespace Utils {
    * For example:
    * - toWei("5", 2) implies a 2 decimal currency -> 5.00 = 500 Wei
    * - fromWei("80000", 4) implies a 4 decimal currency -> 80000 Wei = 8.0000
+   * amounts in BigNumber are overloads converted to hex, then string.
    */
   std::string toWei(std::string amount, int decimals);
+  std::string toWei(BigNumber amount, int decimals);
   std::string fromWei(std::string amount, int decimals);
+  std::string fromWei(BigNumber amount, int decimals);
 
   /**
    * Adds a padding on the left or right of a string, respectively.

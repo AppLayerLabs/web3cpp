@@ -326,6 +326,12 @@ std::string Utils::toWei(std::string amount, int decimals) {
   return valuestr;
 }
 
+std::string Utils::toWei(BigNumber amount, int decimals) {
+  std::string amountHex = Utils::toHex(amount);
+  std::string amountStr = Utils::hexToNumberString(amountHex);
+  return toWei(amountStr, decimals);
+}
+
 std::string Utils::fromWei(std::string amount, int decimals) {
   std::string result;
   if (amount.size() <= decimals) {
@@ -340,6 +346,12 @@ std::string Utils::fromWei(std::string amount, int decimals) {
   }
   if (result == "") result = "0";
   return result;
+}
+
+std::string Utils::fromWei(BigNumber amount, int decimals) {
+  std::string amountHex = Utils::toHex(amount);
+  std::string amountStr = Utils::hexToNumberString(amountHex);
+  return fromWei(amountStr, decimals);
 }
 
 std::string Utils::padLeft(
