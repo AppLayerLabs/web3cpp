@@ -232,18 +232,22 @@ std::string Wallet::ecRecover(
 std::string Wallet::signTransaction(
   dev::eth::TransactionSkeleton txObj, std::string password, Error &err
 ) {
-  Secret s(dev::toHex(txObj.from));
-  std::stringstream txHexBuffer;
+  Error e;
+  Secret s(dev::toHex(Cipher::decrypt(
+    getAccountRawDetails("0x" + dev::toString(txObj.from)).dump(), password, e
+  )));
+  if (e.getCode() != 0) { err.setCode(e.getCode()); return ""; }
   try {
+    std::stringstream txHexBuffer;
     dev::eth::TransactionBase t(txObj);
     t.setNonce(txObj.nonce);
     t.sign(s);
     txHexBuffer << dev::toHex(t.rlp());
+    err.setCode(0);
+    return txHexBuffer.str();
   } catch (std::exception &e) {
-    err.setCode(11);  // Transaction Sign Error
+    err.setCode(11); return ""; // Transaction Sign Error
   }
-  err.setCode(0);
-  return txHexBuffer.str();
 }
 
 std::future<json> Wallet::sendTransaction(
