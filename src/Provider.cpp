@@ -15,7 +15,7 @@ json Provider::presets = {
     {"host", "api.avax-test.network"},
     {"target", "/ext/bc/C/rpc"},
     {"port", 443},
-    {"chainId", 43114},
+    {"chainId", 43113},
     {"currency", "AVAX"},
     {"explorerUrl", "https://testnet.snowtrace.io"},
   }}
