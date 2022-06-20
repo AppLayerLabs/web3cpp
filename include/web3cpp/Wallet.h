@@ -131,21 +131,6 @@ class Wallet {
     bool deleteAccount(std::string address);
 
     /**
-     * Build a transaction from user data.
-     * Coin transactions would have a blank dataHex and the "to" address
-     * being the destination address.
-     * Token transactions would have a filled dataHex, 0 txValue and
-     * the "to" address being the token contract's address.
-     * "creation" sets whether the transaction is creating a contract.
-     * Returns a skeleton filled with data for the transaction, which has to be signed.
-     */
-    dev::eth::TransactionSkeleton buildTransaction(
-      std::string from, std::string to, BigNumber value,
-      BigNumber gasLimit, BigNumber gasPrice, std::string dataHex,
-      int nonce, Error &error, bool creation = false
-    );
-
-    /**
      * Signs a data string as an "Ethereum Signed Message" (EIP-712 compliant).
      * Returns the hex signature, or an error message on failure.
      * Usable with ecRecover().
@@ -163,6 +148,21 @@ class Wallet {
     );
 
     /**
+     * Build a transaction from user data.
+     * Coin transactions would have a blank dataHex and the "to" address
+     * being the destination address.
+     * Token transactions would have a filled dataHex, 0 txValue and
+     * the "to" address being the token contract's address.
+     * "creation" sets whether the transaction is creating a contract.
+     * Returns a skeleton filled with data for the transaction, which has to be signed.
+     */
+    dev::eth::TransactionSkeleton buildTransaction(
+      std::string from, std::string to, BigNumber value,
+      BigNumber gasLimit, BigNumber gasPrice, std::string dataHex,
+      int nonce, Error &error, bool creation = false
+    );
+
+    /**
      * Signs a transaction.
      * Returns the signed transaction hash, or an empty string on failure.
      */
@@ -175,9 +175,7 @@ class Wallet {
      * Returns a JSON containing the send results, or an empty JSON
      * object on failure.
      */
-    std::future<json> sendTransaction(
-      std::string txHash, std::string password, Error &err
-    );
+    std::future<json> sendTransaction(std::string txHash, Error &err);
 
     // Stores/wipes the Wallet's password to/from memory, respectively.
     // 0 seconds = "store indefinitely until wiped manually".

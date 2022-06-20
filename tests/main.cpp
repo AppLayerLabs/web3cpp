@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
       t.handlePasswordStorageAuto();
       t.handlePasswordStorageManual();
       t.signAndRecoverMessage();
+      t.testTransaction();
     } else if (item == "contract") {
       std::cout << "* Testing functions from Contract" << std::endl;
       t.loadAndTestContractLegacy();

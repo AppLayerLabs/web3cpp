@@ -212,6 +212,16 @@ class Tests {
      */
     void signAndRecoverMessage();
 
+    /**
+     * Test for building, signing and sending a transaction.
+     * Require at least ONE existing Account WITH FUNDS.
+     * Account will NOT be automatically created and funds can NOT be
+     * automatically fetched.
+     * Make sure you go to a faucet and get AT LEAST 0.01 AVAX
+     * before running the test, otherwise it'll automatically fail.
+     */
+    void testTransaction();
+
     // ==============================================================
     // CONTRACT
     // ==============================================================

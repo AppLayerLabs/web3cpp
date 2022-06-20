@@ -174,30 +174,6 @@ bool Wallet::deleteAccount(std::string address) {
   return this->accountDB.deleteKeyValue(Utils::toLowercaseAddress(address));
 }
 
-dev::eth::TransactionSkeleton Wallet::buildTransaction(
-  std::string from, std::string to,
-  BigNumber value, BigNumber gasLimit, BigNumber gasPrice,
-  std::string dataHex, int nonce, Error &error, bool creation
-) {
-  dev::eth::TransactionSkeleton ret;
-  try {
-    ret.creation = creation;
-    ret.from = dev::eth::toAddress(Utils::toLowercaseAddress(from));
-    ret.to = dev::eth::toAddress(Utils::toLowercaseAddress(to));
-    ret.value = value;
-    if(!dataHex.empty()) { ret.data = dev::fromHex(dataHex); }
-    ret.nonce = nonce;
-    ret.gas = gasLimit;
-    ret.gasPrice = gasPrice;
-    ret.chainId = this->provider->getChainId();
-  } catch (std::exception &e) {
-    error.setCode(11);  // Transaction Build Error
-    return ret;
-  }
-  error.setCode(0);
-  return ret;
-}
-
 std::string Wallet::sign(
   std::string dataToSign, std::string address, std::string password
 ) {
@@ -231,6 +207,31 @@ std::string Wallet::ecRecover(
   return "0x" + dev::toHex(dev::toAddress(p));
 }
 
+dev::eth::TransactionSkeleton Wallet::buildTransaction(
+  std::string from, std::string to,
+  BigNumber value, BigNumber gasLimit, BigNumber gasPrice,
+  std::string dataHex, int nonce, Error &error, bool creation
+) {
+  dev::eth::TransactionSkeleton ret;
+  try {
+    ret.creation = creation;
+    ret.from = dev::eth::toAddress(Utils::toLowercaseAddress(from));
+    ret.to = dev::eth::toAddress(Utils::toLowercaseAddress(to));
+    ret.value = value;
+    if(!dataHex.empty()) { ret.data = dev::fromHex(dataHex); }
+    ret.nonce = nonce;
+    ret.gas = gasLimit;
+    ret.gasPrice = gasPrice;
+    ret.chainId = this->provider->getChainId();
+  } catch (std::exception &e) {
+    error.setCode(11);  // Transaction Build Error
+    return ret;
+  }
+  error.setCode(0);
+  return ret;
+}
+
+
 std::string Wallet::signTransaction(
   dev::eth::TransactionSkeleton txObj, std::string password, Error &err
 ) {
@@ -252,12 +253,26 @@ std::string Wallet::signTransaction(
   }
 }
 
-std::future<json> Wallet::sendTransaction(
-  std::string txHash, std::string password, Error &err
-) {
-  return std::async([=]{
+std::future<json> Wallet::sendTransaction(std::string txHash, Error &err) {
+  if (txHash.substr(0,2) != "0x" || txHash.substr(0,2) != "0X") txHash.insert(0, "0x");
+  return std::async([this, txHash, &err]{
     json txResult;
-    // TODO: use web3cpp methods to send and save tx in history, set error code 12 on fail
+    Error rpcErr;
+    std::string rpcStr = RPC::eth_sendRawTransaction(txHash, rpcErr).dump();
+    if (rpcErr.getCode() != 0) {
+      err.setCode(rpcErr.getCode());
+      return txResult;
+    }
+    std::string req = Net::HTTPRequest(
+      this->provider, Net::RequestTypes::POST, rpcStr
+    );
+    json reqJson = json::parse(req);
+    txResult = reqJson["result"];
+    err.setCode(0);
+    return txResult;
+
+
+    // TODO: save tx in history
     /*
     json txResult = json::parse(API::broadcastTx(txidHex));
     if (txResult.contains("result")) {
@@ -268,8 +283,8 @@ std::future<json> Wallet::sendTransaction(
       txData.operation = operation;
       saveTxToHistory(txData);
     }
-    */
     return txResult;
+    */
   });
 }
 
