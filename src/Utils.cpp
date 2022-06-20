@@ -425,3 +425,62 @@ void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
   storageLock.unlock();
   return;
 }
+
+json Utils::decodeRawTransaction(std::string signedTx) {
+  if (signedTx.substr(0, 2) == "0x" || signedTx.substr(0, 2) == "0X") {
+    signedTx = signedTx.substr(2); // Remove "0x"
+  }
+
+  json ret;
+  dev::eth::TransactionBase tx = dev::eth::TransactionBase(
+    dev::fromHex(signedTx), dev::eth::CheckTransaction::None
+  );
+
+  // Creation, message, sender, receiver and data
+  ret["hex"] = tx.sha3().hex();
+  if (tx.isCreation()) {
+    ret["type"] = "creation";
+    ret["code"] = dev::toHex(tx.data());
+  } else {
+    ret["type"] = "message";
+    ret["to"] = boost::lexical_cast<std::string>(tx.to());
+    ret["data"] = (tx.data().empty() ? "" : dev::toHex(tx.data()));
+  }
+  try {
+    auto s = tx.sender();
+    if (tx.isCreation()) {
+      ret["creates"] = boost::lexical_cast<std::string>(dev::toAddress(s, tx.nonce()));
+    }
+    ret["from"] = boost::lexical_cast<std::string>(s);
+  } catch (std::exception &e) {
+    ret["from"] = "<unsigned>";
+  }
+
+  // Value, nonce, gas limit, gas price, hash and r/s/v signature keys
+  ret["value"] = Utils::fromWei(boost::lexical_cast<std::string>(tx.value()), 18) + " AVAX";
+  ret["nonce"] = boost::lexical_cast<std::string>(tx.nonce());
+  ret["gas"] = boost::lexical_cast<std::string>(tx.gas());
+  ret["price"] = dev::eth::formatBalance(tx.gasPrice()) + " (" +
+    boost::lexical_cast<std::string>(tx.gasPrice()) + " wei)";
+  ret["hash"] = tx.sha3(dev::eth::WithoutSignature).hex();
+  if (tx.safeSender()) {
+    ret["r"] = boost::lexical_cast<std::string>(tx.signature().r);
+    ret["s"] = boost::lexical_cast<std::string>(tx.signature().s);
+    ret["v"] = boost::lexical_cast<std::string>(tx.signature().v);
+  }
+
+  // Timestamps (epoch and human-readable) and confirmed
+  const auto p1 = std::chrono::system_clock::now();
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::stringstream timestream;
+  timestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+  ret["humanDate"] = timestream.str();
+  ret["confirmed"] = false;
+  ret["unixDate"] = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+  ret["invalid"] = false;
+  ret["signature"] = signedTx;
+
+  return ret;
+}
+

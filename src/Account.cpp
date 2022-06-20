@@ -4,7 +4,8 @@ Account::Account(
   boost::filesystem::path walletPath, std::string __address, std::string __name,
   std::string __derivationPath, bool __isLedger, Provider *_provider
 ) : _address(__address), _name(__name), _derivationPath(__derivationPath),
-  _isLedger(__isLedger), provider(_provider)
+  _isLedger(__isLedger), provider(_provider),
+  transactionDB("transactions/" + __address, walletPath)
 {
   Error error;
   std::string nonceRequest = Net::HTTPRequest(
@@ -33,3 +34,18 @@ std::future<BigNumber> Account::balance() {
     return ret;
   });
 }
+
+bool Account::saveTxToHistory(std::string signedTx) {
+  json txData = Utils::decodeRawTransaction(signedTx);
+  return this->transactionDB.putKeyValue(txData["hash"], txData.dump());
+}
+
+json Account::getTxHistory() {
+  json ret;
+  std::map<std::string, std::string> hist = this->transactionDB.getAllPairs();
+  for (std::pair<std::string, std::string> item : hist) {
+    ret[item.first] = item.second;
+  }
+  return ret;
+}
+

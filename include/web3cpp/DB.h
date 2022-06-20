@@ -23,14 +23,13 @@ class Database {
     bool closeDB();
 
   public:
-    // Constructor.
+    // Constructors: empty, default and copy
+    Database(){}
     Database(std::string _name, boost::filesystem::path rootPath)
     : name(_name), path(rootPath.string() + "/" + name) {
       this->dbOpts.create_if_missing = true;
       openDB();
     }
-
-    // Copy constructor.
     Database(Database& other) noexcept :
       name(other.name), path(other.path), db(other.db),
       dbOpts(other.dbOpts), dbStatus(other.dbStatus), tmpValue(other.tmpValue)

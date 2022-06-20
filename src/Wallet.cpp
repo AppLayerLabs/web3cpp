@@ -253,12 +253,14 @@ std::string Wallet::signTransaction(
   }
 }
 
-std::future<json> Wallet::sendTransaction(std::string txHash, Error &err) {
-  if (txHash.substr(0,2) != "0x" || txHash.substr(0,2) != "0X") txHash.insert(0, "0x");
-  return std::async([this, txHash, &err]{
+std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
+  if (signedTx.substr(0,2) != "0x" || signedTx.substr(0,2) != "0X") {
+    signedTx.insert(0, "0x");
+  }
+  return std::async([this, signedTx, &err]{
     json txResult;
     Error rpcErr;
-    std::string rpcStr = RPC::eth_sendRawTransaction(txHash, rpcErr).dump();
+    std::string rpcStr = RPC::eth_sendRawTransaction(signedTx, rpcErr).dump();
     if (rpcErr.getCode() != 0) {
       err.setCode(rpcErr.getCode());
       return txResult;
@@ -267,24 +269,15 @@ std::future<json> Wallet::sendTransaction(std::string txHash, Error &err) {
       this->provider, Net::RequestTypes::POST, rpcStr
     );
     json reqJson = json::parse(req);
-    txResult = reqJson["result"];
-    err.setCode(0);
-    return txResult;
-
-
-    // TODO: save tx in history
-    /*
-    json txResult = json::parse(API::broadcastTx(txidHex));
-    if (txResult.contains("result")) {
-      // Store the successful transaction in the Account's history.
-      // Since the AVAX chain is pretty fast, we can ask if the transaction was
-      // already confirmed even immediately after sending it.
-      TxData txData = Utils::decodeRawTransaction(txidHex);
-      txData.operation = operation;
-      saveTxToHistory(txData);
+    txResult["signature"] = signedTx;
+    if (reqJson.count("error")) {
+      txResult["error"] = reqJson["error"].get<std::string>();
+      err.setCode(13);  // Transaction Send Error
+    } else {
+      txResult["result"] = reqJson["result"].get<std::string>();
+      err.setCode(0);
     }
     return txResult;
-    */
   });
 }
 

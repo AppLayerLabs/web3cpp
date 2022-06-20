@@ -213,7 +213,7 @@ class Tests {
     void signAndRecoverMessage();
 
     /**
-     * Test for building, signing and sending a transaction.
+     * Test for building, signing, sending and storing a transaction in history.
      * Require at least ONE existing Account WITH FUNDS.
      * Account will NOT be automatically created and funds can NOT be
      * automatically fetched.

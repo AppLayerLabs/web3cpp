@@ -41,12 +41,11 @@ class Wallet {
     dev::h256 passSalt;
     int passIterations = 100000;
 
-    // Wallet path, provider, Account list and internal databases.
+    // Wallet path, provider and internal databases.
     boost::filesystem::path path;
     Provider* provider;
     Database infoDB;
     Database accountDB;
-    Database transactionDB;
 
     // Variables for Wallet load status and password storage.
     bool _isLoaded;
@@ -54,7 +53,7 @@ class Wallet {
     std::time_t _passEnd;
     std::thread _passThread;
 
-    // Paths for wallet file and secrets folder.
+    // Several paths for internal wallet files/folders.
     boost::filesystem::path walletExistsPath()   { return path.string() + "/wallet.info"; };
     boost::filesystem::path walletFolder()       { return path.string() + "/wallet"; };
     boost::filesystem::path accountsFolder()     { return path.string() + "/wallet/accounts"; };
@@ -81,8 +80,7 @@ class Wallet {
     Wallet(Provider* _provider, boost::filesystem::path _path)
       : provider(_provider), path(_path),
         infoDB("walletInfo", walletFolder()),
-        accountDB("accounts", walletFolder()),
-        transactionDB("transactions", walletFolder())
+        accountDB("accounts", walletFolder())
     {};
 
     // Getter for provider.
@@ -172,25 +170,34 @@ class Wallet {
 
     /**
      * Sends a transaction over the management API.
-     * Returns a JSON containing the send results, or an empty JSON
-     * object on failure.
+     * Returns a JSON containing the send results and the transaction's
+     * raw signature, or an empty JSON object on failure.
      */
-    std::future<json> sendTransaction(std::string txHash, Error &err);
+    std::future<json> sendTransaction(std::string signedTx, Error &err);
 
-    // Stores/wipes the Wallet's password to/from memory, respectively.
-    // 0 seconds = "store indefinitely until wiped manually".
-    // Any non-zero value will spawn a thread that wipes automatically
-    // after said value counts down to 0.
+    /**
+     * Stores/wipes the Wallet's password to/from memory, respectively.
+     * 0 seconds = "store indefinitely until wiped manually".
+     * Any non-zero value will spawn a thread that wipes automatically
+     * after said value counts down to 0.
+     */
     void storePassword(std::string password, unsigned int seconds = 0);
     void clearPassword();
     bool isPasswordStored();
 
-    // Returns a list of addresses controlled by the node,
-    // the details for a specific address, and the raw details in JSON
-    // for a specific address, respectively.
-    // If no address is found, returns an empty Account or JSON object.
+    // Returns a list of addresses controlled by the node.
     std::vector<std::string> getAccounts();
+
+    /**
+     * Returns the details for a specific Account, or an empty Account
+     * if the address is not found.
+     */
     Account getAccountDetails(std::string address);
+
+    /**
+     * Returns a JSON object with the raw details of a specific Account,
+     * or an empty JSON object if the address is not found.
+     */
     json getAccountRawDetails(std::string address);
 };
 

@@ -27,6 +27,8 @@
 #include <nlohmann/json.hpp>
 #include <web3cpp/devcore/CommonIO.h>
 #include <web3cpp/devcore/SHA3.h>
+#include <web3cpp/ethcore/Common.h>
+#include <web3cpp/ethcore/TransactionBase.h>
 #include <web3cpp/Error.h>
 
 using json = nlohmann::ordered_json;
@@ -219,6 +221,12 @@ namespace Utils {
    */
   json readJSONFile(boost::filesystem::path &filePath);
   void writeJSONFile(json &obj, boost::filesystem::path &filePath);
+
+  /**
+   * Decode a raw transaction signature.
+   * Returns a JSON object with details of the transaction.
+   */
+  json decodeRawTransaction(std::string signedTx);
 };
 
 #endif  // UTILS_H

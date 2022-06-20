@@ -31,25 +31,23 @@ class Account {
     Provider *provider;
     std::atomic<bool> ready;
     mutable std::mutex accountLock;
+    Database transactionDB;
 
   public:
-    // Empty constructor.
+    // Constructors: empty, default and copy
     Account(){}
-
-    // Constructor.
     Account(
       boost::filesystem::path walletPath, std::string name, std::string __address,
       std::string __derivationPath, bool __isLedger, Provider *_provider
     );
-
-    // Copy constructor.
     Account(Account& other) noexcept :
       _address(other._address),
       _name(other._name),
       _derivationPath(other._derivationPath),
       _isLedger(other._isLedger),
       _nonce(other._nonce),
-      provider(other.provider)
+      provider(other.provider),
+      transactionDB(other.transactionDB)
     {}
 
     // Getters.
@@ -59,8 +57,14 @@ class Account {
     uint64_t nonce() { return _nonce; };
     bool isLedger() { return _isLedger; };
 
-    // Network related requests.
+    // Get the Account's balance from the network.
     std::future<BigNumber> balance();
+
+    // Save a transaction to the Account's local history.
+    bool saveTxToHistory(std::string signedTx);
+
+    // Get all saved transactions from this Account's local history.
+    json getTxHistory();
 };
 
 #endif  // ACCOUNTS_H

@@ -243,7 +243,11 @@ void Tests::testTransaction() {
   }
 
   if (buildErr.getCode() == 0 && signErr.getCode() == 0 && sendErr.getCode() == 0) {
-    passed();
+    if (!a.saveTxToHistory(signedTx)) {
+      failed("Transaction was made but not stored in history");
+    } else {
+      passed();
+    }
   }
 
   std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
