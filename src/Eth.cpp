@@ -1,170 +1,140 @@
 #include <web3cpp/Eth.h>
 
-std::future<std::string> Eth::getProtocolVersion() {
+std::future<json> Eth::getProtocolVersion() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_protocolVersion().dump()
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
-    return ret;
+    ));
   });
 }
 
 std::future<json> Eth::isSyncing() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_syncing().dump()
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
-    return ret;
+    ));
   });
 }
 
-std::future<std::string> Eth::getCoinbase() {
+std::future<json> Eth::getCoinbase() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_coinbase().dump()
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
-    return ret;
+    ));
   });
 }
 
-std::future<bool> Eth::isMining() {
+std::future<json> Eth::isMining() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_mining().dump()
-    );
-    json reqJson = json::parse(req);
-    bool ret = reqJson["result"].get<bool>();
-    return ret;
+    ));
   });
 }
 
-std::future<std::string> Eth::getHashrate() {
+std::future<json> Eth::getHashrate() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_hashrate().dump()
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
-    return ret;
+    ));
   });
 }
 
-std::future<std::string> Eth::getGasPrice() {
+std::future<json> Eth::getGasPrice() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_gasPrice().dump()
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
-    return ret;
+    ));
   });
 }
 
-std::future<std::vector<std::string>> Eth::getAccounts() {
+std::future<json> Eth::getAccounts() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_accounts().dump()
-    );
-    json reqJson = json::parse(req);
-    json reqRes = reqJson["result"].get<std::string>();
-    std::vector<std::string> ret;
-    for (std::string acc : reqRes) {
-      ret.push_back(acc);
-    }
-    return ret;
+    ));
   });
 }
 
-std::future<std::string> Eth::getBlockNumber() {
+std::future<json> Eth::getBlockNumber() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST,
       RPC::eth_blockNumber().dump()
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
-    return ret;
+    ));
   });
 }
 
-std::future<std::string> Eth::getBalance(
-  std::string address, std::string defaultBlock
-) {
+std::future<json> Eth::getBalance(std::string address, std::string defaultBlock) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getBalance(address,
       ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
     err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
-std::future<std::string> Eth::getStorageAt(
+std::future<json> Eth::getStorageAt(
   std::string address, std::string position, std::string defaultBlock
 ) {
+  if (position.substr(0, 2) != "0x" || position.substr(0, 2) != "0X") {
+    position.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getStorageAt(address, position,
       ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
     err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
-std::future<std::string> Eth::getStorageAt(
+std::future<json> Eth::getStorageAt(
   std::string address, BigNumber position, std::string defaultBlock
 ) {
   std::stringstream ss;
-  ss << position;
+  ss << std::hex << position;
   return getStorageAt(address, ss.str(), defaultBlock);
 }
 
-std::future<std::string> Eth::getCode(std::string address, std::string defaultBlock) {
+std::future<json> Eth::getCode(std::string address, std::string defaultBlock) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getCode(address,
       ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
     err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
@@ -172,7 +142,14 @@ std::future<std::string> Eth::getCode(std::string address, std::string defaultBl
 std::future<json> Eth::getBlock(
   std::string blockHashOrBlockNumber, bool isHash, bool returnTransactionObjects
 ) {
+  if (
+    blockHashOrBlockNumber.substr(0, 2) != "0x" ||
+    blockHashOrBlockNumber.substr(0, 2) != "0X"
+  ) {
+    blockHashOrBlockNumber.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = (isHash)
       ? RPC::eth_getBlockByHash(
@@ -182,56 +159,64 @@ std::future<json> Eth::getBlock(
         blockHashOrBlockNumber, returnTransactionObjects, err
       ).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
-std::future<std::string> Eth::getBlockTransactionCount(
+std::future<json> Eth::getBlockTransactionCount(
   std::string blockHashOrBlockNumber, bool isHash
 ) {
+  if (
+    blockHashOrBlockNumber.substr(0, 2) != "0x" ||
+    blockHashOrBlockNumber.substr(0, 2) != "0X"
+  ) {
+    blockHashOrBlockNumber.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = (isHash)
       ? RPC::eth_getBlockTransactionCountByHash(blockHashOrBlockNumber, err).dump()
       : RPC::eth_getBlockTransactionCountByNumber(blockHashOrBlockNumber, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
-std::future<std::string> Eth::getBlockUncleCount(
+std::future<json> Eth::getBlockUncleCount(
   std::string blockHashOrBlockNumber, bool isHash
 ) {
+  if (
+    blockHashOrBlockNumber.substr(0, 2) != "0x" ||
+    blockHashOrBlockNumber.substr(0, 2) != "0X"
+  ) {
+    blockHashOrBlockNumber.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = (isHash)
       ? RPC::eth_getUncleCountByBlockHash(blockHashOrBlockNumber, err).dump()
       : RPC::eth_getUncleCountByBlockNumber(blockHashOrBlockNumber, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
@@ -240,7 +225,17 @@ std::future<json> Eth::getUncle(
   std::string blockHashOrBlockNumber, std::string uncleIndex,
   bool isHash, bool returnTransactionObjects
 ) {
+  if (
+    blockHashOrBlockNumber.substr(0, 2) != "0x" ||
+    blockHashOrBlockNumber.substr(0, 2) != "0X"
+  ) {
+    blockHashOrBlockNumber.insert(0, "0x");
+  }
+  if (uncleIndex.substr(0, 2) != "0x" || uncleIndex.substr(0, 2) != "0X") {
+    uncleIndex.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = (isHash)
       ? RPC::eth_getUncleByBlockHashAndIndex(
@@ -250,31 +245,28 @@ std::future<json> Eth::getUncle(
         blockHashOrBlockNumber, uncleIndex, err
       ).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
 std::future<json> Eth::getTransaction(std::string transactionHash) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getTransactionByHash(transactionHash, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
@@ -282,7 +274,17 @@ std::future<json> Eth::getTransaction(std::string transactionHash) {
 std::future<json> Eth::getTransactionFromBlock(
   std::string hashStringOrNumber, bool isHash, std::string indexNumber
 ) {
+  if (
+    hashStringOrNumber.substr(0, 2) != "0x" ||
+    hashStringOrNumber.substr(0, 2) != "0X"
+  ) {
+    hashStringOrNumber.insert(0, "0x");
+  }
+  if (indexNumber.substr(0, 2) != "0x" || indexNumber.substr(0, 2) != "0X") {
+    indexNumber.insert(0, "0x");
+  }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = (isHash)
       ? RPC::eth_getTransactionByBlockHashAndIndex(
@@ -292,173 +294,157 @@ std::future<json> Eth::getTransactionFromBlock(
         hashStringOrNumber, indexNumber, err
       ).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
 std::future<json> Eth::getTransactionReceipt(std::string hash) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getTransactionReceipt(hash, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
-std::future<std::string> Eth::getTransactionCount(
+std::future<json> Eth::getTransactionCount(
   std::string address, std::string defaultBlock
 ) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_getTransactionCount(address,
       ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
     err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
-std::future<std::string> Eth::sign(std::string dataToSign, std::string address) {
+std::future<json> Eth::sign(std::string dataToSign, std::string address) {
+  if (!Utils::isHex(dataToSign)) { dataToSign = Utils::utf8ToHex(dataToSign); }
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_sign(address, dataToSign, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
 std::future<json> Eth::signTransaction(json txObj) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_signTransaction(txObj, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::object();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
-std::future<std::string> Eth::call(json callObject, std::string defaultBlock) {
+std::future<json> Eth::call(json callObject, std::string defaultBlock) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_call(callObject,
       ((!defaultBlock.empty()) ? defaultBlock : this->defaultBlock),
     err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
-std::future<std::string> Eth::estimateGas(json callObject) {
+std::future<json> Eth::estimateGas(json callObject) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_estimateGas(callObject, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return std::string("");
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    std::string ret = reqJson["result"].get<std::string>();
     return ret;
   });
 }
 
 std::future<json> Eth::getPastLogs(json options) {
   return std::async([=]{
+    json ret;
     Error err;
-    std::string rpcStr = RPC::eth_getLogs(options, err);
+    std::string rpcStr = RPC::eth_getLogs(options, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return json::array();
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    json ret = reqJson["result"];
     return ret;
   });
 }
 
-std::future<std::vector<std::string>> Eth::getWork() {
+std::future<json> Eth::getWork() {
   return std::async([=]{
-    std::string req = Net::HTTPRequest(
+    return json::parse(Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST, RPC::eth_getWork().dump()
-    );
-    json reqJson = json::parse(req);
-    json reqObj = reqJson["result"].get<std::string>();
-    std::vector<std::string> ret;
-    for (std::string item : reqObj) {
-      ret.push_back(item);
-    }
-    return ret;
+    ));
   });
 }
 
-std::future<bool> Eth::submitWork(
+std::future<json> Eth::submitWork(
   std::string nonce, std::string powHash, std::string digest
 ) {
   return std::async([=]{
+    json ret;
     Error err;
     std::string rpcStr = RPC::eth_submitWork(nonce, powHash, digest, err).dump();
     if (err.getCode() != 0) {
-      std::cout << "Error: " << __func__ << ": " << err.what() << std::endl;
-      return false;
+      ret["error"]["message"] = err.what();
+    } else {
+      ret = json::parse(Net::HTTPRequest(
+        this->provider, Net::RequestTypes::POST, rpcStr
+      ));
     }
-    std::string req = Net::HTTPRequest(
-      this->provider, Net::RequestTypes::POST, rpcStr
-    );
-    json reqJson = json::parse(req);
-    bool ret = reqJson["result"].get<bool>();
     return ret;
   });
 }

@@ -18,6 +18,8 @@
 using json = nlohmann::ordered_json;
 
 // Module that interacts with the blockchain and smart contracts.
+// Network functions always return the pure JSON response, which
+// has to be filtered afterwards ("result" or "error").
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth.html
 // https://eth.wiki/json-rpc/API
 
@@ -45,70 +47,77 @@ class Eth {
     std::string defaultBlock = "latest";
 
     // Returns the protocol version of the node.
-    std::future<std::string> getProtocolVersion();
+    std::future<json> getProtocolVersion();
 
-    // Checks if the node is currently syncing and returns a JSON syncing object.
-    // If not syncing, returns "false" inside a JSON object.
+    // Checks if the node is currently syncing.
+    // Returns either a syncing object, or "false".
     std::future<json> isSyncing();
 
     // Returns the Coinbase address to which mining rewards will go.
-    std::future<std::string> getCoinbase();
+    std::future<json> getCoinbase();
 
     // Checks whether the node is mining or not.
-    std::future<bool> isMining();
+    // Returns "true" if the node is mining, "false" otherwise.
+    std::future<json> isMining();
 
     // Returns the number of hashes per second that the node is mining with.
-    std::future<std::string> getHashrate();
+    std::future<json> getHashrate();
 
     // Returns the current gas price oracle in Wei.
-    // Current gas price = median gas price of the last few blocks.
-    std::future<std::string> getGasPrice();
+    // The gas price is determined by the last few blocks median gas price.
+    std::future<json> getGasPrice();
+
+    // TODO: getFeeHistory()?
 
     // Returns a list of accounts the node controls.
-    std::future<std::vector<std::string>> getAccounts();
+    std::future<json> getAccounts();
 
     // Returns the current block number.
-    std::future<std::string> getBlockNumber();
+    std::future<json> getBlockNumber();
 
-    // Returns the Wei balance of an address at a given block,
-    // or an empty string in case of error.
-    std::future<std::string> getBalance(
+    // Returns the Wei balance of an address at a given block.
+    std::future<json> getBalance(
       std::string address, std::string defaultBlock = ""
     );
 
     // Returns the value in storage at a specific position of an address.
-    std::future<std::string> getStorageAt(
+    // Position has to be in HEX if string.
+    // Position in BigNumber will be automatically converted to HEX.
+    std::future<json> getStorageAt(
       std::string address, std::string position, std::string defaultBlock = ""
     );
-    std::future<std::string> getStorageAt(
+    std::future<json> getStorageAt(
       std::string address, BigNumber position, std::string defaultBlock = ""
     );
 
     // Returns the code at a specific address.
-    std::future<std::string> getCode(std::string address, std::string defaultBlock = "");
+    std::future<json> getCode(std::string address, std::string defaultBlock = "");
 
     // Returns a block matching the given block number or hash.
+    // Block number has to be in HEX.
     // If returnTransactionObjects is true, the returned block will contain
     // all transactions as objects.
     // If false, will only contain transaction hashes.
-    // Returns an empty JSON object on failure.
     std::future<json> getBlock(
       std::string blockHashOrBlockNumber, bool isHash,
       bool returnTransactionObjects = false
     );
 
     // Returns the number of transactions in a given block.
-    std::future<std::string> getBlockTransactionCount(
+    // Block number has to be in HEX.
+    std::future<json> getBlockTransactionCount(
       std::string blockHashOrBlockNumber, bool isHash
     );
 
     // Returns the number of uncles in a block from a block matching the
     // given block hash or number.
-    std::future<std::string> getBlockUncleCount(
+    // Block number has to be in HEX.
+    std::future<json> getBlockUncleCount(
       std::string blockHashOrBlockNumber, bool isHash
     );
 
     // Returns a block's uncle by a given uncle index position.
+    // Both block number AND uncle index have to be in HEX.
     // An uncle does NOT contain individual transactions.
     // Return structure is the same as getBlock().
     std::future<json> getUncle(
@@ -121,6 +130,7 @@ class Eth {
 
     // Returns a transaction based on a block hash or number and the
     // transaction's index position.
+    // Both block number AND index have to be in HEX.
     // Return structure is the same as getTransaction().
     std::future<json> getTransactionFromBlock(
       std::string hashStringOrNumber, bool isHash, std::string indexNumber
@@ -131,12 +141,13 @@ class Eth {
     std::future<json> getTransactionReceipt(std::string hash);
 
     // Returns the number of transactions sent from the given address.
-    std::future<std::string> getTransactionCount(
+    std::future<json> getTransactionCount(
       std::string address, std::string defaultBlock = ""
     );
 
     // Signs data using a specific account.
-    std::future<std::string> sign(std::string dataToSign, std::string address);
+    // If data is a normal string it will be converted to HEX internally.
+    std::future<json> sign(std::string dataToSign, std::string address);
 
     // Signs a transaction. transactionObject is the same as sendTransaction().
     // Returns the signed transaction object.
@@ -146,13 +157,13 @@ class Eth {
     // VM of the node, but never mined in the blockchain.
     // callObject is the same as sendTransaction().
     // Returns the data of the call, e.g. a smart contract function's return value.
-    std::future<std::string> call(json callObject, std::string defaultBlock = "");
+    std::future<json> call(json callObject, std::string defaultBlock = "");
 
     // Executes a message call or transaction and returns the amount of gas used.
     // The `from` address MUST be specified, otherwise odd behaviour may be experienced.
     // callObject is the same as sendTransaction().
     // Returns the used gas for the simulated call/transaction, as a HEX string.
-    std::future<std::string> estimateGas(json callObject);
+    std::future<json> estimateGas(json callObject);
 
     // Returns past logs matching the given options.
     // json return is actually a JSON array of log objects
@@ -160,13 +171,13 @@ class Eth {
     std::future<json> getPastLogs(json options);
 
     // Returns work for miners to mine on.
-    // Returned strings are all in hex form.
-    std::future<std::vector<std::string>> getWork();
+    // Returned strings are all in HEX.
+    std::future<json> getWork();
 
     // Submits a proof-of-work solution.
     // Provided strings are all in hex form.
     // Returns true if solution is valid, false otherwise.
-    std::future<bool> submitWork(
+    std::future<json> submitWork(
       std::string nonce, std::string powHash, std::string digest
     );
 

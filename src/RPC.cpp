@@ -150,7 +150,7 @@ json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
 }
 
 json RPC::eth_getBlockTransactionCountByNumber(std::string number, Error &err) {
-  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
+  err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockTransactionCountByNumber", {number});
 }
@@ -173,7 +173,7 @@ json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
 }
 
 json RPC::eth_getUncleCountByBlockNumber(std::string number, Error &err) {
-  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
+  err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleCountByBlockNumber", {number});
 }
@@ -315,7 +315,7 @@ json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Er
 }
 
 json RPC::eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err) {
-  err.setCode((!_checkNumber(number)) ? 10 : 0);  // Invalid Number
+  err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockByNumber", {number, returnTransactionObjects});
 }
@@ -351,8 +351,7 @@ json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string in
 json RPC::eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
   int errCode = 0;
   [&](){
-    if (!_checkNumber(number)) { errCode = 10; return; } // Invalid Number
-    if (!_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexData(number) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
@@ -390,8 +389,7 @@ json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, E
 json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
   int errCode = 0;
   [&](){
-    if (!_checkNumber(number)) { errCode = 10; return; } // Invalid Number
-    if (!_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
+    if (!_checkHexData(number) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
   }();
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
