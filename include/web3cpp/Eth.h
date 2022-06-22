@@ -23,10 +23,6 @@ using json = nlohmann::ordered_json;
 // https://web3js.readthedocs.io/en/v1.7.0/web3-eth.html
 // https://eth.wiki/json-rpc/API
 
-// TODO:
-// - Implement promievents to deal with those functions:
-//   - sendTransaction(), sendSignedTransaction()
-
 class Eth {
   private:
     Provider *provider;
@@ -66,8 +62,6 @@ class Eth {
     // Returns the current gas price oracle in Wei.
     // The gas price is determined by the last few blocks median gas price.
     std::future<json> getGasPrice();
-
-    // TODO: getFeeHistory()?
 
     // Returns a list of accounts the node controls.
     std::future<json> getAccounts();

@@ -220,7 +220,7 @@ json RPC::eth_signTransaction(json txObj, Error &err) {
       (txObj.count("to") && !_checkAddress(txObj["to"]))
     ) { errCode = 5; return; } // Invalid Address
     if (
-      !_checkHexData(txObj["data"]) ||
+      (txObj.count("data") && !_checkHexData(txObj["data"])) ||
       (txObj.count("gas") && !_checkHexData(txObj["gas"])) ||
       (txObj.count("gasPrice") && !_checkHexData(txObj["gasPrice"])) ||
       (txObj.count("value") && !_checkHexData(txObj["value"])) ||
@@ -240,7 +240,7 @@ json RPC::eth_sendTransaction(json txObj, Error &err) {
       (txObj.count("to") && !_checkAddress(txObj["to"]))
     ) { errCode = 5; return; } // Invalid Address
     if (
-      !_checkHexData(txObj["data"]) ||
+      (txObj.count("data") && !_checkHexData(txObj["data"]) ||
       (txObj.count("gas") && !_checkHexData(txObj["gas"])) ||
       (txObj.count("gasPrice") && !_checkHexData(txObj["gasPrice"])) ||
       (txObj.count("value") && !_checkHexData(txObj["value"])) ||
