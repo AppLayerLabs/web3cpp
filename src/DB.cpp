@@ -20,7 +20,7 @@ bool Database::closeDB() {
   this->dbMutex.lock();
   this->db = NULL;
   this->dbMutex.unlock();
-  return true;
+  return (db == NULL);
 }
 
 bool Database::keyExists(std::string const &key) {

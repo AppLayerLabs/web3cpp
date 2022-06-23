@@ -31,36 +31,40 @@
 
 using json = nlohmann::ordered_json;
 
-// Module that interacts with a node's accounts.
-// https://web3js.readthedocs.io/en/v1.7.0/web3-eth-personal.html
+/**
+ * Abstraction for a single wallet.
+ */
 
 class Wallet {
   private:
-    // Wallet password hash, salt and number of PBKDF2 iterations.
-    dev::bytesSec passHash;
-    dev::h256 passSalt;
-    int passIterations = 100000;
+    dev::bytesSec passHash;       ///< Hash for the wallet's password
+    dev::h256 passSalt;           ///< Salt for the wallet's password.
+    int passIterations = 100000;  ///< Number of PBKDF2 iterations to hash+salt the wallet's password.
+    boost::filesystem::path path; ///< The wallet's folder path.
+    Provider* provider;           ///< Pointer to Web3::defaultProvider.
+    Database infoDB;              ///< The wallet's information database.
+    Database accountDB;           ///< The wallet's account database.
+    bool _isLoaded;               ///< Indicates the wallet is properly loaded.
+    std::string _password;        ///< In-memory plain text copy of the wallet's password. Set by the user when they want to "remember" the password.
+    std::time_t _passEnd;         ///< Timestamp after which the password will be "forgotten"/erased from memory.
+    std::thread _passThread;      ///< Thread object that runs passHandler().
 
-    // Wallet path, provider and internal databases.
-    boost::filesystem::path path;
-    Provider* provider;
-    Database infoDB;
-    Database accountDB;
+    /// Get the wallet's "wallet.info" file path. Usually used to check if the wallet exists.
+    boost::filesystem::path walletExistsPath() { return path.string() + "/wallet.info"; };
 
-    // Variables for Wallet load status and password storage.
-    bool _isLoaded;
-    std::string _password;
-    std::time_t _passEnd;
-    std::thread _passThread;
+    /// Get the wallet's root folder path.
+    boost::filesystem::path walletFolder() { return path.string() + "/wallet"; };
 
-    // Several paths for internal wallet files/folders.
-    boost::filesystem::path walletExistsPath()   { return path.string() + "/wallet.info"; };
-    boost::filesystem::path walletFolder()       { return path.string() + "/wallet"; };
-    boost::filesystem::path accountsFolder()     { return path.string() + "/wallet/accounts"; };
-    boost::filesystem::path seedPhraseFile()     { return path.string() + "/wallet/seed"; };
+    /// Get the wallet's account database folder path.
+    boost::filesystem::path accountsFolder() { return path.string() + "/wallet/accounts"; };
+
+    /// Get the wallet's seed phrase file path.
+    boost::filesystem::path seedPhraseFile() { return path.string() + "/wallet/seed"; };
+
+    /// Get the wallet's transaction database root folder path.
     boost::filesystem::path transactionsFolder() { return path.string() + "/wallet/transactions"; }
 
-    // Thread function for storing/clearing password in memory
+    /// Threaded function that handles the logic of storing/clearing password to/from memory.
     void passHandler() {
       while (true) {
         std::time_t now = std::time(nullptr);
@@ -72,74 +76,116 @@ class Wallet {
       return;
     }
 
-    // Called by loadWallet() if no wallet is found on the desired path.
+    /**
+     * Creates a new wallet.
+     * Called by loadWallet() if no wallet is found on the desired path.
+     * Also attempts to create a default account in the process.
+     * @param &password The wallet's password.
+     * @param &error Error object.
+     * @return `true` if the wallet was successfully created, `false` otherwise.
+     *         Will still return `true` if the default account wasn't created.
+     */
     bool createNewWallet(std::string const &password, Error &error);
 
   public:
-    // Constructor.
+    /**
+     * Constructor.
+     * @param *_provider Pointer to the provider that will be used.
+     * @param _path The path for the wallet.
+     */
     Wallet(Provider* _provider, boost::filesystem::path _path)
       : provider(_provider), path(_path),
         infoDB("walletInfo", walletFolder()),
         accountDB("accounts", walletFolder())
     {};
 
-    // Getter for provider.
-    Provider* getProvider() { return this->provider; }
+    Provider* getProvider() { return this->provider; } ///< Getter for provider.
 
     /**
      * Load a wallet with the given password.
      * Creates a new wallet if no wallet exists.
-     * Returns true on success, false if password is incorrect..
+     * @param &password The wallet's password.
+     * @param &error Error object.
+     * @return `true` if the wallet is successfully loaded, `false` otherwise.
      */
     bool loadWallet(std::string const &password, Error &error);
 
-    // Check if a wallet is loaded.
+    /**
+     * Check if a wallet is loaded.
+     * @return `true` if wallet is loaded, `false` otherwise.
+     */
     bool isLoaded() { return this->_isLoaded; }
 
-    // Check if the given password matches with the wallet's.
+    /**
+     * Check if a given password matches with the wallet's.
+     * @param &password The password to be checked.
+     * @return `true` if the password matches the wallet's, `false` otherwise.
+     */
     bool checkPassword(std::string &password);
 
-    // Check if the wallet file and its keys folder exists in a given path.
+    /**
+     * Check if the wallet file and its keys folder exists in a given folder.
+     * @param &wallet_path The folder to be checked.
+     * @return `true` if a wallet exists in the given folder, `false` otherwise.
+     */
     static bool walletExists(boost::filesystem::path &wallet_path);
 
     /**
-     * Creates a new account.
-     * Always stores address as lowercase.
-     * If no custom seed is passed, uses BIP39 seed stored in json file.
-     * Returns the checksum address of the newly created Account,
-     * or an empty string on failure.
+     * Create a new account. Address is stored as lowercase.
+     * @param derivPath The full derivation path of the account (e.g. "m/44'/60'/0'/0").
+     * @param &password The wallet's password.
+     * @param name A custom human-readable name/label for the account.
+     * @param &error Error object.
+     * @param seed (optional) The BIP39 seed phrase to use for generating the account.
+     *                        If no seed is passed, uses the BIP39 seed from the wallet.
+     * @return The checksum address of the new account, or an empty string on failure.
      */
     std::string createAccount(
       std::string derivPath, std::string &password, std::string name,
       Error &error, std::string seed = ""
     );
 
-    // Import a given private key into the wallet database.
-    // Always stores address as lowercase.
+    /**
+     * Import a given private key into the wallet. Address is stored as lowercase.
+     * @param &secret The private/public key pair to import.
+     * @param &password The wallet's password.
+     * @param name A custom human-readable name/label for the account.
+     * @param &derivPath The full derivation path of the account (e.g. "m/44'/60'/0'/0").
+     * @param &error Error object.
+     * @return `true` if the key was successfully imported, `false` otherwise.
+     */
     bool importPrivKey(
       dev::Secret const &secret, std::string const &password,
-      std::string const &name, std::string const &derivationPath, Error &error
+      std::string const &name, std::string const &derivPath, Error &error
     );
 
     /**
-     * Deletes a previously created account.
-     * Converts input to lowercase before attempting to delete.
-     * Returns true on success, false on failure.
+     * Delete an existing account.
+     * @param address The address of the account to be deleted. Will be converted
+     *                to lowercase before attempting to delete.
+     * @return `true` if the account was successfully deleted or didn't exist
+     *         anyway prior to requesting deletion, `false` otherwise.
      */
     bool deleteAccount(std::string address);
 
     /**
-     * Signs a data string as an "Ethereum Signed Message" (EIP-712 compliant).
-     * Returns the hex signature, or an error message on failure.
-     * Usable with ecRecover().
+     * Sign a data string as an "Ethereum Signed Message".
+     * [EIP-712](https://eips.ethereum.org/EIPS/eip-712) compliant.
+     * @param dataToSign The data to be signed.
+     * @param address The address to use for signing.
+     * @param password The wallet's password.
+     * @return The hex signature which is meant to be used on ecRecover(),
+     *         or an error message on failure.
      */
     std::string sign(
       std::string dataToSign, std::string address, std::string password
     );
 
     /**
-     * Recovers the account that signed the given data.
-     * Signature is the one returned from sign().
+     * Recover the account that signed a given data string.
+     * @param dataThatWasSigned The unencrypted data string that was signed.
+     * @param signature The raw signature that came from sign().
+     * @return The original account used to sign the data string.
      */
     std::string ecRecover(
       std::string dataThatWasSigned, std::string signature
@@ -147,12 +193,23 @@ class Wallet {
 
     /**
      * Build a transaction from user data.
-     * Coin transactions would have a blank dataHex and the "to" address
-     * being the destination address.
-     * Token transactions would have a filled dataHex, 0 txValue and
-     * the "to" address being the token contract's address.
-     * "creation" sets whether the transaction is creating a contract.
-     * Returns a skeleton filled with data for the transaction, which has to be signed.
+     * @param from The address that will make the transaction.
+     * @param to The address that will receive the transaction. For coin transactions,
+     *           this is the destination address. For token transactions, this is
+     *           the token contract's address.
+     * @param value The value of the transaction (in Wei). For token transactions
+     *              this is 0, as the token value would be packed inside `dataHex`.
+     * @param gasLimit The gas limit of the transaction (in Wei).
+     * @param gasPrice The gas price of the transaction (in Wei).
+     * @param dataHex The arbitrary data of the transaction. For coin transactions
+     *                this is blank. For token transactions this would be a
+     *                packed ABI call.
+     * @param nonce The nonce of the `from` address.
+     * @param &error Error object.
+     * @param creation (optional) Sets whether the transaction is creating a contract
+     *                 or not. Defaults to false.
+     * @return A struct filled with data for the transaction, ready to be signed,
+     *         or an empty/incomplete struct on failure.
      */
     dev::eth::TransactionSkeleton buildTransaction(
       std::string from, std::string to, BigNumber value,
@@ -161,42 +218,60 @@ class Wallet {
     );
 
     /**
-     * Signs a transaction.
-     * Returns the signed transaction hash, or an empty string on failure.
+     * Sign a built transaction.
+     * @param txObj The transaction struct returned from buildTransaction().
+     * @param password The wallet's password.
+     * @param &err Error object.
+     * @return The raw transaction signature ready to be sent, or an empty string on failure.
      */
     std::string signTransaction(
       dev::eth::TransactionSkeleton txObj, std::string password, Error &err
     );
 
     /**
-     * Sends a transaction over the management API.
-     * Returns a JSON containing the send results and the transaction's
-     * raw signature, or an empty JSON object on failure.
+     * Send/broadcast a signed transaction to the blockchain.
+     * @param signedTx The raw transaction signature returned from signTransaction().
+     * @param &err Error object.
+     * @return A JSON object with the send results (either "result" or "error")
+     *         and the transaction's raw signature.
      */
     std::future<json> sendTransaction(std::string signedTx, Error &err);
 
     /**
-     * Stores/wipes the Wallet's password to/from memory, respectively.
-     * 0 seconds = "store indefinitely until wiped manually".
-     * Any non-zero value will spawn a thread that wipes automatically
-     * after said value counts down to 0.
+     * Store the wallet's password in memory.
+     * @param password The wallet's password.
+     * @param seconds (optional) The number of seconds to store the password in memory.
+     *                Defaults to 0, which means "store indefinitely until cleared manually".
      */
     void storePassword(std::string password, unsigned int seconds = 0);
-    void clearPassword();
+
+    void clearPassword(); ///< Clear the wallet's password from memory.
+
+    /**
+     * Check if the wallet has a password stored in memory.
+     * @return `true` is password is stored in memory, `false` otherwise.
+     */
     bool isPasswordStored();
 
-    // Returns a list of addresses controlled by the node.
+    /**
+     * Get the accounts stored in the wallet.
+     * @return A list of addresses from the wallet.
+     */
     std::vector<std::string> getAccounts();
 
     /**
-     * Returns the details for a specific Account, or an empty Account
-     * if the address is not found.
+     * Get the details for a specific account.
+     * @param address The address of the account. Will be converted to lowercase.
+     * @return A struct with details of the account, or an empty struct
+     *         if the address is not found.
      */
     Account getAccountDetails(std::string address);
 
     /**
-     * Returns a JSON object with the raw details of a specific Account,
-     * or an empty JSON object if the address is not found.
+     * Get the raw structure of a specific account.
+     * @param address The address of the account. Will be converted to lowercase.
+     * @return A JSON object with the raw details of the account, or an empty
+     *         JSON object if the address is not found.
      */
     json getAccountRawDetails(std::string address);
 };

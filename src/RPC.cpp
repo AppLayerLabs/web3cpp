@@ -17,12 +17,11 @@ bool RPC::_checkAddress(std::string add) {
   return Utils::isAddress(add);
 }
 
-bool RPC::_checkDefaultBlock(std::string defaultBlock) {
+// TODO: fix this? block has to be a HEX digit, not a DEC digit
+bool RPC::_checkDefaultBlock(std::string block) {
   return (
-    defaultBlock == "latest" ||
-    defaultBlock == "earliest" ||
-    defaultBlock == "pending" ||
-    std::all_of(defaultBlock.begin(), defaultBlock.end(), ::isdigit)
+    block == "latest" || block == "earliest" || block == "pending" ||
+    std::all_of(block.begin(), block.end(), ::isdigit)
   );
 }
 
@@ -240,7 +239,7 @@ json RPC::eth_sendTransaction(json txObj, Error &err) {
       (txObj.count("to") && !_checkAddress(txObj["to"]))
     ) { errCode = 5; return; } // Invalid Address
     if (
-      (txObj.count("data") && !_checkHexData(txObj["data"]) ||
+      (txObj.count("data") && !_checkHexData(txObj["data"])) ||
       (txObj.count("gas") && !_checkHexData(txObj["gas"])) ||
       (txObj.count("gasPrice") && !_checkHexData(txObj["gasPrice"])) ||
       (txObj.count("value") && !_checkHexData(txObj["value"])) ||
@@ -546,109 +545,5 @@ json RPC::eth_submitHashrate(std::string hashrate, std::string id, Error &err) {
   err.setCode(errCode);
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_submitHashrate", {hashrate, id});
-}
-
-json RPC::db_putString(std::string dbName, std::string key, std::string value) {
-  return _buildJSON("db_putString", {dbName, key, value});
-}
-
-json RPC::db_getString(std::string dbName, std::string key) {
-  return _buildJSON("db_getString", {dbName, key});
-}
-
-json RPC::db_putHex(std::string dbName, std::string key, std::string value, Error &err) {
-  err.setCode((!_checkHexData(value)) ? 4 : 0); // Invalid Hex Data
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("db_putHex", {dbName, key, value});
-}
-
-json RPC::db_getHex(std::string dbName, std::string key) {
-  return _buildJSON("db_getHex", {dbName, key});
-}
-
-json RPC::shh_version() {
-  return _buildJSON("shh_version");
-}
-
-json RPC::shh_post(json whisperPostObject, Error &err) {
-  int errCode = 0;
-  [&](){
-    for (json topic : whisperPostObject["topics"]) {
-      std::string topicStr = topic.get<std::string>();
-      if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
-    }
-    if (!_checkHexData(whisperPostObject["data"])) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexData(whisperPostObject["priority"])) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexData(whisperPostObject["ttl"])) { errCode = 4; return; } // Invalid Hex Data
-    if (whisperPostObject.count("from")) {
-      if (!_checkHexData(whisperPostObject["from"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(whisperPostObject["from"], 65)) { errCode = 6; return; } // Invalid Hash Length
-    }
-    if (whisperPostObject.count("to")) {
-      if (!_checkHexData(whisperPostObject["to"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(whisperPostObject["to"], 65)) { errCode = 6; return; } // Invalid Hash Length
-    }
-  }();
-  err.setCode(errCode);
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_post", {whisperPostObject});
-}
-
-json RPC::shh_newIdentity() {
-  return _buildJSON("shh_newIdentity");
-}
-
-json RPC::shh_hasIdentity() {
-  return _buildJSON("shh_hasIdentity");
-}
-
-json RPC::shh_newGroup() {
-  return _buildJSON("shh_newGroup");
-}
-
-json RPC::shh_addToGroup(std::string identityAddress, Error &err) {
-  int errCode = 0;
-  [&](){
-    if (!_checkHexData(identityAddress)) { errCode = 4; return; } // Invalid Hex Data
-    if (!_checkHexLength(identityAddress, 65)) { errCode = 6; return; } // Invalid Hash Length
-  }();
-  err.setCode(errCode);
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_addToGroup", {identityAddress});
-}
-
-json RPC::shh_newFilter(json filterOptions, Error &err) {
-  int errCode = 0;
-  [&](){
-    for (json topic : filterOptions["topics"]) {
-      std::string topicStr = topic.get<std::string>();
-      if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
-    }
-    if (filterOptions.count("to")) {
-      if (!_checkHexData(filterOptions["to"])) { errCode = 4; return; } // Invalid Hex Data
-      if (!_checkHexLength(filterOptions["to"], 65)) { errCode = 6; return; } // Invalid Hash Length
-    }
-  }();
-  err.setCode(errCode);
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_newFilter", {filterOptions});
-}
-
-json RPC::shh_uninstallFilter(std::string filterId, Error &err) {
-  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_uninstallFilter", {filterId});
-}
-
-json RPC::shh_getFilterChanges(std::string filterId, Error &err) {
-  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_getFilterChanges", {filterId});
-}
-
-json RPC::shh_getMessages(std::string filterId, Error &err) {
-  err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
-  return (err.getCode() != 0) ? json::object()
-    : _buildJSON("shh_getMessages", {filterId});
 }
 

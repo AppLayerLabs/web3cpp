@@ -16,30 +16,40 @@
 using json = nlohmann::ordered_json;
 
 /**
- * Module that contains information about a given account,
- * imported by the Wallet class which controls all instances of Accounts.
- * Also contains information about transactions of that specific account.
+ * Abstraction for a single account.
+ * Contains details such as address, nonce, transaction history, etc..
  */
 
 class Account {
   private:
-    std::string _address;
-    std::string _name;
-    std::string _derivationPath;
-    uint64_t _nonce;
-    bool _isLedger;
-    Provider *provider;
-    std::atomic<bool> ready;
-    mutable std::mutex accountLock;
-    Database transactionDB;
+    std::string _address;           ///< Address for the account.
+    std::string _name;              ///< Custom name/label for the account.
+    std::string _derivationPath;    ///< Complete derivation path for the account (e.g. "m/44'/60'/0'/0").
+    uint64_t _nonce;                ///< Current nonce for the account.
+    bool _isLedger;                 ///< Indicates the account is imported from a Ledger device.
+    Provider *provider;             ///< Pointer to Web3::defaultProvider.
+    mutable std::mutex accountLock; ///< Mutex for managing read/write access to the account object.
+    Database transactionDB;         ///< Database of transactions made with the account.
 
   public:
-    // Constructors: empty, default and copy
+    /// Empty constructor.
     Account(){}
+
+    /**
+     * Default constructor.
+     * @param walletPath The path for the wallet from which the account comes from.
+     * @param name Custom name/label for the account.
+     * @param __address Address for the account.
+     * @param __derivationPath Full derivation path for the account (e.g. `m/44'/60'/0'/0`).
+     * @param __isLedger Flag to set whether the account comes from a Ledger device or not.
+     * @param *_provider Pointer to the provider used by the account.
+     */
     Account(
       boost::filesystem::path walletPath, std::string name, std::string __address,
       std::string __derivationPath, bool __isLedger, Provider *_provider
     );
+
+    /// Copy constructor.
     Account(Account& other) noexcept :
       _address(other._address),
       _name(other._name),
@@ -50,20 +60,29 @@ class Account {
       transactionDB(other.transactionDB)
     {}
 
-    // Getters.
-    std::string address() { return _address; };
-    std::string name() { return _name; }
-    std::string derivationPath() { return _derivationPath; };
-    uint64_t nonce() { return _nonce; };
-    bool isLedger() { return _isLedger; };
+    std::string address() { return _address; }                ///< Getter for the address.
+    std::string name() { return _name; }                      ///< Getter for the custom name/label.
+    std::string derivationPath() { return _derivationPath; }  ///< Getter for the derivation path.
+    uint64_t nonce() { return _nonce; }                       ///< Getter for the nonce.
+    bool isLedger() { return _isLedger; }                     ///< Getter for the Ledger flag.
 
-    // Get the Account's balance from the network.
+    /**
+     * Request the account's balance from the network.
+     * @return The balance in Wei as a BigNumber, or 0 if the request fails.
+     */
     std::future<BigNumber> balance();
 
-    // Save a transaction to the Account's local history.
+    /**
+     * Save a transaction to the account's local history database.
+     * @param signedTx The raw transaction signature that will be decoded and stored.
+     * @return `true` on success, `false` on failure.
+     */
     bool saveTxToHistory(std::string signedTx);
 
-    // Get all saved transactions from this Account's local history.
+    /**
+     * Get all saved transactions from this account's local history database.
+     * @return The account's transaction history as a JSON object.
+     */
     json getTxHistory();
 };
 

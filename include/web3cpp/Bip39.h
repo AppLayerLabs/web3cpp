@@ -14,35 +14,37 @@
 #include <boost/lexical_cast.hpp>
 
 /**
- * Simple wrapper for BIP39 interactions.
- * Uses https://github.com/itamarcps/bip3x to ensure safety (OpenSSL as randomness).
+ * Namespace for BIP39 functions.
+ * Abstracts functions from the [bip3x](https://github.com/itamarcps/bip3x) library.
  */
 
 namespace BIP39 {
   /**
    * Generate a new random mnemonic phrase.
-   * Returns the mnemonic phrase.
+   * @return A struct that contains details about the mnemonic phrase.
    */
   bip3x::Bip39Mnemonic::MnemonicResult createNewMnemonic();
 
   /**
-   * Create a public/private key pair for an Account using a mnemonic phrase
-   * and a derivation path (e.g. "m/44'/60'/0'/0" for Ethereum).
-   * Returns the key pair for the Account.
+   * Create a public/private key pair.
+   * @param &phrase The full BIP39 mnemonic phrase string.
+   * @param derivPath The full derivation path (e.g. "m/44'/60'/0'/0").
+   * @return An object that contains details about the key pair.
    */
   bip3x::HDKey createKey(std::string &phrase, std::string derivPath);
 
   /**
-   * Check if a word exists in the English BIP39 wordlist.
-   * Returns true on success, false on failure.
+   * Check if a word exists in the **English** BIP39 wordlist.
+   * @return `true` if the word exists, `false` otherwise.
    */
   bool wordExists(std::string word);
 
   /**
-   * Generate a list with 10 Accounts based on a given seed and a starting index.
-   * derivPath should not include last digit, example:
-   * "m/44'/60'/0'/0/"
-   * Returns a vector of pairs - first = address, second = path.
+   * Generate a list with 10 addresses based on a given seed and a starting index.
+   * @param &phrase The full BIP39 mnemonic phrase string.
+   * @param derivPath The derivation path **without** the last digit (e.g. "m/44'/60'/0'/0/").
+   * @param start The derivation index to start counting from (e.g. "10" will count from indexes 10-19).
+   * @return A vector of pairs of generated addresses and their respective full derivation paths.
    */
   std::vector<std::pair<std::string,std::string>> generateAccountsFromSeed(
     std::string &phrase, std::string derivPath, int64_t start

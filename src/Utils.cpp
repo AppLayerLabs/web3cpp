@@ -16,10 +16,8 @@ boost::filesystem::path Utils::GetSpecialFolderPath(int nFolder, bool fCreate) {
 boost::filesystem::path Utils::getDefaultDataDir() {
   namespace fs = boost::filesystem;
   #ifdef __MINGW32__
-    // Windows: C:\Users\Username\AppData\Roaming\web3cpp
     return GetSpecialFolderPath(CSIDL_APPDATA) / "web3cpp";
   #else
-    // Unix: ~/.web3cpp
     fs::path pathRet;
     char* pszHome = getenv("HOME");
     if (pszHome == NULL || strlen(pszHome) == 0)
@@ -389,10 +387,10 @@ std::string Utils::rightPad(
   return padRight(string, characterAmount, sign);
 }
 
+// TODO: use Error instead of throwing?
 json Utils::readJSONFile(boost::filesystem::path &filePath) {
   json returnData;
   storageLock.lock();
-  //std::cout << "File path: " << filePath.string() << std::endl;
   if (!boost::filesystem::exists(filePath)) {
     throw std::string("Error reading json file: File does not exist");
   }
@@ -404,15 +402,13 @@ json Utils::readJSONFile(boost::filesystem::path &filePath) {
     storageLock.unlock();
     throw std::string("Error reading json file: ") + std::string(e.what());
   }
-
   storageLock.unlock();
   return returnData;
 }
 
+// TODO: use Error instead of throwing?
 void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
-  json returnData;
   storageLock.lock();
-
   try {
     boost::nowide::ofstream os(filePath.string());
     os << std::setw(2) << obj << std::endl;
@@ -421,9 +417,7 @@ void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
     storageLock.unlock();
     throw std::string("Error writing json file: ") + std::string(e.what());
   }
-
   storageLock.unlock();
-  return;
 }
 
 json Utils::decodeRawTransaction(std::string signedTx) {

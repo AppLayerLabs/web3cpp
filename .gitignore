@@ -3,3 +3,4 @@ build/
 *.kate-swp
 .vscode/*.*
 include/web3cpp/version.h
+docs/

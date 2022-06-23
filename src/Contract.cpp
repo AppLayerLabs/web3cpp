@@ -152,6 +152,25 @@ std::string Contract::operator() (json arguments, std::string function, Error &e
   return Solidity::packMulti(args, error, func);
 }
 
+// ALL ARGUMENTS ARE PARSED AS STRINGS INSIDE THE JSON!
+// Always use ordered_json!
+// Example:
+// Function(uint256, address[], uint256)
+// [
+//   "5123815123858123",
+//   [
+//     "0xaaaaaaaaaaaaaaa...",
+//     "0xbbbbbbbbbbbbbbb..."
+//   ],
+//   "189237815123"
+// ]
+// jsonArgs = json::parse(
+//   "[\"5123815123858123\",
+//   [\"0xaaaaaaaaaaaaaaa...\",
+//   \"0xbbbbbbbbbbbbbbb...\"],
+//   \"189237815123\"]"
+// );
+// contract("Function", jsonArgs, error);
 std::string Contract::operator() (std::string function, json arguments, Error &error) {
   // Check if function exists.
   //std::cout << arguments.dump() << std::endl;

@@ -128,7 +128,7 @@ std::string Wallet::createAccount(
 
 bool Wallet::importPrivKey(
   dev::Secret const &secret, std::string const &password,
-  std::string const &name, std::string const &derivationPath, Error &error
+  std::string const &name, std::string const &derivPath, Error &error
 ) {
   // Check if password is correct
   json walletInfo = json::parse(infoDB.getKeyValue("walletInfo"));
@@ -150,7 +150,7 @@ bool Wallet::importPrivKey(
     "0x" + dev::toHex(dev::toAddress(secret))
   );
   encryptedKey["name"] = name;
-  encryptedKey["derivationPath"] = derivationPath;
+  encryptedKey["derivationPath"] = derivPath;
   encryptedKey["isLedger"] = false;
 
   // Import the account
