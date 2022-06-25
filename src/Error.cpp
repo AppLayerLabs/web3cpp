@@ -34,6 +34,9 @@ const std::map<uint64_t, std::string> Error::codeMap = {
   {30, "ABI Invalid Function"},
   {31, "ABI Unsupported Or Invalid Type"},
   {32, "ABI Missing Type Or Value"},
+  {33, "JSON File Does Not Exist"},
+  {34, "JSON File Read Error"},
+  {35, "JSON File Write Error"},
   {999, "Unknown Error"}
 };
 

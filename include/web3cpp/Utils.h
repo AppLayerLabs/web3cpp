@@ -103,12 +103,12 @@ namespace Utils {
    * @return The hash of the string.
    */
   std::string sha3(std::string string, bool isNibble = false);
-  
+
   std::string keccak256(std::string string, bool isNibble = false); ///< Alias of sha3().
-  
+
   /// Same as sha3(), but returns the hash value instead of empty if an empty string is passed.
   std::string sha3Raw(std::string string, bool isNibble = false);
-  
+
   /**
    * Calculate the Keccak256/SHA3 of given arguments in the same way %Solidity would.
    * @param params The arguments to be hashed. Will be converted/packed to ABI
@@ -269,7 +269,7 @@ namespace Utils {
    * @return The amount in fixed point as a string.
    */
   std::string fromWei(std::string amount, int decimals);
-  
+
   /// Overload of fromWei() that takes a BigNumber as the amount.
   std::string fromWei(BigNumber amount, int decimals);
 
@@ -314,16 +314,18 @@ namespace Utils {
   /**
    * Read from a JSON file.
    * @param &filePath The full path of the JSON file to read from.
+   * @param &err Error object.
    * @return A JSON object with the file's contents.
    */
-  json readJSONFile(boost::filesystem::path &filePath);
+  json readJSONFile(boost::filesystem::path &filePath, Error &err);
 
   /**
    * Write to a JSON file.
    * @param &obj The JSON object to write.
+   * @param &err Error object.
    * @param &filePath The full path of the JSON file to write to.
    */
-  void writeJSONFile(json &obj, boost::filesystem::path &filePath);
+  void writeJSONFile(json &obj, boost::filesystem::path &filePath, Error &err);
 
   /**
    * Decode a signed transaction.

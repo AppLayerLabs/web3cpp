@@ -8,6 +8,9 @@
 
 /**
  * Class for handling custom error codes and messages.
+ * When an error object is created, it can only be set *once*, so it's assumed
+ * that when an error object is passed as an argument to a function, it will
+ * always be set to something and can't be reused after.
  */
 
 class Error {
@@ -48,6 +51,9 @@ class Error {
      * \arg \c 30 - **ABI Invalid Function**
      * \arg \c 31 - **ABI Unsupported Or Invalid Type**
      * \arg \c 32 - **ABI Missing Type Or Value**
+     * \arg \c 33 - **JSON File Does Not Exist**
+     * \arg \c 34 - **JSON File Read %Error**
+     * \arg \c 35 - **JSON File Write %Error**
      * \arg \c 999 - **Unknown %Error**
      */
     static const std::map<uint64_t, std::string> codeMap;

@@ -387,27 +387,28 @@ std::string Utils::rightPad(
   return padRight(string, characterAmount, sign);
 }
 
-// TODO: use Error instead of throwing?
-json Utils::readJSONFile(boost::filesystem::path &filePath) {
-  json returnData;
+json Utils::readJSONFile(boost::filesystem::path &filePath, Error &err) {
+  json ret;
   storageLock.lock();
   if (!boost::filesystem::exists(filePath)) {
-    throw std::string("Error reading json file: File does not exist");
+    err.setCode(33);  // JSON File Does Not Exist
+    return ret;
   }
   try {
     boost::nowide::ifstream jsonFile(filePath.string());
-    jsonFile >> returnData;
+    jsonFile >> ret;
     jsonFile.close();
   } catch (std::exception &e) {
     storageLock.unlock();
-    throw std::string("Error reading json file: ") + std::string(e.what());
+    err.setCode(34);  // JSON File Read Error
+    return ret;
   }
   storageLock.unlock();
-  return returnData;
+  err.setCode(0);
+  return ret;
 }
 
-// TODO: use Error instead of throwing?
-void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
+void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath, Error &err) {
   storageLock.lock();
   try {
     boost::nowide::ofstream os(filePath.string());
@@ -415,9 +416,11 @@ void Utils::writeJSONFile(json &obj, boost::filesystem::path &filePath) {
     os.close();
   } catch (std::exception &e) {
     storageLock.unlock();
-    throw std::string("Error writing json file: ") + std::string(e.what());
+    err.setCode(35);  // JSON File Write Error
+    return;
   }
   storageLock.unlock();
+  err.setCode(0);
 }
 
 json Utils::decodeRawTransaction(std::string signedTx) {

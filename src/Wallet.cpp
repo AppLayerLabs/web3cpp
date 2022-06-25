@@ -29,14 +29,18 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   // Use exactly as many bytes for the cipher as needed.
   auto seedPhrase = BIP39::createNewMnemonic();
   json seedJson;
-  Error encErr;
+  Error encErr, writeErr;
   seedJson = json::parse(Cipher::encrypt(seedPhrase.raw, password, encErr));
   if (encErr.getCode() != 0) {
     error.setCode(encErr.getCode());
     return false;
   }
   boost::filesystem::path tmpPath = seedPhraseFile();
-  Utils::writeJSONFile(seedJson, tmpPath);
+  Utils::writeJSONFile(seedJson, tmpPath, writeErr);
+  if (writeErr.getCode() != 0) {
+    error.setCode(writeErr.getCode());
+    return false;
+  }
 
   // Create the first (default) account.
   bip3x::HDKey rootKey = BIP39::createKey(seedPhrase.raw, "m/44'/60'/0'/0");
@@ -97,9 +101,13 @@ std::string Wallet::createAccount(
   std::string seedPhrase;
   if (seed.empty()) {
     // Load the seed phrase from JSON.
+    Error readErr, decErr;
     boost::filesystem::path tmpPath = seedPhraseFile();
-    json seedJson = Utils::readJSONFile(tmpPath);
-    Error decErr;
+    json seedJson = Utils::readJSONFile(tmpPath, readErr);
+    if (readErr.getCode() != 0) {
+      error.setCode(readErr.getCode());
+      return "";
+    }
     seedPhrase = Cipher::decrypt(seedJson.dump(), password, decErr);
     if (decErr.getCode() != 0) { error.setCode(decErr.getCode()); return ""; }
   } else {
