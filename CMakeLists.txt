@@ -12,16 +12,8 @@ cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;Re
 set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release)
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
 
-# Get Hunter
-include("cmake/HunterGate.cmake")
-HunterGate(
-  URL "https://github.com/cpp-pm/hunter/archive/v0.23.288.tar.gz"
-  SHA1 "6c9b2bc606d86ae31f96a62fc68f0a593024815b"
-  LOCAL # Load config from `${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake`
-)
-
 # Project data
-project(web3cpp VERSION 0.0.1 DESCRIPTION "Implementation of Web3.js in C++")
+project(web3cpp VERSION 0.0.1 DESCRIPTION "Custom implementation of Web3 in C++")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -40,6 +32,7 @@ message("Building tests: ${BUILD_TESTS}")
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
+set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/deps") # "deps", not "_deps"
 find_package(Boost REQUIRED filesystem system thread)
 find_package(OpenSSL REQUIRED)
 message("Fetching nlohmann/json...")
@@ -74,13 +67,9 @@ else()
   endif()
 endif()
 
-# Add Hunter packages
-hunter_add_package(cryptopp)
-find_package(cryptopp CONFIG REQUIRED)
-hunter_add_package(libscrypt)
-find_package(libscrypt CONFIG REQUIRED)
-
 # Add external modules
+include(ProjectCryptoPP)
+include(ProjectScrypt)
 include(ProjectEthash)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
@@ -146,8 +135,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ssl crypto
-  nlohmann_json::nlohmann_json cryptopp-static libscrypt::scrypt
+  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json cryptopp scrypt
   Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )
 
