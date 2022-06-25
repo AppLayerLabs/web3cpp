@@ -17,16 +17,11 @@ bool RPC::_checkAddress(std::string add) {
   return Utils::isAddress(add);
 }
 
-// TODO: fix this? block has to be a HEX digit, not a DEC digit
 bool RPC::_checkDefaultBlock(std::string block) {
   return (
     block == "latest" || block == "earliest" || block == "pending" ||
-    std::all_of(block.begin(), block.end(), ::isdigit)
+    Utils::isHexStrict(block)
   );
-}
-
-bool RPC::_checkNumber(std::string num) {
-  return std::all_of(num.begin(), num.end(), ::isdigit);
 }
 
 json RPC::web3_clientVersion() {

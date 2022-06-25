@@ -67,13 +67,6 @@ namespace RPC {
    */
   bool _checkDefaultBlock(std::string block);
 
-  /**
-   * Check if a given string is a number.
-   * @param num The number string to check.
-   * @return `true` if string is a number, `false` otherwise.
-   */
-  bool _checkNumber(std::string num);
-
   json web3_clientVersion(); ///< Build data for `web3_clientVersion`.
 
   /**
