@@ -22,9 +22,12 @@ ExternalProject_Add(
              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
              -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+             -DLEVELDB_BUILD_TESTS=OFF
+             -DLEVELDB_BUILD_BENCHMARKS=OFF
              ${_only_release_configuration}
              ${_windows_configuration}
              -DCMAKE_INSTALL_LIBDIR=lib
+  UPDATE_DISCONNECTED true
   LOG_CONFIGURE 1
   BUILD_COMMAND ""
   ${_overwrite_install_command}
