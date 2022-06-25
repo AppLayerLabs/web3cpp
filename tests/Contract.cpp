@@ -17,7 +17,18 @@ void Tests::loadAndTestContractLegacy() {
     boost::filesystem::current_path().parent_path().string()
     + "/tests/ArrayTest.json"
   );
-  json contractJson = Utils::readJSONFile(contractPath);
+  Error jsonErr;
+  json contractJson = Utils::readJSONFile(contractPath, jsonErr);
+  if (jsonErr.getCode() != 0) {
+    failed(jsonErr.what());
+    std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+    logStream << "* Test: " << __func__ << std::endl
+      << "* Test result: " <<
+        ((curPass) ? "PASSED" : "FAILED - " + curReason)
+      << std::endl << std::endl;
+    return;
+  }
+
   Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
   std::string addToAddressList = ArrayTest("addToAddressListArr",
     json::array({
@@ -192,7 +203,18 @@ void Tests::loadAndTestContractNormal() {
     boost::filesystem::current_path().parent_path().string()
     + "/tests/ArrayTest.json"
   );
-  json contractJson = Utils::readJSONFile(contractPath);
+  Error jsonErr;
+  json contractJson = Utils::readJSONFile(contractPath, jsonErr);
+  if (jsonErr.getCode() != 0) {
+    failed(jsonErr.what());
+    std::cout << ((curPass) ? "PASSED" : "FAILED") << std::endl;
+    logStream << "* Test: " << __func__ << std::endl
+      << "* Test result: " <<
+        ((curPass) ? "PASSED" : "FAILED - " + curReason)
+      << std::endl << std::endl;
+    return;
+  }
+
   Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
   std::string addToAddressList = ArrayTest(
     json::array({
