@@ -9,6 +9,7 @@ set(prefix "${CMAKE_BINARY_DIR}/deps")
 set(BIP3X_LIBRARY "${prefix}/lib/bip3x-2.1/${CMAKE_STATIC_LIBRARY_PREFIX}bip39${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(BIP3X_INCLUDE_DIR "${prefix}/include")
 
+
 ExternalProject_Add(
     bip3x
     PREFIX "${prefix}"
@@ -22,7 +23,7 @@ ExternalProject_Add(
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                -DCMAKE_C_FLAGS=-I${BIP3X_INCLUDE_DIR}
-               -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include\ ${CMAKE_CXX_FLAGS}
+               -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${OPENSSL_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
                -DENABLE_CONAN=OFF
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}
@@ -32,7 +33,7 @@ ExternalProject_Add(
     ${_overwrite_install_command}
     LOG_INSTALL 1
     BUILD_BYPRODUCTS "${BIP3X_LIBRARY}"
-	DEPENDS toolbox
+	DEPENDS toolbox OpenSSL::Crypto
 )
 
 add_library(bip39 STATIC IMPORTED)
@@ -40,5 +41,5 @@ file(MAKE_DIRECTORY "${BIP3X_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET bip39 PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET bip39 PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
 set_property(TARGET bip39 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BIP3X_INCLUDE_DIR}")
-add_dependencies(bip39 toolbox bip3x ${OPENSSL_LIBS})
+add_dependencies(bip39 toolbox bip3x ${OPENSSL_LIBRARIES})
 

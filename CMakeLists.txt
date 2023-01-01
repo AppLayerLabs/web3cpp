@@ -2,22 +2,25 @@
 cmake_minimum_required(VERSION 3.19.0)
 include(FetchContent)
 
-include(cmake/cable/bootstrap.cmake)
-include(CableBuildInfo)
-include(CableBuildType)
-include(GNUInstallDirs)
-cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
-
 # Map current configuration to configurations of imported targets.
 set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release)
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
 
+# Include cable
+include(cmake/cable/bootstrap.cmake)
+include(CableBuildType)
+include(CableCompilerSettings)
+include(CablePackage)
+include(CableToolchains)
+include(CMakePackageConfigHelpers)
+
+# Setup CXX
+
+cable_configure_toolchain(DEFAULT cxx17-pic)
+cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
+
 # Project data
 project(web3cpp VERSION 0.0.1 DESCRIPTION "Custom implementation of Web3 in C++")
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_STATIC ON CACHE BOOL "Build library as static, turn off to build as shared")
 set(BUILD_TESTS ON CACHE BOOL "Build helper unit testing program")
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
@@ -28,7 +31,9 @@ message("Building as static: ${BUILD_STATIC}")
 message("Building tests: ${BUILD_TESTS}")
 
 # Fetch and set up external libraries
-# TODO: add options to set boost path and openssl non-system-wise
+# As this is a library, it checks if it is being a externalProject added with multiple DEPENDS
+# If it is, it doens't need to include the Project .cmake files, as the libraries are being brought by the parent project.
+include(CheckLibraryExists)
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -39,36 +44,15 @@ message("Fetching nlohmann/json...")
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-cable_add_buildinfo_library(PROJECT_NAME web3cpp)
-set(DEPENDS_PREFIX "")
-if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
-  set(DEPENDS_PREFIX "x86_64-w64-mingw32")
-  message("Toolchain: x86_64-w64-mingw32")
-  message("Loading Windows Libraries")
-  include("${CMAKE_SOURCE_DIR}/cmake/WindowsLibraries.cmake")
-else()
-  if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-apple-darwin20")
-    message("Toolchain: x86_64-apple-darwin20")
-    set(DEPENDS_PREFIX "x86_64-apple-darwin20.5.0")
-    message("Loading Darwin Libraries")
-    include("${CMAKE_SOURCE_DIR}/cmake/DarwinLibraries.cmake")
-  else()
-    if("${TOOLCHAIN_PREFIX}" STREQUAL "arm-apple-darwin21.2.0")
-      message("Toolchain: arm-apple-darwin21.2.0")
-      set(DEPENDS_PREFIX "arm-apple-darwin21.2.0")
-      include("${CMAKE_SOURCE_DIR}/cmake/DarwinArmLibraries.cmake")
-      message("Loading Darwin Libraries")
-    else()
-      message("Toolchain: x86_64-pc-linux-gnu")
-      set(DEPENDS_PREFIX "x86_64-pc-linux-gnu")
-      include("${CMAKE_SOURCE_DIR}/cmake/LinuxLibraries.cmake")
-      message("Loading Linux Libraries")
-    endif()
-  endif()
-endif()
 
 # Add external modules
-include(ProjectCryptoPP)
+find_package(CryptoPP)
+
+if(NOT LIBCRYPTOPP_FOUND)
+  message(WARNING "CryptoPP Not found, compiling from source.")
+  include(ProjectCryptoPP)
+  find_package(CryptoPP)
+endif()
 include(ProjectScrypt)
 include(ProjectEthash)
 include(ProjectSecp256k1)
@@ -135,7 +119,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json cryptopp scrypt
+  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json CryptoPP scrypt
   Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
 )
 
