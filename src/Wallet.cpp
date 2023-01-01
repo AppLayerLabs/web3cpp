@@ -348,3 +348,16 @@ json Wallet::getAccountRawDetails(std::string address) {
   return ret;
 }
 
+std::string Wallet::getSeedPhrase(std::string password, Error &err) {
+  std::string seedPhrase;
+  Error readErr, decErr;
+  boost::filesystem::path tmpPath = seedPhraseFile();
+  json seedJson = Utils::readJSONFile(tmpPath, readErr);
+  if (readErr.getCode() != 0) {
+    err.setCode(readErr.getCode());
+    return "";
+  }
+  seedPhrase = Cipher::decrypt(seedJson.dump(), password, decErr);
+  if (decErr.getCode() != 0) { err.setCode(decErr.getCode()); return ""; }
+  return seedPhrase;
+}

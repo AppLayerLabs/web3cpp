@@ -260,6 +260,15 @@ class Wallet {
     std::vector<std::string> getAccounts();
 
     /**
+     * Get the account seed phrase
+     * @param password the Wallet's password.
+     * @param &err Error object.
+     * @return The wallet seed phrase.
+     */
+
+    std::string getSeedPhrase(std::string password, Error &err);
+
+    /**
      * Get the details for a specific account.
      * @param address The address of the account. Will be converted to lowercase.
      * @return A struct with details of the account, or an empty struct
