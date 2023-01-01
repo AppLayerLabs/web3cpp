@@ -48,11 +48,13 @@ FetchContent_MakeAvailable(json)
 # Add external modules
 find_package(CryptoPP)
 
-if(NOT LIBCRYPTOPP_FOUND)
+if(NOT CRYPTOPP_FOUND)
   message(WARNING "CryptoPP Not found, compiling from source.")
   include(ProjectCryptoPP)
   find_package(CryptoPP)
 endif()
+
+
 include(ProjectScrypt)
 include(ProjectEthash)
 include(ProjectSecp256k1)
