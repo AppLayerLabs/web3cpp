@@ -14,7 +14,7 @@ set(SNAPPY_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}snappy${CMAKE_ST
 set(SNAPPY_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-    Snappy
+    snappy
     PREFIX "${prefix}"
     DOWNLOAD_NAME snappy-1.1.9.tar.gz
     DOWNLOAD_NO_PROGRESS 1
@@ -39,10 +39,10 @@ ExternalProject_Add(
     BUILD_BYPRODUCTS "${SNAPPY_LIBRARY}"
 )
 
-add_library(snappy STATIC IMPORTED)
+add_library(Snappy STATIC IMPORTED)
 file(MAKE_DIRECTORY "${SNAPPY_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET snappy PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET snappy PROPERTY IMPORTED_LOCATION_RELEASE "${SNAPPY_LIBRARY}")
-set_property(TARGET snappy PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SNAPPY_INCLUDE_DIR}")
-add_dependencies(snappy Snappy)
+set_property(TARGET Snappy PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET Snappy PROPERTY IMPORTED_LOCATION_RELEASE "${SNAPPY_LIBRARY}")
+set_property(TARGET Snappy PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SNAPPY_INCLUDE_DIR}")
+add_dependencies(Snappy snappy)
 

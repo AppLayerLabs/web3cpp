@@ -46,24 +46,69 @@ FetchContent_MakeAvailable(json)
 
 
 # Add external modules
-find_package(CryptoPP)
 
+find_package(CryptoPP)
 if(NOT CRYPTOPP_FOUND)
   message(WARNING "CryptoPP Not found, compiling from source.")
   include(ProjectCryptoPP)
   find_package(CryptoPP)
 endif()
 
+find_package(Scrypt)
+if (NOT SCRYPT_FOUND)
+  message(WARNING "Scrypt not found, compiling from source.")
+  include(ProjectScrypt)
+  find_package(Scrypt)
+endif()
 
-include(ProjectScrypt)
-include(ProjectEthash)
-include(ProjectSecp256k1)
-include(ProjectToolbox)
-include(ProjectBip3x)
-include(ProjectSnappy)
-include(ProjectLevelDB)
-include(ProjectBoostCertify)
-find_package(Threads)
+find_package(Ethash)
+if(NOT ETHASH_FOUND)
+  message(WARNING "Ethash not found, compiling from source.")
+  include(ProjectEthash)
+  find_package(Ethash)
+endif()
+
+find_package(Secp256k1)
+if(NOT SECP256K1_FOUND)
+  message(WARNING "Secp256k1 not found, compiling from source.")
+  include(ProjectSecp256k1)
+  find_package(Secp256k1)
+endif()
+
+find_package(Toolbox)
+if(NOT TOOLBOX_FOUND)
+  message(WARNING "Toolbox not found, compiling from source.")
+  include(ProjectToolbox)
+  find_package(Toolbox)
+endif()
+
+find_package(Bip3x)
+if(NOT BIP3X_FOUND)
+  message(WARNING "Bip3x not found, compiling from source.")
+  include(ProjectBip3x)
+  find_package(Bip3x)
+endif()
+
+find_package(Snappy)
+if(NOT SNAPPY_FOUND)
+  message(WARNING "Snappy not found, compiling from source.")
+  include(ProjectSnappy)
+  find_package(Snappy)
+endif()
+
+find_package(LevelDB)
+if(NOT LEVELDB_FOUND)
+  message(WARNING "LevelDB not found, compiling from source.")
+  include(ProjectLevelDB)
+  find_package(LevelDB)
+endif()
+
+find_package(BoostCertify)
+if (NOT BOOSTCERTIFY_FOUND)
+  message(WARNING "BoostCertify not found, compiling from source.")
+  include(ProjectBoostCertify)
+  find_package(BoostCertify)
+endif()
 
 # Include headers and libs
 include_directories(
@@ -122,7 +167,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
   ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json CryptoPP scrypt
-  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
+  Secp256k1 Bip3x Toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB Snappy
 )
 
 # Build helper test program
@@ -146,6 +191,7 @@ install(TARGETS web3cpp
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install(DIRECTORY include/ DESTINATION include)
