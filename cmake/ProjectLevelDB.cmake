@@ -33,7 +33,6 @@ ExternalProject_Add(
   ${_overwrite_install_command}
   LOG_INSTALL 1
   BUILD_BYPRODUCTS "${LEVELDB_BYPRODUCTS}"
-  DEPENDS Snappy
 )
 
 # Create imported library
