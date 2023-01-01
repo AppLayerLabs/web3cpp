@@ -50,7 +50,7 @@ class Account {
     );
 
     /// Copy constructor.
-    Account(Account& other) noexcept :
+    Account(const Account& other) noexcept :
       _address(other._address),
       _name(other._name),
       _derivationPath(other._derivationPath),

@@ -53,7 +53,7 @@ class Database {
     }
 
     /// Copy constructor.
-    Database(Database& other) noexcept :
+    Database(const Database& other) noexcept :
       name(other.name), path(other.path), db(other.db),
       dbOpts(other.dbOpts), dbStatus(other.dbStatus), tmpValue(other.tmpValue)
     {}
