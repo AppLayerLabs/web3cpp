@@ -25,7 +25,7 @@ ExternalProject_Add(
                -DBUILD_SHARED_LIBS=OFF
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-               -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+               -DCMAKE_CXX_COMPILER=-I${MD4C_INCLUDE_DIR}\ ${CMAKE_CXX_COMPILER}
                -DCMAKE_C_FLAGS=-I${MD4C_INCLUDE_DIR}
                -DCMAKE_CXX_FLAGS=-I${MD4C_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include\ ${CMAKE_CXX_FLAGS}
                ${_only_release_configuration}

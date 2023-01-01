@@ -4,8 +4,8 @@
 include(ProjectMPIR)
 
 set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(libff_library "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ff${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(libff_inlcude_dir "${prefix}/include/libff")
+set(LIBFF_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ff${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(LIBFF_INCLUDE_DIR "${prefix}/include/libff")
 
 ExternalProject_Add(libff
     PREFIX "${prefix}"
@@ -21,21 +21,21 @@ ExternalProject_Add(libff
         -DCURVE=ALT_BN128 -DPERFORMANCE=Off -DWITH_PROCPS=Off
         -DUSE_PT_COMPRESSION=Off
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_CXX_COMPILER=-I${LIBFF_INCLUDE_DIR}\ ${CMAKE_CXX_COMPILER}
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
         -DCMAKE_INSTALL_LIBDIR=lib
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release
     LOG_BUILD 1
     INSTALL_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release --target install
-    BUILD_BYPRODUCTS "${libff_library}"
+    BUILD_BYPRODUCTS "${LIBFF_LIBRARY}"
 )
 add_dependencies(libff mpir)
 
 # Create snark imported library
 add_library(libff::ff STATIC IMPORTED)
-file(MAKE_DIRECTORY ${libff_inlcude_dir})
+file(MAKE_DIRECTORY ${LIBFF_INCLUDE_DIR})
 set_property(TARGET libff::ff PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET libff::ff PROPERTY IMPORTED_LOCATION_RELEASE ${libff_library})
-set_property(TARGET libff::ff PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${libff_inlcude_dir})
+set_property(TARGET libff::ff PROPERTY IMPORTED_LOCATION_RELEASE ${LIBFF_LIBRARY})
+set_property(TARGET libff::ff PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${LIBFF_INCLUDE_DIR})
 set_property(TARGET libff::ff PROPERTY INTERFACE_LINK_LIBRARIES MPIR::mpir)
 add_dependencies(libff::ff libff)
