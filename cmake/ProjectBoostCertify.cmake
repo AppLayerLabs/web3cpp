@@ -6,8 +6,8 @@ if (MSVC)
 endif()
 
 set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(CERTIFY_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}certify${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(CERTIFY_INCLUDE_DIR "${prefix}/include")
+set(BOOSTCERTIFY_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}certify${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(BOOSTCERTIFY_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
   certify
