@@ -34,7 +34,7 @@ ExternalProject_Add(
   LOG_INSTALL 1
   BUILD_BYPRODUCTS "${LEVELDB_BYPRODUCTS}"
   DOWNLOAD_EXTRACT_TIMESTAMP 1
-  DEPENDS snappy
+  DEPENDS Snappy
 )
 
 # Create imported library
