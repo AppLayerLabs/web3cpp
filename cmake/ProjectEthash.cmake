@@ -21,10 +21,11 @@ ExternalProject_Add(
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-	      	   -DCMAKE_CXX_FLAGS=-I${ETHASH_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
-			   -DETHASH_BUILD_TESTS=OFF
-	           -DCMAKE_INSTALL_LIBDIR=lib
+	      		   -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+			         -DETHASH_BUILD_TESTS=OFF
+	             -DCMAKE_INSTALL_LIBDIR=lib
                ${_only_release_configuration}
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -33,7 +34,7 @@ ExternalProject_Add(
 )
  
 # Create imported library
-add_library(Ethash STATIC IMPORTED)
+add_library(Ethash STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${ETHASH_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET Ethash PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET Ethash PROPERTY IMPORTED_LOCATION_RELEASE "${ETHASH_LIBRARY}")

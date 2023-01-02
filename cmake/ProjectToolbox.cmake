@@ -21,11 +21,12 @@ ExternalProject_Add(
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-               -DCMAKE_CXX_FLAGS=-I${TOOLBOX_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
+               -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
                -DCMAKE_SYSTEM_NAME=Generic # https://github.com/commonmark/cmark/pull/300#issuecomment-496286133
                -DENABLE_CONAN=OFF
                ${_only_release_configuration}
                -DCMAKE_INSTALL_LIBDIR=lib
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -33,7 +34,7 @@ ExternalProject_Add(
     BUILD_BYPRODUCTS "${TOOLBOX_LIBRARY}"
 )
 
-add_library(Toolbox STATIC IMPORTED)
+add_library(Toolbox STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${TOOLBOX_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET Toolbox PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET Toolbox PROPERTY IMPORTED_LOCATION_RELEASE "${TOOLBOX_LIBRARY}")

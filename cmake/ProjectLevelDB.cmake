@@ -21,7 +21,7 @@ ExternalProject_Add(
              -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-             -DCMAKE_CXX_FLAGS=-I${LEVELDB_INCLUDE_DIR}\ ${CMAKE_CXX_FLAGS}
+             -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
              -DLEVELDB_BUILD_TESTS=OFF
              -DLEVELDB_BUILD_BENCHMARKS=OFF
              ${_only_release_configuration}
@@ -33,12 +33,14 @@ ExternalProject_Add(
   ${_overwrite_install_command}
   LOG_INSTALL 1
   BUILD_BYPRODUCTS "${LEVELDB_BYPRODUCTS}"
+  DOWNLOAD_EXTRACT_TIMESTAMP 1
+  DEPENDS snappy
 )
 
 # Create imported library
-add_library(LevelDB STATIC IMPORTED)
+add_library(LevelDB STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${LEVELDB_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET LevelDB PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET LevelDB PROPERTY IMPORTED_LOCATION_RELEASE "${LEVELDB_LIBRARY}")
 set_property(TARGET LevelDB PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${LEVELDB_INCLUDE_DIR}")
-add_dependencies(LevelDB leveldb Snappy ${LEVELDB_BYPRODUCTS})
+add_dependencies(LevelDB leveldb snappy ${LEVELDB_BYPRODUCTS})

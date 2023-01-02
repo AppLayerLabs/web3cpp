@@ -28,6 +28,7 @@ ExternalProject_Add(
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}
                -DCMAKE_INSTALL_LIBDIR=lib
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -36,7 +37,7 @@ ExternalProject_Add(
 	DEPENDS toolbox OpenSSL::Crypto
 )
 
-add_library(Bip3x STATIC IMPORTED)
+add_library(Bip3x STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${BIP3X_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET Bip3x PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET Bip3x PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")

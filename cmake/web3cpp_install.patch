@@ -1,0 +1,125 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e9208ae..a94221a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -135,7 +135,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
+ 
+ # Link project to dependencies and external libraries
+ target_link_libraries(${PROJECT_NAME} PUBLIC
+-  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json cryptopp scrypt
++  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json libcryptopp scrypt
+   Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
+ )
+ 
+@@ -155,3 +155,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "include/web3cpp/
+ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+ set_target_properties(${PROJECT_NAME} PROPERTIES LANGUAGE CXX)
+ 
++install(TARGETS web3cpp
++  EXPORT web3cppTargets
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(DIRECTORY include/ DESTINATION include)
++
++
+diff --git a/cmake/ProjectCryptoPP.cmake b/cmake/ProjectCryptoPP.cmake
+index 2b8a7bf..0fefa21 100644
+--- a/cmake/ProjectCryptoPP.cmake
++++ b/cmake/ProjectCryptoPP.cmake
+@@ -27,9 +27,9 @@ ExternalProject_Add(
+   BUILD_BYPRODUCTS "${CRYPTOPP_LIBRARY}"
+ )
+ 
+-add_library(cryptopp STATIC IMPORTED)
++add_library(libcryptopp STATIC IMPORTED)
+ file(MAKE_DIRECTORY "${CRYPTOPP_INCLUDE_DIR}")  # Must exist.
+-set_property(TARGET cryptopp PROPERTY IMPORTED_CONFIGURATIONS Release)
+-set_property(TARGET cryptopp PROPERTY IMPORTED_LOCATION_RELEASE "${CRYPTOPP_LIBRARY}")
+-set_property(TARGET cryptopp PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CRYPTOPP_INCLUDE_DIR}")
++set_property(TARGET libcryptopp PROPERTY IMPORTED_CONFIGURATIONS Release)
++set_property(TARGET libcryptopp PROPERTY IMPORTED_LOCATION_RELEASE "${CRYPTOPP_LIBRARY}")
++set_property(TARGET libcryptopp PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CRYPTOPP_INCLUDE_DIR}")
+ 
+diff --git a/include/web3cpp/Account.h b/include/web3cpp/Account.h
+index b4dfb69..47a701b 100644
+--- a/include/web3cpp/Account.h
++++ b/include/web3cpp/Account.h
+@@ -50,7 +50,7 @@ class Account {
+     );
+ 
+     /// Copy constructor.
+-    Account(Account& other) noexcept :
++    Account(const Account& other) noexcept :
+       _address(other._address),
+       _name(other._name),
+       _derivationPath(other._derivationPath),
+diff --git a/include/web3cpp/DB.h b/include/web3cpp/DB.h
+index c2fbac9..adfb178 100644
+--- a/include/web3cpp/DB.h
++++ b/include/web3cpp/DB.h
+@@ -53,7 +53,7 @@ class Database {
+     }
+ 
+     /// Copy constructor.
+-    Database(Database& other) noexcept :
++    Database(const Database& other) noexcept :
+       name(other.name), path(other.path), db(other.db),
+       dbOpts(other.dbOpts), dbStatus(other.dbStatus), tmpValue(other.tmpValue)
+     {}
+diff --git a/include/web3cpp/Wallet.h b/include/web3cpp/Wallet.h
+index 9fd598b..5ca2fdd 100644
+--- a/include/web3cpp/Wallet.h
++++ b/include/web3cpp/Wallet.h
+@@ -259,6 +259,15 @@ class Wallet {
+      */
+     std::vector<std::string> getAccounts();
+ 
++    /**
++     * Get the account seed phrase
++     * @param password the Wallet's password.
++     * @param &err Error object.
++     * @return The wallet seed phrase.
++     */
++
++    std::string getSeedPhrase(std::string password, Error &err);
++
+     /**
+      * Get the details for a specific account.
+      * @param address The address of the account. Will be converted to lowercase.
+diff --git a/src/Wallet.cpp b/src/Wallet.cpp
+index af802ff..23de2dc 100644
+--- a/src/Wallet.cpp
++++ b/src/Wallet.cpp
+@@ -348,3 +348,17 @@ json Wallet::getAccountRawDetails(std::string address) {
+   return ret;
+ }
+ 
++std::string Wallet::getSeedPhrase(std::string password, Error &err) {
++  std::string seedPhrase;
++  Error readErr, decErr;
++  boost::filesystem::path tmpPath = seedPhraseFile();
++  json seedJson = Utils::readJSONFile(tmpPath, readErr);
++  if (readErr.getCode() != 0) {
++    err.setCode(readErr.getCode());
++    return "";
++  }
++  seedPhrase = Cipher::decrypt(seedJson.dump(), password, decErr);
++  if (decErr.getCode() != 0) { err.setCode(decErr.getCode()); return ""; }
++  return seedPhrase;
++}
++
+diff --git a/src/devcrypto/CryptoPP.cpp b/src/devcrypto/CryptoPP.cpp
+index 42f1588..cb5613e 100644
+--- a/src/devcrypto/CryptoPP.cpp
++++ b/src/devcrypto/CryptoPP.cpp
+@@ -10,7 +10,7 @@
+ #include <web3cpp/devcore/Assertions.h>
+ #include <web3cpp/devcore/SHA3.h>
+ 
+-static_assert(CRYPTOPP_VERSION == 820, "Wrong Crypto++ version");
++static_assert(CRYPTOPP_VERSION >= 820, "Wrong Crypto++ version");
+ 
+ using namespace dev;
+ using namespace dev::crypto;

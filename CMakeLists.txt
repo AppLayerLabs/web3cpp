@@ -41,7 +41,9 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/deps") # "deps", not "_deps"
 find_package(Boost REQUIRED filesystem system thread)
 find_package(OpenSSL REQUIRED)
 message("Fetching nlohmann/json...")
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_Declare(json 
+                      URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
+                      DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_MakeAvailable(json)
 
 
