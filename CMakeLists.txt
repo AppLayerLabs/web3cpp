@@ -13,6 +13,7 @@ include(CableCompilerSettings)
 include(CablePackage)
 include(CableToolchains)
 include(CMakePackageConfigHelpers)
+include(CableBuildInfo)
 
 # Setup CXX
 
@@ -21,6 +22,7 @@ cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;Re
 
 # Project data
 project(web3cpp VERSION 0.0.1 DESCRIPTION "Custom implementation of Web3 in C++")
+cable_add_buildinfo_library(PROJECT_NAME web3cpp)
 set(BUILD_STATIC ON CACHE BOOL "Build library as static, turn off to build as shared")
 set(BUILD_TESTS ON CACHE BOOL "Build helper unit testing program")
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
