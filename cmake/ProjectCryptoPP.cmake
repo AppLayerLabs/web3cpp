@@ -5,7 +5,7 @@ if (MSVC)
 endif()
 
 set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(CRYPTOPP_ROOT_RIT "${prefix}")
+set(CRYPTOPP_ROOT_DIR "${prefix}")
 set(CRYPTOPP_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cryptopp${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(CRYPTOPP_INCLUDE_DIR "${prefix}/include")
 
