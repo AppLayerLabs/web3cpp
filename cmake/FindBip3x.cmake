@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${BIP3X_INCLUDE_DIR}/bip3x/" NAMES bip39.h)
+find_path(BIP3X_INCLUDE_DIR NAMES bip3x/bip39.h)
 find_library(BIP3X_LIBRARY NAMES libbip39.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(Bip3x)

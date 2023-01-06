@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${ETHASH_INCLUDE_DIR}/ethash/" NAMES ethash.h)
+find_path(ETHASH_INCLUDE_DIR NAMES ethash/ethash.h)
 find_library(ETHASH_LIBRARY NAMES libethash.a libkeccak.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(Ethash)

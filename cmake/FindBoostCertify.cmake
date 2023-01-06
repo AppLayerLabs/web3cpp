@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${BOOSTCERTIFY_INCLUDE_DIR}/boost/certify" NAMES https_verification.hpp)
+find_path(BOOSTCERTIFY_INCLUDE_DIR NAMES boost/certify/https_verification.hpp)
 find_library(BOOSTCERTIFY_LIBRARY NAMES libboostcertify.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(BoostCertify)

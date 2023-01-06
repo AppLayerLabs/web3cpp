@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${TOOLBOX_INCLUDE_DIR}" NAMES strings.hpp)
+find_path(TOOLBOX_INCLUDE_DIR NAMES strings.hpp)
 find_library(TOOLBOX_LIBRARY NAMES libtoolbox.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(Toolbox)

@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${SCRYPT_INCLUDE_DIR}" NAMES libscrypt.h)
+find_path(SCRYPT_INCLUDE_DIR NAMES libscrypt.h)
 find_library(SCRYPT_LIBRARY NAMES libscrypt.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(Scrypt)

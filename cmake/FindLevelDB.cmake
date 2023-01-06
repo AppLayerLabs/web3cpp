@@ -6,7 +6,7 @@
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-find_path("${LEVELDB_INCLUDE_DIR}/leveldb/" NAMES db.h)
+find_path(LEVELDB_INCLUDE_DIR NAMES leveldb/db.h)
 find_library(LEVELDB_LIBRARY NAMES libleveldb.a)
 
 SELECT_LIBRARY_CONFIGURATIONS(LevelDB)
