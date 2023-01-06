@@ -10,7 +10,7 @@ set(TOOLBOX_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}toolbox${CMAKE_
 set(TOOLBOX_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-    toolbox
+    Toolbox
     PREFIX "${prefix}"
     DOWNLOAD_NAME toolbox-3.1.2.tar.gz
     DOWNLOAD_NO_PROGRESS 1
@@ -34,9 +34,9 @@ ExternalProject_Add(
     BUILD_BYPRODUCTS "${TOOLBOX_LIBRARY}"
 )
 
-add_library(Toolbox STATIC IMPORTED GLOBAL)
+add_library(toolbox STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${TOOLBOX_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET Toolbox PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET Toolbox PROPERTY IMPORTED_LOCATION_RELEASE "${TOOLBOX_LIBRARY}")
-set_property(TARGET Toolbox PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${TOOLBOX_INCLUDE_DIR}")
-add_dependencies(Toolbox toolbox)
+set_property(TARGET toolbox PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET toolbox PROPERTY IMPORTED_LOCATION_RELEASE "${TOOLBOX_LIBRARY}")
+set_property(TARGET toolbox PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${TOOLBOX_INCLUDE_DIR}")
+add_dependencies(toolbox Toolbox)

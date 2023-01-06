@@ -10,7 +10,7 @@ set(CRYPTOPP_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cryptopp${CMAK
 set(CRYPTOPP_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-  cryptopp
+  CryptoPP
   PREFIX "${prefix}"
   DOWNLOAD_NAME cryptopp-8.2.0.tar.gz
   DOWNLOAD_NO_PROGRESS 1
@@ -29,9 +29,9 @@ ExternalProject_Add(
   BUILD_BYPRODUCTS "${CRYPTOPP_LIBRARY}"
 )
 
-add_library(CryptoPP STATIC IMPORTED GLOBAL)
+add_library(cryptopp STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${CRYPTOPP_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET CryptoPP PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET CryptoPP PROPERTY IMPORTED_LOCATION_RELEASE "${CRYPTOPP_LIBRARY}")
-set_property(TARGET CryptoPP PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CRYPTOPP_INCLUDE_DIR}")
-add_dependencies(CryptoPP cryptopp)
+set_property(TARGET cryptopp PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET cryptopp PROPERTY IMPORTED_LOCATION_RELEASE "${CRYPTOPP_LIBRARY}")
+set_property(TARGET cryptopp PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CRYPTOPP_INCLUDE_DIR}")
+add_dependencies(cryptopp CryptoPP)

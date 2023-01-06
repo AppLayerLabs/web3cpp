@@ -14,7 +14,7 @@ set(LEVELDB_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}leveldb${CMAKE_
 set(LEVELDB_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-  leveldb
+  LevelDB
   PREFIX "${prefix}"
   GIT_REPOSITORY https://github.com/itamarcps/leveldb
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
@@ -38,9 +38,9 @@ ExternalProject_Add(
 )
 
 # Create imported library
-add_library(LevelDB STATIC IMPORTED GLOBAL)
+add_library(leveldb STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${LEVELDB_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET LevelDB PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET LevelDB PROPERTY IMPORTED_LOCATION_RELEASE "${LEVELDB_LIBRARY}")
-set_property(TARGET LevelDB PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${LEVELDB_INCLUDE_DIR}")
-add_dependencies(LevelDB leveldb Snappy ${LEVELDB_BYPRODUCTS})
+set_property(TARGET leveldb PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET leveldb PROPERTY IMPORTED_LOCATION_RELEASE "${LEVELDB_LIBRARY}")
+set_property(TARGET leveldb PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${LEVELDB_INCLUDE_DIR}")
+add_dependencies(leveldb LevelDB Snappy ${LEVELDB_BYPRODUCTS})

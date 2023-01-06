@@ -11,7 +11,7 @@ set(BIP3X_INCLUDE_DIR "${prefix}/include")
 
 
 ExternalProject_Add(
-    bip3x
+    Bip3x
     PREFIX "${prefix}"
     DOWNLOAD_NAME bip3x-9363c7b.tar.gz
     DOWNLOAD_NO_PROGRESS 1
@@ -37,10 +37,10 @@ ExternalProject_Add(
 	DEPENDS toolbox OpenSSL::Crypto
 )
 
-add_library(Bip3x STATIC IMPORTED GLOBAL)
+add_library(bip3x STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${BIP3X_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET Bip3x PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET Bip3x PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
+set_property(TARGET bip3x PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET bip3x PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
 set_property(TARGET Bip3x PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BIP3X_INCLUDE_DIR}")
-add_dependencies(Bip3x Toolbox bip3x ${OPENSSL_LIBRARIES})
+add_dependencies(bip3x toolbox Bip3x ${OPENSSL_LIBRARIES})
 

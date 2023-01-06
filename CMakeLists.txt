@@ -170,8 +170,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json CryptoPP scrypt
-  Secp256k1 Bip3x Toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB Snappy
+  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json cryptopp scrypt
+  secp256k1 bip3x toolbox ${ETHASH_BYPRODUCTS} ethash leveldb snappy
 )
 
 # Build helper test program

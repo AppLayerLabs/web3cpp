@@ -10,7 +10,7 @@ set(BOOSTCERTIFY_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}certify${C
 set(BOOSTCERTIFY_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-  certify
+  Certify
   PREFIX "${prefix}"
   URL https://github.com/djarek/certify/archive/97f5eebfd99a5d6e99d07e4820240994e4e59787.tar.gz
   URL_HASH SHA256=1c964b0aba47cd90081eaacc4946ea8e58d0c14fb267856f26515219e8ca1d68
@@ -33,9 +33,9 @@ ExternalProject_Add(
 )
 
 # Create imported library
-add_library(Certify STATIC IMPORTED GLOBAL)
+add_library(certify STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${CERTIFY_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET Certify PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET Certify PROPERTY IMPORTED_LOCATION_RELEASE "${CERTIFY_LIBRARY}")
-set_property(TARGET Certify PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CERTIFY_INCLUDE_DIR}")
-add_dependencies(Certify certify ${CERTIFY_BYPRODUCTS})
+set_property(TARGET certify PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET certify PROPERTY IMPORTED_LOCATION_RELEASE "${CERTIFY_LIBRARY}")
+set_property(TARGET certify PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CERTIFY_INCLUDE_DIR}")
+add_dependencies(certify Certify ${CERTIFY_BYPRODUCTS})
