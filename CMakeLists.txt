@@ -169,6 +169,15 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 # For linking openssl on MacOS
 target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${LEVELDB_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SNAPPY_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${ETHASH_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SECP256K1_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TOOLBOX_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${BIP3X_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CRYPTOPP_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SCRYPT_INCLUDE_DIR})
 
 
 # Link project to dependencies and external libraries
