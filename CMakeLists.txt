@@ -182,7 +182,7 @@ if(BUILD_TESTS)
   file(GLOB TESTS_SOURCES "tests/*.cpp")
   add_executable(${PROJECT_NAME}-tests ${TESTS_HEADERS} ${TESTS_SOURCES})
   target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
-  target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${OPENSSL_INCLUDE_DIR})
   target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
 endif()
 
