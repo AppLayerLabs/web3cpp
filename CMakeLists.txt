@@ -174,7 +174,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
   ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} nlohmann_json::nlohmann_json cryptopp scrypt
-  secp256k1 bip3x toolbox ${ETHASH_BYPRODUCTS} ethash leveldb snappy
+  secp256k1 bip3x toolbox ${ETHASH_BYPRODUCTS} ethash ${LEVELDB_LIBRARY} ${SNAPPY_LIBRARY}
 )
 
 # For certify to work on MacOS
