@@ -166,7 +166,9 @@ else()
 endif()
 
 # Configure directories to search for header files
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -179,7 +181,8 @@ if(BUILD_TESTS)
   file(GLOB TESTS_HEADERS "tests/*.h")
   file(GLOB TESTS_SOURCES "tests/*.cpp")
   add_executable(${PROJECT_NAME}-tests ${TESTS_HEADERS} ${TESTS_SOURCES})
-  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
   target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
 endif()
 
