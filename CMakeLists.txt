@@ -167,6 +167,7 @@ endif()
 
 # Configure directories to search for header files
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+# For linking openssl on MacOS
 target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
 
 
@@ -176,6 +177,12 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   secp256k1 bip3x toolbox ${ETHASH_BYPRODUCTS} ethash leveldb snappy
 )
 
+# For certify to work on MacOS
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} INTERFACE "-framework CoreFoundation" "-framework Security")
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
+endif()
+
 # Build helper test program
 if(BUILD_TESTS)
   file(GLOB TESTS_HEADERS "tests/*.h")
@@ -183,6 +190,11 @@ if(BUILD_TESTS)
   add_executable(${PROJECT_NAME}-tests ${TESTS_HEADERS} ${TESTS_SOURCES})
   target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
   target_include_directories(${PROJECT_NAME}-tests PRIVATE ${OPENSSL_INCLUDE_DIR})
+  # For certify to work on MacOS
+  if(APPLE)
+    target_link_libraries(${PROJECT_NAME}-tests INTERFACE "-framework CoreFoundation" "-framework Security")
+    set_target_properties(${PROJECT_NAME}-tests PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
+  endif()
   target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
 endif()
 
