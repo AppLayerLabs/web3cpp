@@ -40,8 +40,12 @@ set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/deps") # "deps", not "_deps"
+# CryptoPP, Snappy, Boost, OpenSSL and LevelDB are available as packages on most systems, we don't compile them from source
+find_package(CryptoPP REQUIRED)
+find_package(Snappy REQUIRED)
 find_package(Boost REQUIRED filesystem system thread)
 find_package(OpenSSL REQUIRED)
+find_package(LevelDB REQUIRED)
 message("Fetching nlohmann/json...")
 FetchContent_Declare(json 
                       URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
@@ -50,13 +54,6 @@ FetchContent_MakeAvailable(json)
 
 
 # Add external modules
-
-find_package(CryptoPP)
-if(NOT CRYPTOPP_FOUND)
-  message(WARNING "CryptoPP Not found, compiling from source.")
-  include(ProjectCryptoPP)
-  find_package(CryptoPP)
-endif()
 
 find_package(Scrypt)
 if (NOT SCRYPT_FOUND)
@@ -91,20 +88,6 @@ if(NOT BIP3X_FOUND)
   message(WARNING "Bip3x not found, compiling from source.")
   include(ProjectBip3x)
   find_package(Bip3x)
-endif()
-
-find_package(Snappy)
-if(NOT SNAPPY_FOUND)
-  message(WARNING "Snappy not found, compiling from source.")
-  include(ProjectSnappy)
-  find_package(Snappy)
-endif()
-
-find_package(LevelDB)
-if(NOT LEVELDB_FOUND)
-  message(WARNING "LevelDB not found, compiling from source.")
-  include(ProjectLevelDB)
-  find_package(LevelDB)
 endif()
 
 find_package(BoostCertify)
