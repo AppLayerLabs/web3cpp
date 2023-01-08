@@ -133,6 +133,14 @@ namespace Utils {
   bool isHexStrict(std::string hex);
 
   /**
+    * check if a given string contains only numbers
+    * @param str The string to be checked.
+    * @return `true` if the string contains only numbers, `false` otherwise.
+    */
+  
+  bool isNumber(const std::string &str);
+  
+  /**
    * Check if a given string is a valid address.
    * @param address The address to be checked. If the address has both upper
    *                *and* lowercase letters, will also check the checksum.

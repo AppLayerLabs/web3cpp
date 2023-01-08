@@ -47,15 +47,12 @@ std::string Utils::randomHex(unsigned int size, bool prefixed) {
 }
 
 BigNumber Utils::toBN(std::string number) {
-  BigNumber ret;
-  std::stringstream ss;
   if (isHexStrict(number)) {
-    ss << std::hex << number;
-  } else {
-    ss << number;
+    return hexToBigNumber(number);
+  } else if (isNumber(number)) {
+    return boost::lexical_cast<BigNumber>(number);
   }
-  ss >> ret;
-  return ret;
+  throw std::invalid_argument("invalid number value (not hex or uint string)");
 }
 
 std::string Utils::sha3(std::string string, bool isNibble) {
@@ -87,6 +84,10 @@ bool Utils::isHex(std::string hex) {
 
 bool Utils::isHexStrict(std::string hex) {
   return (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") ? isHex(hex) : false;
+}
+
+bool Utils::isNumber(const std::string& str) {
+  return (str.find_first_not_of("0123456789") == std::string::npos);
 }
 
 bool Utils::isAddress(std::string address) {
@@ -190,11 +191,7 @@ std::string Utils::stripHexPrefix(std::string str) {
 }
 
 std::string Utils::hexToNumberString(std::string hex) {
-  if (hex.substr(0,2) != "0x" || hex.substr(0, 2) != "0X") { hex.insert(0, "0x"); }
-  BigNumber bn = toBN(hex);
-  std::stringstream ss;
-  ss << bn;
-  return ss.str();
+  return boost::lexical_cast<std::string>(toBN(hex));
 }
 
 BigNumber Utils::hexToBigNumber(std::string hex) {
