@@ -72,7 +72,7 @@ std::future<json> Eth::getBlockNumber() {
   });
 }
 
-std::future<json> Eth::getBalance(std::string address, std::string defaultBlock) {
+std::future<json> Eth::getBalance(const std::string& address, const std::string& defaultBlock) {
   return std::async([=]{
     json ret;
     Error err;
@@ -91,7 +91,7 @@ std::future<json> Eth::getBalance(std::string address, std::string defaultBlock)
 }
 
 std::future<json> Eth::getStorageAt(
-  std::string address, std::string position, std::string defaultBlock
+  std::string address, std::string position, const std::string& defaultBlock
 ) {
   if (position.substr(0, 2) != "0x" || position.substr(0, 2) != "0X") {
     position.insert(0, "0x");
@@ -114,14 +114,14 @@ std::future<json> Eth::getStorageAt(
 }
 
 std::future<json> Eth::getStorageAt(
-  std::string address, BigNumber position, std::string defaultBlock
+  const std::string& address, const BigNumber& position, const std::string& defaultBlock
 ) {
   std::stringstream ss;
   ss << std::hex << position;
   return getStorageAt(address, ss.str(), defaultBlock);
 }
 
-std::future<json> Eth::getCode(std::string address, std::string defaultBlock) {
+std::future<json> Eth::getCode(const std::string& address, const std::string& defaultBlock) {
   return std::async([=]{
     json ret;
     Error err;
@@ -255,7 +255,7 @@ std::future<json> Eth::getUncle(
   });
 }
 
-std::future<json> Eth::getTransaction(std::string transactionHash) {
+std::future<json> Eth::getTransaction(const std::string& transactionHash) {
   return std::async([=]{
     json ret;
     Error err;
@@ -304,7 +304,7 @@ std::future<json> Eth::getTransactionFromBlock(
   });
 }
 
-std::future<json> Eth::getTransactionReceipt(std::string hash) {
+std::future<json> Eth::getTransactionReceipt(const std::string& hash) {
   return std::async([=]{
     json ret;
     Error err;
@@ -321,7 +321,7 @@ std::future<json> Eth::getTransactionReceipt(std::string hash) {
 }
 
 std::future<json> Eth::getTransactionCount(
-  std::string address, std::string defaultBlock
+  const std::string& address, std::string defaultBlock
 ) {
   return std::async([=]{
     json ret;
@@ -340,7 +340,7 @@ std::future<json> Eth::getTransactionCount(
   });
 }
 
-std::future<json> Eth::sign(std::string dataToSign, std::string address) {
+std::future<json> Eth::sign(std::string dataToSign, const std::string& address) {
   if (!Utils::isHex(dataToSign)) { dataToSign = Utils::utf8ToHex(dataToSign); }
   return std::async([=]{
     json ret;
@@ -357,7 +357,7 @@ std::future<json> Eth::sign(std::string dataToSign, std::string address) {
   });
 }
 
-std::future<json> Eth::signTransaction(json txObj) {
+std::future<json> Eth::signTransaction(const json& txObj) {
   return std::async([=]{
     json ret;
     Error err;
@@ -373,7 +373,7 @@ std::future<json> Eth::signTransaction(json txObj) {
   });
 }
 
-std::future<json> Eth::call(json callObject, std::string defaultBlock) {
+std::future<json> Eth::call(const json& callObject,const std::string& defaultBlock) {
   return std::async([=]{
     json ret;
     Error err;
@@ -391,7 +391,7 @@ std::future<json> Eth::call(json callObject, std::string defaultBlock) {
   });
 }
 
-std::future<json> Eth::estimateGas(json callObject) {
+std::future<json> Eth::estimateGas(const json& callObject) {
   return std::async([=]{
     json ret;
     Error err;
@@ -407,7 +407,7 @@ std::future<json> Eth::estimateGas(json callObject) {
   });
 }
 
-std::future<json> Eth::getPastLogs(json options) {
+std::future<json> Eth::getPastLogs(const json& options) {
   return std::async([=]{
     json ret;
     Error err;

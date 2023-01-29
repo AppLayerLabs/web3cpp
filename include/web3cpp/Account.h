@@ -45,8 +45,8 @@ class Account {
      * @param *_provider Pointer to the provider used by the account.
      */
     Account(
-      boost::filesystem::path walletPath, std::string name, std::string __address,
-      std::string __derivationPath, bool __isLedger, Provider *_provider
+      const boost::filesystem::path& walletPath, const std::string& name, const std::string& __address,
+      const std::string& __derivationPath, bool __isLedger, Provider *_provider
     );
 
     /// Copy constructor.
@@ -59,11 +59,11 @@ class Account {
       provider(other.provider),
       transactionDB(other.transactionDB)
     {}
-
-    std::string address() { return _address; }                ///< Getter for the address.
-    std::string name() { return _name; }                      ///< Getter for the custom name/label.
-    std::string derivationPath() { return _derivationPath; }  ///< Getter for the derivation path.
-    uint64_t nonce() { return _nonce; }                       ///< Getter for the nonce.
+    
+    const std::string& address() { return _address; }                ///< Getter for the address.
+    const std::string& name() { return _name; }                      ///< Getter for the custom name/label.
+    const std::string& derivationPath() { return _derivationPath; }  ///< Getter for the derivation path.
+    const uint64_t& nonce() { return _nonce; }                       ///< Getter for the nonce.
     bool isLedger() { return _isLedger; }                     ///< Getter for the Ledger flag.
 
     /**

@@ -43,6 +43,18 @@ class Contract {
      */
     bool isTypeArray(Types const &type);
 
+    /**
+     * List of methods from the contract, as key and value pairs.
+     * Key is the method name, value is a vector with each of the method's parameter types.
+     */
+    std::map<std::string,std::vector<Types>> _methods;
+
+    /**
+     * List of functors from the contract.
+     * Key is the method name, value is the method hash (first 8 bytes of the ABI hash).
+     */
+    std::map<std::string,std::string> _functors;
+
   public:
     /// Transaction options for the contract.
     class Options {
@@ -68,7 +80,7 @@ class Contract {
      * @param options (optional) The transaction options to override for the
      *                contract as a JSON object. Defaults to NULL.
      */
-    Contract(json jsonInterface, std::string address, json options = NULL);
+    Contract(const json& jsonInterface, const std::string& address, json options = NULL);
 
     Options options;  ///< Object for the contract's transaction options.
 
@@ -76,13 +88,13 @@ class Contract {
      * List of methods from the contract, as key and value pairs.
      * Key is the method name, value is a vector with each of the method's parameter types.
      */
-    std::map<std::string,std::vector<Types>> methods;
+    const std::map<std::string,std::vector<Types>>& methods() { return _methods; }
 
     /**
      * List of functors from the contract.
      * Key is the method name, value is the method hash (first 8 bytes of the ABI hash).
      */
-    std::map<std::string,std::string> functors;
+    const std::map<std::string,std::string>& functors() { return _functors; };
 
     /**
      * Clones the current contract instance.
@@ -100,7 +112,7 @@ class Contract {
      * @param &error Error object.
      * @return The %Solidity encoded function ABI.
      */
-    std::string operator() (json arguments, std::string function, Error &error);
+    std::string operator() (const json& arguments, const std::string& function, Error &error);
 
     /**
      * ABI constructor.
@@ -114,7 +126,7 @@ class Contract {
      * @param &error Error object.
      * @return The %Solidity encoded function ABI.
      */
-    std::string operator() (std::string function, json arguments, Error &error);
+    std::string operator() (const std::string& function, const json& arguments, Error &error);
 };
 
 #endif  // CONTRACT_H

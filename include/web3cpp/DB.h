@@ -46,7 +46,7 @@ class Database {
      * @param _name The database's name.
      * @param rootPath The parent folder of the database.
      */
-    Database(std::string _name, boost::filesystem::path rootPath)
+    Database(const std::string& _name, const boost::filesystem::path& rootPath)
     : name(_name), path(rootPath.string() + "/" + name) {
       this->dbOpts.create_if_missing = true;
       openDB();

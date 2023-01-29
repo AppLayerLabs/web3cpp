@@ -67,14 +67,14 @@ class Provider {
     /// Operators.
     Provider& operator=(const Provider &p);
 
-    std::string getName() { return this->name; }                ///< Getter for provider name.
-    std::string getHost() { return this->host; }                ///< Getter for provider host.
-    std::string getTarget() { return this->target; }            ///< Getter for provider %RPC endpoint target.
-    uint64_t getPort() { return this->port; }                   ///< Getter for provider port.
-    uint64_t getChainId() { return this->chainId; }             ///< Getter for provider chain ID.
-    std::string getCurrency() { return this->currency; }        ///< Getter for provider currency.
-    std::string getExplorerUrl() { return this->explorerUrl; }  ///< Getter for provider block explorer URL.
-    static json getPresets() { return Provider::presets; }      ///< Getter for provider presets.
+    const std::string& getName() { return this->name; }                ///< Getter for provider name.
+    const std::string& getHost() { return this->host; }                ///< Getter for provider host.
+    const std::string& getTarget() { return this->target; }            ///< Getter for provider %RPC endpoint target.
+    const uint64_t& getPort() { return this->port; }                   ///< Getter for provider port.
+    const uint64_t& getChainId() { return this->chainId; }             ///< Getter for provider chain ID.
+    const std::string& getCurrency() { return this->currency; }        ///< Getter for provider currency.
+    const std::string& getExplorerUrl() { return this->explorerUrl; }  ///< Getter for provider block explorer URL.
+    const static json& getPresets() { return Provider::presets; }      ///< Getter for provider presets.
 };
 
 #endif  // PROVIDER_H

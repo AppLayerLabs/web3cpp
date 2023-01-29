@@ -1,6 +1,6 @@
 #include <web3cpp/Solidity.h>
 
-bool Solidity::checkType(std::string type, json value, Error &err) {
+bool Solidity::checkType(const std::string& type, const json& value, Error &err) {
   if (type == "function") {
     // Check both "funcName()" and every type inside the "()"
     std::string hdr = value.get<std::string>();
@@ -96,27 +96,28 @@ bool Solidity::checkType(std::string type, json value, Error &err) {
   err.setCode(31); return false;  // ABI Unsupported Or Invalid Type
 }
 
-std::string Solidity::packFunction(std::string func) {
+std::string Solidity::packFunction(const std::string& func) {
   return dev::toHex(dev::sha3(func)).substr(0, 8);
 }
 
-std::string Solidity::packUint(std::string num) {
+std::string Solidity::packUint(const std::string& num) {
   return Utils::padLeft(Utils::toHex(num), 64);
 }
 
-std::string Solidity::packAddress(std::string add) {
+std::string Solidity::packAddress(const std::string& add) {
   return Utils::padLeft(
     Utils::stripHexPrefix(Utils::toLowercaseAddress(add))
   , 64);
 }
 
-std::string Solidity::packBool(std::string b) {
-  if (b == "true") b = "1";
-  else if (b == "false") b = "0";
-  return Utils::padLeft(b, 64);
+std::string Solidity::packBool(const std::string& b) {
+  std::string ret;
+  if (b == "true") ret = "1";
+  else if (b == "false") ret = "0";
+  return Utils::padLeft(ret, 64);
 }
 
-std::string Solidity::packBytes(std::string hex) {
+std::string Solidity::packBytes(const std::string& hex) {
   std::string hexStrip, hexOffset, hexLength, hexData = "";
   int padding = 0;
   hexStrip = Utils::stripHexPrefix(hex);
@@ -127,7 +128,7 @@ std::string Solidity::packBytes(std::string hex) {
   return hexOffset + hexLength + hexData;
 }
 
-std::string Solidity::packString(std::string str) {
+std::string Solidity::packString(const std::string& str) {
   std::string strStrip, strOffset, strLength, strData = "";
   int padding = 0;
   strStrip = Utils::stripHexPrefix(Utils::utf8ToHex(str));
@@ -138,7 +139,7 @@ std::string Solidity::packString(std::string str) {
   return strOffset + strLength + strData;
 }
 
-std::string Solidity::packUintArray(std::vector<std::string> numV) {
+std::string Solidity::packUintArray(const std::vector<std::string> numV) {
   std::string arrOffset, arrSize, arrData = "";
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
   arrSize = Utils::padLeft(Utils::toHex(numV.size()), 64);
@@ -148,7 +149,7 @@ std::string Solidity::packUintArray(std::vector<std::string> numV) {
   return arrOffset + arrSize + arrData;
 }
 
-std::string Solidity::packAddressArray(std::vector<std::string> addV) {
+std::string Solidity::packAddressArray(const std::vector<std::string> addV) {
   std::string arrOffset, arrSize, arrData = "";
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
   arrSize = Utils::padLeft(Utils::toHex(addV.size()), 64);
@@ -160,7 +161,7 @@ std::string Solidity::packAddressArray(std::vector<std::string> addV) {
   return arrOffset + arrSize + arrData;
 }
 
-std::string Solidity::packBoolArray(std::vector<std::string> bV) {
+std::string Solidity::packBoolArray(const std::vector<std::string> bV) {
   std::string arrOffset, arrSize, arrData = "";
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
   arrSize = Utils::padLeft(Utils::toHex(bV.size()), 64);
@@ -172,7 +173,7 @@ std::string Solidity::packBoolArray(std::vector<std::string> bV) {
   return arrOffset + arrSize + arrData;
 }
 
-std::string Solidity::packBytesArray(std::vector<std::string> hexV) {
+std::string Solidity::packBytesArray(const std::vector<std::string> hexV) {
   std::string arrOffset, arrSize = "";
   std::vector<std::string> hexStrip, hexOffset, hexLength, hexData = {};
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
@@ -201,7 +202,7 @@ std::string Solidity::packBytesArray(std::vector<std::string> hexV) {
   return ret;
 }
 
-std::string Solidity::packStringArray(std::vector<std::string> strV) {
+std::string Solidity::packStringArray(const std::vector<std::string> strV) {
   std::string arrOffset, arrSize = "";
   std::vector<std::string> strStrip, strOffset, strLength, strData = {};
   arrOffset = Utils::padLeft(Utils::toHex(32), 64);
@@ -229,7 +230,7 @@ std::string Solidity::packStringArray(std::vector<std::string> strV) {
   return ret;
 }
 
-std::string Solidity::packMulti(json args, Error &err, std::string func) {
+std::string Solidity::packMulti(const json& args, Error &err, const std::string& func) {
   // Handle function ID first if it exists
   std::string ret = "0x";
   if (!func.empty()) {

@@ -52,7 +52,7 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   return true;
 }
 
-bool Wallet::loadWallet(std::string const &password, Error &error) {
+bool Wallet::loadWallet(const std::string& password, Error &error) {
   // Create the wallet if it doesn't exist already
   if (!boost::filesystem::exists(walletExistsPath())) {
     Error createErr;
@@ -81,7 +81,7 @@ bool Wallet::loadWallet(std::string const &password, Error &error) {
   }
 }
 
-bool Wallet::checkPassword(std::string &password) {
+bool Wallet::checkPassword(const std::string& password) {
   auto inputPassword = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
   return (inputPassword.ref().toString() == passHash.ref().toString());
 }
@@ -94,7 +94,7 @@ bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
 }
 
 std::string Wallet::createAccount(
-  std::string derivPath, std::string &password, std::string name,
+  std::string derivPath, const std::string &password, std::string name,
   Error &error, std::string seed
 ) {
   if (!checkPassword(password)) { error.setCode(1); return ""; } // Incorrect Password
@@ -289,7 +289,7 @@ std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
   });
 }
 
-void Wallet::storePassword(std::string password, unsigned int seconds) {
+void Wallet::storePassword(const std::string& password, unsigned int seconds) {
   this->_password = password;
   if (seconds > 0) {
     this->_passEnd = std::time(nullptr) + seconds;
@@ -348,7 +348,7 @@ json Wallet::getAccountRawDetails(std::string address) {
   return ret;
 }
 
-std::string Wallet::getSeedPhrase(std::string password, Error &err) {
+std::string Wallet::getSeedPhrase(const std::string& password, Error &err) {
   std::string seedPhrase;
   Error readErr, decErr;
   boost::filesystem::path tmpPath = seedPhraseFile();

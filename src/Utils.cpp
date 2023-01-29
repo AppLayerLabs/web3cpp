@@ -46,7 +46,7 @@ std::string Utils::randomHex(unsigned int size, bool prefixed) {
   return ret;
 }
 
-BigNumber Utils::toBN(std::string number) {
+BigNumber Utils::toBN(const std::string& number) {
   if (isHexStrict(number)) {
     return hexToBigNumber(number);
   } else if (isNumber(number)) {
@@ -55,15 +55,15 @@ BigNumber Utils::toBN(std::string number) {
   throw std::invalid_argument("invalid number value (not hex or uint string)");
 }
 
-std::string Utils::sha3(std::string string, bool isNibble) {
+std::string Utils::sha3(const std::string& string, bool isNibble) {
   return (!string.empty()) ? dev::toHex(dev::sha3(string, isNibble)) : "";
 }
 
-std::string Utils::keccak256(std::string string, bool isNibble) {
+std::string Utils::keccak256(const std::string& string, bool isNibble) {
   return Utils::sha3(string, isNibble);
 }
 
-std::string Utils::sha3Raw(std::string string, bool isNibble) {
+std::string Utils::sha3Raw(const std::string& string, bool isNibble) {
   return dev::toHex(dev::sha3(string, isNibble));
 }
 
@@ -77,12 +77,14 @@ std::string Utils::soliditySha3Raw(json params, Error &err) {
   return ((err.getCode() == 0) ? "0x" + Utils::sha3Raw(ret, true) : "");
 }
 
-bool Utils::isHex(std::string hex) {
-  if (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") { hex = hex.substr(2); }
+bool Utils::isHex(const std::string& hex) {
+  if (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") { 
+    return (hex.substr(2).find_first_not_of("0123456789abcdefABCDEF") == std::string::npos); 
+  }
   return (hex.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos);
 }
 
-bool Utils::isHexStrict(std::string hex) {
+bool Utils::isHexStrict(const std::string& hex) {
   return (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") ? isHex(hex) : false;
 }
 
@@ -90,7 +92,7 @@ bool Utils::isNumber(const std::string& str) {
   return (str.find_first_not_of("0123456789") == std::string::npos);
 }
 
-bool Utils::isAddress(std::string address) {
+bool Utils::isAddress(const std::string& address) {
   // Regexes for checking the basic requirements of an address,
   // all lower or all upper case, respectively.
   std::regex addRegex = std::regex("^(0x|0X)?[0-9a-fA-F]{40}$");
@@ -105,20 +107,20 @@ bool Utils::isAddress(std::string address) {
   }
 }
 
-std::string Utils::toLowercaseAddress(std::string address) {
-  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
-    address = address.substr(2);
-  }
+std::string Utils::toLowercaseAddress(const std::string& address) {
   std::string ret = address;
+  if (ret.substr(0, 2) == "0x" || ret.substr(0, 2) == "0X") {
+    ret = ret.substr(2);
+  }
   std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
   return "0x" + ret;
 }
 
-std::string Utils::toUppercaseAddress(std::string address) {
-  if (address.substr(0, 2) == "0x" || address.substr(0, 2) == "0X") {
-    address = address.substr(2);
-  }
+std::string Utils::toUppercaseAddress(const std::string& address) {
   std::string ret = address;
+  if (ret.substr(0, 2) == "0x" || ret.substr(0, 2) == "0X") {
+    ret = ret.substr(2);
+  }
   std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
   return "0x" + ret;
 }
@@ -166,7 +168,7 @@ bool Utils::checkAddressChecksum(std::string address) {
   return true;
 }
 
-std::string Utils::toHex(std::string value) {
+std::string Utils::toHex(const std::string& value) {
   std::stringstream ss;
   if (std::all_of(value.begin(), value.end(), ::isdigit)) { // Number string
     return toHex(boost::lexical_cast<dev::u256>(value));
@@ -184,13 +186,13 @@ std::string Utils::toHex(BigNumber value) {
   return ss.str();
 }
 
-std::string Utils::stripHexPrefix(std::string str) {
+std::string Utils::stripHexPrefix(const std::string& str) {
   return (
     !str.empty() && isHex(str) && (str.substr(0, 2) == "0x" || str.substr(0, 2) == "0X")
   ) ? str.substr(2) : str;
 }
 
-std::string Utils::hexToNumberString(std::string hex) {
+std::string Utils::hexToNumberString(const std::string& hex) {
   return boost::lexical_cast<std::string>(toBN(hex));
 }
 
@@ -213,7 +215,7 @@ std::string Utils::hexToUtf8(std::string hex) {
   return str;
 }
 
-std::string Utils::hexToString(std::string hex) {
+std::string Utils::hexToString(const std::string& hex) {
   return Utils::hexToUtf8(hex);
 }
 
@@ -243,7 +245,7 @@ std::vector<unsigned int> Utils::hexToBytes(std::string hex) {
   return bytes;
 }
 
-std::string Utils::utf8ToHex(std::string str) {
+std::string Utils::utf8ToHex(const std::string& str) {
   std::string hex = "";
 
   std::stringstream ss;
@@ -256,11 +258,11 @@ std::string Utils::utf8ToHex(std::string str) {
   return "0x" + hex;
 }
 
-std::string Utils::stringToHex(std::string hex) {
+std::string Utils::stringToHex(const std::string& hex) {
   return Utils::utf8ToHex(hex);
 }
 
-std::string Utils::asciiToHex(std::string str) {
+std::string Utils::asciiToHex(const std::string& str) {
   std::string hex = "";
 
   for (int i = 0; i < str.length(); i++) {
@@ -274,7 +276,7 @@ std::string Utils::asciiToHex(std::string str) {
   return "0x" + hex;
 }
 
-std::string Utils::bytesToHex(std::vector<unsigned int> byteArray) {
+std::string Utils::bytesToHex(const std::vector<unsigned int>& byteArray) {
   std::string hex = "";
 
   std::ostringstream result;
@@ -287,7 +289,7 @@ std::string Utils::bytesToHex(std::vector<unsigned int> byteArray) {
   return "0x" + hex;
 }
 
-std::string Utils::toWei(std::string amount, int decimals) {
+std::string Utils::toWei(const std::string& amount, int decimals) {
   std::string digitPadding = "";
   std::string valuestr = "";
 
@@ -322,13 +324,13 @@ std::string Utils::toWei(std::string amount, int decimals) {
   return valuestr;
 }
 
-std::string Utils::toWei(BigNumber amount, int decimals) {
+std::string Utils::toWei(const BigNumber& amount, int decimals) {
   std::string amountHex = Utils::toHex(amount);
   std::string amountStr = Utils::hexToNumberString(amountHex);
   return toWei(amountStr, decimals);
 }
 
-std::string Utils::fromWei(std::string amount, int decimals) {
+std::string Utils::fromWei(const std::string& amount, int decimals) {
   std::string result;
   if (amount.size() <= decimals) {
     int valueToPoint = decimals - amount.size();
@@ -344,7 +346,7 @@ std::string Utils::fromWei(std::string amount, int decimals) {
   return result;
 }
 
-std::string Utils::fromWei(BigNumber amount, int decimals) {
+std::string Utils::fromWei(const BigNumber& amount, int decimals) {
   std::string amountHex = Utils::toHex(amount);
   std::string amountStr = Utils::hexToNumberString(amountHex);
   return fromWei(amountStr, decimals);

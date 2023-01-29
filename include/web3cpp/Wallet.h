@@ -85,7 +85,7 @@ class Wallet {
      * @return `true` if the wallet was successfully created, `false` otherwise.
      *         Will still return `true` if the default account wasn't created.
      */
-    bool createNewWallet(std::string const &password, Error &error);
+    bool createNewWallet(const std::string& password, Error &error);
 
   public:
     /**
@@ -108,7 +108,7 @@ class Wallet {
      * @param &error Error object.
      * @return `true` if the wallet is successfully loaded, `false` otherwise.
      */
-    bool loadWallet(std::string const &password, Error &error);
+    bool loadWallet(const std::string& password, Error &error);
 
     /**
      * Check if a wallet is loaded.
@@ -121,7 +121,7 @@ class Wallet {
      * @param &password The password to be checked.
      * @return `true` if the password matches the wallet's, `false` otherwise.
      */
-    bool checkPassword(std::string &password);
+    bool checkPassword(const std::string& password);
 
     /**
      * Check if the wallet file and its keys folder exists in a given folder.
@@ -141,7 +141,7 @@ class Wallet {
      * @return The checksum address of the new account, or an empty string on failure.
      */
     std::string createAccount(
-      std::string derivPath, std::string &password, std::string name,
+      std::string derivPath, const std::string& password, std::string name,
       Error &error, std::string seed = ""
     );
 
@@ -243,7 +243,7 @@ class Wallet {
      * @param seconds (optional) The number of seconds to store the password in memory.
      *                Defaults to 0, which means "store indefinitely until cleared manually".
      */
-    void storePassword(std::string password, unsigned int seconds = 0);
+    void storePassword(const std::string& password, unsigned int seconds = 0);
 
     void clearPassword(); ///< Clear the wallet's password from memory.
 
@@ -266,7 +266,7 @@ class Wallet {
      * @return The wallet seed phrase.
      */
 
-    std::string getSeedPhrase(std::string password, Error &err);
+    std::string getSeedPhrase(const std::string& password, Error &err);
 
     /**
      * Get the details for a specific account.
