@@ -114,6 +114,7 @@ std::string Solidity::packBool(const std::string& b) {
   std::string ret;
   if (b == "true") ret = "1";
   else if (b == "false") ret = "0";
+  else ret = b;
   return Utils::padLeft(ret, 64);
 }
 
