@@ -33,7 +33,7 @@ namespace Net {
    * @return The response of the request as a string.
    */
   std::string HTTPRequest(
-    Provider *provider, const RequestTypes& requestType, const std::string& reqBody
+    const std::unique_ptr<Provider>& provider, const RequestTypes& requestType, const std::string& reqBody
   );
 
   /**

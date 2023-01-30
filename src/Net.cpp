@@ -6,7 +6,7 @@
 #include <boost/certify/https_verification.hpp>
 
 std::string Net::HTTPRequest(
-  Provider *provider, const RequestTypes& requestType,const std::string& reqBody
+  const std::unique_ptr<Provider>& provider, const RequestTypes& requestType,const std::string& reqBody
 ) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>

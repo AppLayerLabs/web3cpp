@@ -4,6 +4,7 @@
 #include <future>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <web3cpp/DB.h>
 #include <web3cpp/Net.h>
@@ -22,18 +23,18 @@ using json = nlohmann::ordered_json;
 
 class Account {
   private:
-    std::string _address;           ///< Address for the account.
-    std::string _name;              ///< Custom name/label for the account.
-    std::string _derivationPath;    ///< Complete derivation path for the account (e.g. "m/44'/60'/0'/0").
-    uint64_t _nonce;                ///< Current nonce for the account.
-    bool _isLedger;                 ///< Indicates the account is imported from a Ledger device.
-    Provider *provider;             ///< Pointer to Web3::defaultProvider.
-    mutable std::mutex accountLock; ///< Mutex for managing read/write access to the account object.
-    Database transactionDB;         ///< Database of transactions made with the account.
+    std::string _address;                                        ///< Address for the account.
+    std::string _name;                                           ///< Custom name/label for the account.
+    std::string _derivationPath;                                 ///< Complete derivation path for the account (e.g. "m/44'/60'/0'/0").
+    uint64_t _nonce;                                             ///< Current nonce for the account.
+    bool _isLedger;                                              ///< Indicates the account is imported from a Ledger device.
+    const std::unique_ptr<Provider>& provider;                   ///< Pointer to Web3::defaultProvider.
+    mutable std::mutex accountLock;                              ///< Mutex for managing read/write access to the account object.
+    Database transactionDB;                                      ///< Database of transactions made with the account.
 
   public:
     /// Empty constructor.
-    Account(){}
+    Account() : provider(nullptr) {}
 
     /**
      * Default constructor.
@@ -46,7 +47,7 @@ class Account {
      */
     Account(
       const boost::filesystem::path& walletPath, const std::string& __address, const std::string& __name,
-      const std::string& __derivationPath, bool __isLedger, Provider *_provider
+      const std::string& __derivationPath, bool __isLedger, const std::unique_ptr<Provider>& _provider
     );
 
     /// Copy constructor.

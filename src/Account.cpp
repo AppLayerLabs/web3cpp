@@ -2,7 +2,7 @@
 
 Account::Account(
   const boost::filesystem::path& walletPath, const std::string& __address, const std::string& __name,
-  const std::string& __derivationPath, bool __isLedger, Provider *_provider
+  const std::string& __derivationPath, bool __isLedger, const std::unique_ptr<Provider>& _provider
 ) : _address(__address), _name(__name), _derivationPath(__derivationPath),
   _isLedger(__isLedger), provider(_provider),
   transactionDB("transactions/" + __address, walletPath)

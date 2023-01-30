@@ -26,16 +26,16 @@ using json = nlohmann::ordered_json;
 
 class Eth {
   private:
-    Provider *provider; ///< Pointer to Web3::defaultProvider.
+    const std::unique_ptr<Provider>& provider; ///< Pointer to Web3::defaultProvider.
 
   public:
     /**
      * Constructor.
      * @param _provider Pointer to the provider that will be used.
      */
-    Eth(Provider* _provider) : provider(_provider) {};
+    Eth(const std::unique_ptr<Provider>& _provider) : provider(_provider) {};
 
-    Provider* getProvider() { return this->provider; } ///< Getter for the provider pointer.
+    const std::unique_ptr<Provider>& getProvider() { return this->provider; } ///< Getter for the provider pointer.
 
     /**
      * Address used as the default "from" property, if no "from"

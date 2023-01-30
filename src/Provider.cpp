@@ -59,12 +59,10 @@ Provider::Provider(
   _setData(pJ);
 }
 
-Provider& Provider::operator=(const Provider &p) {
+void Provider::setProvider(const Provider &p) {
   json pJ = {
     {"name", p.name}, {"host", p.host}, {"target", p.target}, {"port", p.port},
     {"chainId", p.chainId}, {"currency", p.currency}, {"explorerUrl", p.explorerUrl}
   };
-  _setData(pJ);
-  return *this;
-}
-
+  this->_setData(pJ);
+};

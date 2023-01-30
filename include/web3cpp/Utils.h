@@ -10,6 +10,7 @@
 #include <string>
 #include <mutex>
 #include <regex>
+#include <memory>
 
 #include <boost/filesystem.hpp>
 #include <boost/nowide/filesystem.hpp>

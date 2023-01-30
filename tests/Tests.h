@@ -44,7 +44,7 @@ class Tests {
     // Constructor
     Tests(std::string &password) {
       std::cout << "Creating/Loading wallet... " << std::flush;
-      web3 = new Web3(new Provider("avax-c-test"), &walletFolder);
+      web3 = new Web3(Provider("avax-c-test"), walletFolder);
       Error error;
       if (!web3->wallet.loadWallet(password, error)) {
         std::cout << std::string("Could not load wallet: ") << error.what() << std::endl;
