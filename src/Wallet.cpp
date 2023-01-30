@@ -60,6 +60,19 @@ bool Wallet::loadWallet(const std::string& password, Error &error) {
       error.setCode(createErr.getCode());
       return false;
     }
+  } else {
+    // If wallet already exists, populate this->accountList from DB.
+    for (auto const& acc : this->accountDB.getAllPairs()) {
+      json accJson = json::parse(acc.second);
+      this->accountList.emplace_back(std::make_unique<Account>(
+        boost::filesystem::path(this->path.string() + "/wallet"),
+        accJson["address"].get<std::string>(),
+        accJson["name"].get<std::string>(),
+        accJson["derivationPath"].get<std::string>(),
+        accJson["isLedger"].get<bool>(),
+        this->provider
+      ));
+    }
   }
 
   // Check if password is correct
@@ -97,6 +110,7 @@ std::string Wallet::createAccount(
   std::string derivPath, const std::string &password, std::string name,
   Error &error, std::string seed
 ) {
+  std::string ret;
   if (!checkPassword(password)) { error.setCode(1); return ""; } // Incorrect Password
   std::string seedPhrase;
   if (seed.empty()) {
@@ -118,18 +132,14 @@ std::string Wallet::createAccount(
   // Derive and import the account.
   bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivPath);
   dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
+  ret = Utils::toLowercaseAddress("0x" + dev::toHex(k.address()));
   Error importErr;
   if (!this->importPrivKey(k.secret(), password, name, derivPath, importErr)) {
     std::cout << "Error when importing account: " << importErr.what() << std::endl;
     error.setCode(importErr.getCode());
     return "";
   }
-  std::string ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    json accJson = json::parse(acc.second);
-    if (accJson["name"] == name) { ret = acc.first; break; }
-  }
+
   error.setCode(0); // No Error
   return ret;
 }
@@ -162,10 +172,8 @@ bool Wallet::importPrivKey(
   encryptedKey["isLedger"] = false;
 
   // Import the account
-  std::vector<std::string> ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    if (acc.first == encryptedKey["address"]) {
+  for (auto const &acc : this->accountList) {
+    if (encryptedKey["address"] == acc->address()) {
       error.setCode(3);  // Account Exists
       return false;
     }
@@ -174,12 +182,38 @@ bool Wallet::importPrivKey(
     error.setCode(2); // Database Insert Failed
     return false;
   }
+
+  // Import to vector
+  this->accountList.emplace_back(std::make_unique<Account>(
+    boost::filesystem::path(this->path.string() + "/wallet"),
+    encryptedKey["address"].get<std::string>(),
+    encryptedKey["name"].get<std::string>(),
+    encryptedKey["derivationPath"].get<std::string>(),
+    encryptedKey["isLedger"].get<bool>(),
+    this->provider
+  ));
   error.setCode(0); // No Error
   return true;
 }
 
 bool Wallet::deleteAccount(std::string address) {
-  return this->accountDB.deleteKeyValue(Utils::toLowercaseAddress(address));
+  // Delete from vector
+  address = Utils::toLowercaseAddress(address);
+  bool accFound = false;
+  uint64_t accIndex = 0;
+  for (uint64_t i = 0; i < this->accountList.size(); ++i) {
+    if (accountList[i]->address() == address) {
+      accIndex = i;
+      accFound = true;
+    }
+  }
+  if (accFound) {
+    this->accountList.erase(accountList.begin() + accIndex);
+    this->accountList.shrink_to_fit();
+  }
+
+  // Delete from DB Permanently.
+  return this->accountDB.deleteKeyValue(address);
 }
 
 std::string Wallet::sign(
@@ -309,30 +343,21 @@ bool Wallet::isPasswordStored() {
 
 std::vector<std::string> Wallet::getAccounts() {
   std::vector<std::string> ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    ret.push_back(acc.first);
+  for (auto const &acc : this->accountList) {
+    ret.push_back(acc->address());
   }
   return ret;
 }
 
-Account Wallet::getAccountDetails(std::string address) {
+const std::unique_ptr<Account>& Wallet::getAccountDetails(std::string address) {
   address = Utils::toLowercaseAddress(address);
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    if (acc.first == address) {
-      json accJson = json::parse(acc.second);
-      return Account(
-        boost::filesystem::path(path.string() + "/wallet"),
-        accJson["address"].get<std::string>(),
-        acc.first,
-        accJson["derivationPath"].get<std::string>(),
-        accJson["isLedger"].get<bool>(),
-        this->provider
-      );
+  for (auto &acc : this->accountList) {
+    if (acc->address() == address) {
+      return acc;
     }
   }
-  return Account();
+
+  return NullAccount;
 }
 
 json Wallet::getAccountRawDetails(std::string address) {

@@ -66,7 +66,7 @@ class Database {
      * @param &key The key to search for.
      * @return `true` if the key exists, `false` otherwise.
      */
-    bool keyExists(std::string const &key);
+    bool keyExists(std::string const &key) const;
 
     /**
      * Get the value of a key from the database.
@@ -95,19 +95,19 @@ class Database {
      * Get all the individual keys stored in the database.
      * @return A vector with all the key strings.
      */
-    std::vector<std::string> getAllKeys();
+    std::vector<std::string> getAllKeys() const;
 
     /**
      * Get all the individual values stored in the database.
      * @return A vector with all the value strings.
      */
-    std::vector<std::string> getAllValues();
+    std::vector<std::string> getAllValues() const;
 
     /**
      * Get all the key/value pairs stored in the database.
      * @return A list with all the key/value strings.
      */
-    std::map<std::string, std::string> getAllPairs();
+    std::map<std::string, std::string> getAllPairs() const;
 
     /// Clear all entries stored in the database.
     void dropDatabase();

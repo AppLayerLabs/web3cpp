@@ -35,19 +35,22 @@ using json = nlohmann::ordered_json;
  * Abstraction for a single wallet.
  */
 
+static const std::unique_ptr<Account> NullAccount = nullptr; 
+
 class Wallet {
   private:
-    dev::bytesSec passHash;       ///< Hash for the wallet's password
-    dev::h256 passSalt;           ///< Salt for the wallet's password.
-    int passIterations = 100000;  ///< Number of PBKDF2 iterations to hash+salt the wallet's password.
-    boost::filesystem::path path; ///< The wallet's folder path.
-    Provider* provider;           ///< Pointer to Web3::defaultProvider.
-    Database infoDB;              ///< The wallet's information database.
-    Database accountDB;           ///< The wallet's account database.
-    bool _isLoaded;               ///< Indicates the wallet is properly loaded.
-    std::string _password;        ///< In-memory plain text copy of the wallet's password. Set by the user when they want to "remember" the password.
-    std::time_t _passEnd;         ///< Timestamp after which the password will be "forgotten"/erased from memory.
-    std::thread _passThread;      ///< Thread object that runs passHandler().
+    dev::bytesSec passHash;           ///< Hash for the wallet's password
+    dev::h256 passSalt;               ///< Salt for the wallet's password.
+    int passIterations = 100000;      ///< Number of PBKDF2 iterations to hash+salt the wallet's password.
+    boost::filesystem::path path;     ///< The wallet's folder path.
+    Provider* provider;               ///< Pointer to Web3::defaultProvider.
+    Database infoDB;                  ///< The wallet's information database.
+    Database accountDB;               ///< The wallet's account database.
+    bool _isLoaded;                   ///< Indicates the wallet is properly loaded.
+    std::string _password;            ///< In-memory plain text copy of the wallet's password. Set by the user when they want to "remember" the password.
+    std::time_t _passEnd;             ///< Timestamp after which the password will be "forgotten"/erased from memory.
+    std::thread _passThread;          ///< Thread object that runs passHandler().
+    std::vector<std::unique_ptr<Account>> accountList; ///< List of accounts loaded in this wallet. vector is modified on constructor (load from DB) and createNew 
 
     /// Get the wallet's "wallet.info" file path. Usually used to check if the wallet exists.
     boost::filesystem::path walletExistsPath() { return path.string() + "/wallet.info"; };
@@ -274,7 +277,7 @@ class Wallet {
      * @return A struct with details of the account, or an empty struct
      *         if the address is not found.
      */
-    Account getAccountDetails(std::string address);
+    const std::unique_ptr<Account>& getAccountDetails(std::string address);
 
     /**
      * Get the raw structure of a specific account.

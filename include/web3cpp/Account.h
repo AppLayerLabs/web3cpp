@@ -45,7 +45,7 @@ class Account {
      * @param *_provider Pointer to the provider used by the account.
      */
     Account(
-      const boost::filesystem::path& walletPath, const std::string& name, const std::string& __address,
+      const boost::filesystem::path& walletPath, const std::string& __address, const std::string& __name,
       const std::string& __derivationPath, bool __isLedger, Provider *_provider
     );
 
@@ -60,17 +60,17 @@ class Account {
       transactionDB(other.transactionDB)
     {}
     
-    const std::string& address() { return _address; }                ///< Getter for the address.
-    const std::string& name() { return _name; }                      ///< Getter for the custom name/label.
-    const std::string& derivationPath() { return _derivationPath; }  ///< Getter for the derivation path.
-    const uint64_t& nonce() { return _nonce; }                       ///< Getter for the nonce.
-    bool isLedger() { return _isLedger; }                     ///< Getter for the Ledger flag.
+    const std::string& address()        const { return _address; }           ///< Getter for the address.
+    const std::string& name()           const { return _name; }              ///< Getter for the custom name/label.
+    const std::string& derivationPath() const { return _derivationPath; }    ///< Getter for the derivation path.
+    const uint64_t& nonce()             const { return _nonce; }             ///< Getter for the nonce.
+    bool isLedger()                     const { return _isLedger; }          ///< Getter for the Ledger flag.
 
     /**
      * Request the account's balance from the network.
      * @return The balance in Wei as a BigNumber, or 0 if the request fails.
      */
-    std::future<BigNumber> balance();
+    std::future<BigNumber> balance() const;
 
     /**
      * Save a transaction to the account's local history database.
@@ -83,7 +83,7 @@ class Account {
      * Get all saved transactions from this account's local history database.
      * @return The account's transaction history as a JSON object.
      */
-    json getTxHistory();
+    json getTxHistory() const;
 };
 
 #endif  // ACCOUNTS_H
