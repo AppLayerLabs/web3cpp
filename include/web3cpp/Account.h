@@ -33,9 +33,7 @@ class Account {
     Database transactionDB;                                      ///< Database of transactions made with the account.
 
   public:
-    /// Empty constructor.
-    Account() : provider(nullptr) {}
-
+  
     /**
      * Default constructor.
      * @param walletPath The path for the wallet from which the account comes from.
