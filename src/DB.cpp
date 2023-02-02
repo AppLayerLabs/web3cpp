@@ -2,7 +2,7 @@
 
 bool Database::openDB() {
   this->dbMutex.lock();
-  if (!boost::filesystem::exists(this->path)); {
+  if (!boost::filesystem::exists(this->path)) {
     boost::filesystem::create_directories(this->path);
   }
   this->dbStatus = leveldb::DB::Open(this->dbOpts, this->path.string(), &this->db);
