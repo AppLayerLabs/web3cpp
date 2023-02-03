@@ -59,6 +59,17 @@ class Account {
       transactionDB(other.transactionDB)
     {}
     
+    /// Copy constructor from pointer.
+    Account(const std::unique_ptr<Account>& other) noexcept :
+      _address(other->_address),
+      _name(other->_name),
+      _derivationPath(other->_derivationPath),
+      _isLedger(other->_isLedger),
+      _nonce(other->_nonce),
+      provider(other->provider),
+      transactionDB(other->transactionDB)
+    {}
+    
     const std::string& address()        const { return _address; }           ///< Getter for the address.
     const std::string& name()           const { return _name; }              ///< Getter for the custom name/label.
     const std::string& derivationPath() const { return _derivationPath; }    ///< Getter for the derivation path.
