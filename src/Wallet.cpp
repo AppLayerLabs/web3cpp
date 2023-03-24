@@ -296,7 +296,7 @@ std::string Wallet::signTransaction(
 }
 
 std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
-  if (signedTx.substr(0,2) != "0x" || signedTx.substr(0,2) != "0X") {
+  if (signedTx.substr(0,2) != "0x" && signedTx.substr(0,2) != "0X") {
     signedTx.insert(0, "0x");
   }
   return std::async([this, signedTx, &err]{
@@ -305,15 +305,18 @@ std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
     std::string rpcStr = RPC::eth_sendRawTransaction(signedTx, rpcErr).dump();
     if (rpcErr.getCode() != 0) {
       err.setCode(rpcErr.getCode());
+      txResult["error"] = rpcStr;
       return txResult;
     }
+
     std::string req = Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST, rpcStr
     );
     json reqJson = json::parse(req);
+
     txResult["signature"] = signedTx;
     if (reqJson.count("error")) {
-      txResult["error"] = reqJson["error"].get<std::string>();
+      txResult["error"] = reqJson;
       err.setCode(13);  // Transaction Send Error
     } else {
       txResult["result"] = reqJson["result"].get<std::string>();
