@@ -48,6 +48,11 @@ FetchContent_Declare(json
                       DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_MakeAvailable(json)
 
+# Build catch2 to a library.
+add_library(catch2
+  ${CMAKE_SOURCE_DIR}/src/libs/catch2/catch_amalgamated.hpp
+  ${CMAKE_SOURCE_DIR}/src/libs/catch2/catch_amalgamated.cpp
+)
 
 # Add external modules
 
@@ -204,7 +209,7 @@ if(BUILD_TESTS)
     target_link_libraries(${PROJECT_NAME}-tests INTERFACE "-framework CoreFoundation" "-framework Security")
     set_target_properties(${PROJECT_NAME}-tests PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
   endif()
-  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
+  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME} catch2)
 endif()
 
 # Set required properties

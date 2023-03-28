@@ -19,6 +19,7 @@ class Web3;
 
 class Provider {
   private:
+    const std::string _id;    ///< The ID of the provider.
     std::string name;         ///< The name of the provider.
     std::string host;         ///< The host of the provider.
     std::string target;       ///< The RPC target of the provider.
