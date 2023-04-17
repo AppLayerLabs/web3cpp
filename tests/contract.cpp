@@ -5,6 +5,7 @@
 #include <vector>
 #include "../old_tests/Tests.h"
 
+
 using namespace std;
 using Catch::Matchers::Equals;
 
@@ -29,14 +30,15 @@ namespace TContract
                 boost::filesystem::current_path().parent_path().string() + "/tests/ArrayTest.json");
             Error jsonErr;
             json contractJson = Utils::readJSONFile(contractPath, jsonErr);
+
             REQUIRE(jsonErr.getCode() != 0);
+            REQUIRE(jsonErr.getCode() == 0);
 
             Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
             std::string addToAddressList = ArrayTest("addToAddressListArr",
                                                      json::array({json::array({"0x2E913a79206280B3882860B3eF4dF8204a62C8B1",
                                                                                "0x2E913a79206280B3882860B3eF4dF8204a62C8B1"})}),
                                                      error);
-
 
             std::string addToStringList = ArrayTest("addToStringListArr",
                                                     json::array({json::array({"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -204,6 +206,7 @@ namespace TContract
             REQUIRE(e7.getCode() != 0);
             REQUIRE(e8.getCode() != 0);
             REQUIRE(e9.getCode() != 0);
+
             REQUIRE(addToAddressList == addToAddressListExpected);
             REQUIRE(addToStringList == addToStringListExpected);
             REQUIRE(addToStringListFour == addToStringListFourExpected);
@@ -215,4 +218,5 @@ namespace TContract
             REQUIRE(testAlmostAll == testAlmostAllExpected);
         }
     }
+
 }
