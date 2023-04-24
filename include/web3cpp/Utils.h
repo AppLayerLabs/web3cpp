@@ -10,6 +10,7 @@
 #include <string>
 #include <mutex>
 #include <regex>
+#include <memory>
 
 #include <boost/filesystem.hpp>
 #include <boost/nowide/filesystem.hpp>
@@ -92,7 +93,7 @@ namespace Utils {
    *               first non-digit character.
    * @return The number string in BigNumber format.
    */
-  BigNumber toBN(std::string number);
+  BigNumber toBN(const std::string& number);
 
   /**
    * Calculate the Keccak256/SHA3 hash of a string.
@@ -102,12 +103,12 @@ namespace Utils {
    * @param isNibble (optional) If `true`, treats input as raw bytes. Defaults to false.
    * @return The hash of the string.
    */
-  std::string sha3(std::string string, bool isNibble = false);
+  std::string sha3(const std::string& string, bool isNibble = false);
 
-  std::string keccak256(std::string string, bool isNibble = false); ///< Alias of sha3().
+  std::string keccak256(const std::string& string, bool isNibble = false); ///< Alias of sha3().
 
   /// Same as sha3(), but returns the hash value instead of empty if an empty string is passed.
-  std::string sha3Raw(std::string string, bool isNibble = false);
+  std::string sha3Raw(const std::string& string, bool isNibble = false);
 
   /**
    * Calculate the Keccak256/SHA3 of given arguments in the same way %Solidity would.
@@ -127,32 +128,40 @@ namespace Utils {
    * @param hex The string to be checked.
    * @return `true` if the string is in hex format, `false` otherwise.
    */
-  bool isHex(std::string hex);
+  bool isHex(const std::string& hex);
 
   /// Same as isHex() but will return `false` if the "0x" prefix is missing.
-  bool isHexStrict(std::string hex);
+  bool isHexStrict(const std::string& hex);
 
+  /**
+    * check if a given string contains only numbers
+    * @param str The string to be checked.
+    * @return `true` if the string contains only numbers, `false` otherwise.
+    */
+  
+  bool isNumber(const std::string &str);
+  
   /**
    * Check if a given string is a valid address.
    * @param address The address to be checked. If the address has both upper
    *                *and* lowercase letters, will also check the checksum.
    * @return `true` if the address is valid, `false` otherwise.
    */
-  bool isAddress(std::string address);
+  bool isAddress(const std::string& address);
 
   /**
    * Convert an address to all lowercase.
    * @param address The address to convert.
    * @return The lowercase address.
    */
-  std::string toLowercaseAddress(std::string address);
+  std::string toLowercaseAddress(const std::string& address);
 
   /**
    * Convert an address to all uppercase.
    * @param address The address to convert.
    * @return The uppercase address.
    */
-  std::string toUppercaseAddress(std::string address);
+  std::string toUppercaseAddress(const std::string& address);
 
   /**
    * Convert an address to its [EIP-55](https://eips.ethereum.org/EIPS/eip-55)
@@ -177,7 +186,7 @@ namespace Utils {
    * @param value The value to convert.
    * @return The converted hex value string.
    */
-  std::string toHex(std::string value);
+  std::string toHex(const std::string&value);
 
   /// Overload of toHex() that takes a BigNumber as value.
   std::string toHex(BigNumber value);
@@ -187,14 +196,14 @@ namespace Utils {
    * @param str The hex string to strip.
    * @return The stripped hex string.
    */
-  std::string stripHexPrefix(std::string str);
+  std::string stripHexPrefix(const std::string& str);
 
   /**
    * Convert a given hex value to a number string.
    * @param hex The hex value to convert.
    * @return The converted value as a hex string.
    */
-  std::string hexToNumberString(std::string hex);
+  std::string hexToNumberString(const std::string& hex);
 
   /**
    * Convert a given hex value to a BigNumber.
@@ -210,7 +219,7 @@ namespace Utils {
    */
   std::string hexToUtf8(std::string hex);
 
-  std::string hexToString(std::string hex); ///< Alias of hexToUtf8().
+  std::string hexToString(const std::string& hex); ///< Alias of hexToUtf8().
 
   /**
    * Convert a given hex value to an ASCII string.
@@ -231,23 +240,23 @@ namespace Utils {
    * @param str The UTF-8 string to convert.
    * @return The converted hex string.
    */
-  std::string utf8ToHex(std::string str);
+  std::string utf8ToHex(const std::string& str);
 
-  std::string stringToHex(std::string str); ///< Alias of utf8ToHex().
+  std::string stringToHex(const std::string& str); ///< Alias of utf8ToHex().
 
   /**
    * Convert a given ASCII string to hex format.
    * @param str The ASCII string to convert.
    * @return The converted hex string.
    */
-  std::string asciiToHex(std::string str);
+  std::string asciiToHex(const std::string& str);
 
   /**
    * Convert a given byte array to hex format.
    * @param byteArray The byte array to convert.
    * @return The converted hex string.
    */
-  std::string bytesToHex(std::vector<unsigned int> byteArray);
+  std::string bytesToHex(const std::vector<unsigned int>& byteArray);
 
   /**
    * Convert a given currency value in fixed point to Wei.
@@ -256,10 +265,10 @@ namespace Utils {
    *                 implies a 2 decimal currency -> **5.00 = 500 Wei**
    * @return The amount in Wei as a string.
    */
-  std::string toWei(std::string amount, int decimals);
+  std::string toWei(const std::string& amount, int decimals);
 
   /// Overload of toWei() that takes a BigNumber as the amount.
-  std::string toWei(BigNumber amount, int decimals);
+  std::string toWei(const BigNumber& amount, int decimals);
 
   /**
    * Convert a given currency amount in Wei to fixed point.
@@ -268,10 +277,10 @@ namespace Utils {
    *                 implies a 4 decimal currency -> **80000 Wei = 8.0000**
    * @return The amount in fixed point as a string.
    */
-  std::string fromWei(std::string amount, int decimals);
+  std::string fromWei(const std::string& amount, int decimals);
 
   /// Overload of fromWei() that takes a BigNumber as the amount.
-  std::string fromWei(BigNumber amount, int decimals);
+  std::string fromWei(const BigNumber& amount, int decimals);
 
   /**
    * Add a padding to the left of a string.

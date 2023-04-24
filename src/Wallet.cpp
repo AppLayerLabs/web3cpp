@@ -52,13 +52,26 @@ bool Wallet::createNewWallet(std::string const &password, Error &error) {
   return true;
 }
 
-bool Wallet::loadWallet(std::string const &password, Error &error) {
+bool Wallet::loadWallet(const std::string& password, Error &error) {
   // Create the wallet if it doesn't exist already
   if (!boost::filesystem::exists(walletExistsPath())) {
     Error createErr;
     if (!createNewWallet(password, createErr)) {
       error.setCode(createErr.getCode());
       return false;
+    }
+  } else {
+    // If wallet already exists, populate this->accountList from DB.
+    for (auto const& acc : this->accountDB.getAllPairs()) {
+      json accJson = json::parse(acc.second);
+      this->accountList.emplace_back(std::make_unique<Account>(
+        boost::filesystem::path(this->path.string() + "/wallet"),
+        accJson["address"].get<std::string>(),
+        accJson["name"].get<std::string>(),
+        accJson["derivationPath"].get<std::string>(),
+        accJson["isLedger"].get<bool>(),
+        this->provider
+      ));
     }
   }
 
@@ -81,7 +94,7 @@ bool Wallet::loadWallet(std::string const &password, Error &error) {
   }
 }
 
-bool Wallet::checkPassword(std::string &password) {
+bool Wallet::checkPassword(const std::string& password) {
   auto inputPassword = dev::pbkdf2(password, this->passSalt.asBytes(), this->passIterations);
   return (inputPassword.ref().toString() == passHash.ref().toString());
 }
@@ -94,9 +107,10 @@ bool Wallet::walletExists(boost::filesystem::path &wallet_path) {
 }
 
 std::string Wallet::createAccount(
-  std::string derivPath, std::string &password, std::string name,
+  std::string derivPath, const std::string &password, std::string name,
   Error &error, std::string seed
 ) {
+  std::string ret;
   if (!checkPassword(password)) { error.setCode(1); return ""; } // Incorrect Password
   std::string seedPhrase;
   if (seed.empty()) {
@@ -118,18 +132,14 @@ std::string Wallet::createAccount(
   // Derive and import the account.
   bip3x::HDKey rootKey = BIP39::createKey(seedPhrase, derivPath);
   dev::KeyPair k(dev::Secret::frombip3x(rootKey.privateKey));
+  ret = Utils::toLowercaseAddress("0x" + dev::toHex(k.address()));
   Error importErr;
   if (!this->importPrivKey(k.secret(), password, name, derivPath, importErr)) {
     std::cout << "Error when importing account: " << importErr.what() << std::endl;
     error.setCode(importErr.getCode());
     return "";
   }
-  std::string ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    json accJson = json::parse(acc.second);
-    if (accJson["name"] == name) { ret = acc.first; break; }
-  }
+
   error.setCode(0); // No Error
   return ret;
 }
@@ -162,10 +172,8 @@ bool Wallet::importPrivKey(
   encryptedKey["isLedger"] = false;
 
   // Import the account
-  std::vector<std::string> ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    if (acc.first == encryptedKey["address"]) {
+  for (auto const &acc : this->accountList) {
+    if (encryptedKey["address"] == acc->address()) {
       error.setCode(3);  // Account Exists
       return false;
     }
@@ -174,12 +182,38 @@ bool Wallet::importPrivKey(
     error.setCode(2); // Database Insert Failed
     return false;
   }
+
+  // Import to vector
+  this->accountList.emplace_back(std::make_unique<Account>(
+    boost::filesystem::path(this->path.string() + "/wallet"),
+    encryptedKey["address"].get<std::string>(),
+    encryptedKey["name"].get<std::string>(),
+    encryptedKey["derivationPath"].get<std::string>(),
+    encryptedKey["isLedger"].get<bool>(),
+    this->provider
+  ));
   error.setCode(0); // No Error
   return true;
 }
 
 bool Wallet::deleteAccount(std::string address) {
-  return this->accountDB.deleteKeyValue(Utils::toLowercaseAddress(address));
+  // Delete from vector
+  address = Utils::toLowercaseAddress(address);
+  bool accFound = false;
+  uint64_t accIndex = 0;
+  for (uint64_t i = 0; i < this->accountList.size(); ++i) {
+    if (accountList[i]->address() == address) {
+      accIndex = i;
+      accFound = true;
+    }
+  }
+  if (accFound) {
+    this->accountList.erase(accountList.begin() + accIndex);
+    this->accountList.shrink_to_fit();
+  }
+
+  // Delete from DB Permanently.
+  return this->accountDB.deleteKeyValue(address);
 }
 
 std::string Wallet::sign(
@@ -262,7 +296,7 @@ std::string Wallet::signTransaction(
 }
 
 std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
-  if (signedTx.substr(0,2) != "0x" || signedTx.substr(0,2) != "0X") {
+  if (signedTx.substr(0,2) != "0x" && signedTx.substr(0,2) != "0X") {
     signedTx.insert(0, "0x");
   }
   return std::async([this, signedTx, &err]{
@@ -271,15 +305,18 @@ std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
     std::string rpcStr = RPC::eth_sendRawTransaction(signedTx, rpcErr).dump();
     if (rpcErr.getCode() != 0) {
       err.setCode(rpcErr.getCode());
+      txResult["error"] = rpcStr;
       return txResult;
     }
+
     std::string req = Net::HTTPRequest(
       this->provider, Net::RequestTypes::POST, rpcStr
     );
     json reqJson = json::parse(req);
+
     txResult["signature"] = signedTx;
     if (reqJson.count("error")) {
-      txResult["error"] = reqJson["error"].get<std::string>();
+      txResult["error"] = reqJson;
       err.setCode(13);  // Transaction Send Error
     } else {
       txResult["result"] = reqJson["result"].get<std::string>();
@@ -289,7 +326,7 @@ std::future<json> Wallet::sendTransaction(std::string signedTx, Error &err) {
   });
 }
 
-void Wallet::storePassword(std::string password, unsigned int seconds) {
+void Wallet::storePassword(const std::string& password, unsigned int seconds) {
   this->_password = password;
   if (seconds > 0) {
     this->_passEnd = std::time(nullptr) + seconds;
@@ -309,30 +346,21 @@ bool Wallet::isPasswordStored() {
 
 std::vector<std::string> Wallet::getAccounts() {
   std::vector<std::string> ret;
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    ret.push_back(acc.first);
+  for (auto const &acc : this->accountList) {
+    ret.push_back(acc->address());
   }
   return ret;
 }
 
-Account Wallet::getAccountDetails(std::string address) {
+const std::unique_ptr<Account>& Wallet::getAccountDetails(std::string address) {
   address = Utils::toLowercaseAddress(address);
-  std::map<std::string, std::string> accs = this->accountDB.getAllPairs();
-  for (std::pair<std::string, std::string> acc : accs) {
-    if (acc.first == address) {
-      json accJson = json::parse(acc.second);
-      return Account(
-        boost::filesystem::path(path.string() + "/wallet"),
-        accJson["address"].get<std::string>(),
-        acc.first,
-        accJson["derivationPath"].get<std::string>(),
-        accJson["isLedger"].get<bool>(),
-        this->provider
-      );
+  for (auto &acc : this->accountList) {
+    if (acc->address() == address) {
+      return acc;
     }
   }
-  return Account();
+
+  return NullAccount;
 }
 
 json Wallet::getAccountRawDetails(std::string address) {
@@ -348,3 +376,16 @@ json Wallet::getAccountRawDetails(std::string address) {
   return ret;
 }
 
+std::string Wallet::getSeedPhrase(const std::string& password, Error &err) {
+  std::string seedPhrase;
+  Error readErr, decErr;
+  boost::filesystem::path tmpPath = seedPhraseFile();
+  json seedJson = Utils::readJSONFile(tmpPath, readErr);
+  if (readErr.getCode() != 0) {
+    err.setCode(readErr.getCode());
+    return "";
+  }
+  seedPhrase = Cipher::decrypt(seedJson.dump(), password, decErr);
+  if (decErr.getCode() != 0) { err.setCode(decErr.getCode()); return ""; }
+  return seedPhrase;
+}

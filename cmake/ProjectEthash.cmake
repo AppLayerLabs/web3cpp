@@ -11,7 +11,7 @@ set(ETHASH_INCLUDE_DIR "${prefix}/include")
 set(ETHASH_BYPRODUCTS "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}keccak${CMAKE_STATIC_LIBRARY_SUFFIX}")
  
 ExternalProject_Add(
-    ethash
+    Ethash
     PREFIX "${prefix}"
     DOWNLOAD_NAME ethash-v0.5.0.tar.gz
     DOWNLOAD_NO_PROGRESS 1
@@ -25,6 +25,7 @@ ExternalProject_Add(
 			         -DETHASH_BUILD_TESTS=OFF
 	             -DCMAKE_INSTALL_LIBDIR=lib
                ${_only_release_configuration}
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -33,9 +34,9 @@ ExternalProject_Add(
 )
  
 # Create imported library
-add_library(Ethash STATIC IMPORTED)
+add_library(ethash STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${ETHASH_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET Ethash PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET Ethash PROPERTY IMPORTED_LOCATION_RELEASE "${ETHASH_LIBRARY}")
-set_property(TARGET Ethash PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${ETHASH_INCLUDE_DIR}")
-add_dependencies(Ethash ethash ${ETHASH_BYPRODUCTS})
+set_property(TARGET ethash PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET ethash PROPERTY IMPORTED_LOCATION_RELEASE "${ETHASH_LIBRARY}")
+set_property(TARGET ethash PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${ETHASH_INCLUDE_DIR}")
+add_dependencies(ethash Ethash ${ETHASH_BYPRODUCTS})

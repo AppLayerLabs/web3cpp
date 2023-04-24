@@ -2,7 +2,7 @@
 
 bool Database::openDB() {
   this->dbMutex.lock();
-  if (!boost::filesystem::exists(this->path)); {
+  if (!boost::filesystem::exists(this->path)) {
     boost::filesystem::create_directories(this->path);
   }
   this->dbStatus = leveldb::DB::Open(this->dbOpts, this->path.string(), &this->db);
@@ -23,7 +23,7 @@ bool Database::closeDB() {
   return (db == NULL);
 }
 
-bool Database::keyExists(std::string const &key) {
+bool Database::keyExists(std::string const &key) const {
   this->dbMutex.lock();
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
@@ -75,7 +75,7 @@ bool Database::deleteKeyValue(std::string const &key) {
   return this->dbStatus.ok();
 }
 
-std::vector<std::string> Database::getAllKeys() {
+std::vector<std::string> Database::getAllKeys() const {
   this->dbMutex.lock();
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());
@@ -87,7 +87,7 @@ std::vector<std::string> Database::getAllKeys() {
   return ret;
 }
 
-std::vector<std::string> Database::getAllValues() {
+std::vector<std::string> Database::getAllValues() const {
   this->dbMutex.lock();
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());
@@ -99,7 +99,7 @@ std::vector<std::string> Database::getAllValues() {
   return ret;
 }
 
-std::map<std::string, std::string> Database::getAllPairs() {
+std::map<std::string, std::string> Database::getAllPairs() const {
   this->dbMutex.lock();
   std::map<std::string, std::string> ret;
   leveldb::Iterator* it = this->db->NewIterator(leveldb::ReadOptions());

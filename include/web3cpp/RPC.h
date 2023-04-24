@@ -32,7 +32,7 @@ namespace RPC {
    *               Defaults to an empty array.
    * @return The JSON object that will be sent as a request.
    */
-  json _buildJSON(std::string method, json params = json::array());
+  json _buildJSON(const std::string& method, const json& params = json::array());
 
   /**
    * Check if a given data string is in hex format.
@@ -41,7 +41,7 @@ namespace RPC {
    *                          instead of Utils::isHex(). Defaults to true.
    * @return `true` if data is in hex format, `false` otherwise.
    */
-  bool _checkHexData(std::string hex, bool strict = true);
+  bool _checkHexData(const std::string& hex, bool strict = true);
 
   /**
    * Check the length of a given hex string. Ignores the "0x" prefix if it exists.
@@ -50,14 +50,14 @@ namespace RPC {
    *                  (e.g. "deadbeef" = 4 ("de ad be ef"), not 8 ("d e a d b e e f")).
    * @return `true` if hex string has the given length, `false` otherwise.
    */
-  bool _checkHexLength(std::string hex, int hexLength);
+  bool _checkHexLength(const std::string& hex, int hexLength);
 
   /**
    * Check if a given string is a valid address, as defined by Utils::isAddress().
    * @param add The address to check.
    * @return `true` if string is a valid address, `false` otherwise.
    */
-  bool _checkAddress(std::string add);
+  bool _checkAddress(const std::string& add);
 
   /**
    * Check if a given string is a valid block number.
@@ -65,7 +65,7 @@ namespace RPC {
    * @param block The block number to check.
    * @return `true` if block number is valid, `false` otherwise.
    */
-  bool _checkDefaultBlock(std::string block);
+  bool _checkDefaultBlock(const std::string& block);
 
   json web3_clientVersion(); ///< Build data for `web3_clientVersion`.
 
@@ -74,7 +74,7 @@ namespace RPC {
    * @param data The data to convert into a SHA3 hash.
    * @param &err Error object.
    */
-  json web3_sha3(std::string data, Error &err);
+  json web3_sha3(const std::string& data, Error &err);
 
   json net_version();   ///< Build data for `net_version`.
   json net_listening(); ///< Build data for `net_listening`.
@@ -95,10 +95,10 @@ namespace RPC {
    * @param defaultBlock The block to use as reference.
    * @param &err Error object.
    */
-  json eth_getBalance(std::string address, std::string defaultBlock, Error &err);
+  json eth_getBalance(const std::string& address, const std::string& defaultBlock, Error &err);
 
   /// Overload of getBalance() that takes a BigNumber as the block.
-  json eth_getBalance(std::string address, BigNumber defaultBlock, Error &err);
+  json eth_getBalance(const std::string& address, BigNumber defaultBlock, Error &err);
 
   /**
    * Build data for `eth_getStorageAt`.
@@ -107,10 +107,10 @@ namespace RPC {
    * @param defaultBlock The block to use as reference.
    * @param &err Error object.
    */
-  json eth_getStorageAt(std::string address, std::string position, std::string defaultBlock, Error &err);
+  json eth_getStorageAt(const std::string& address, const std::string& position, const std::string& defaultBlock, Error &err);
 
   /// Overload of getStorageAt() that takes a BigNumber as the block.
-  json eth_getStorageAt(std::string address, std::string position, BigNumber defaultBlock, Error &err);
+  json eth_getStorageAt(const std::string& address, const std::string& position, BigNumber defaultBlock, Error &err);
 
   /**
    * Build data for `eth_getTransactionCount`.
@@ -118,24 +118,24 @@ namespace RPC {
    * @param defaultBlock The block to use as reference.
    * @param &err Error object.
    */
-  json eth_getTransactionCount(std::string address, std::string defaultBlock, Error &err);
+  json eth_getTransactionCount(const std::string& address, const std::string& defaultBlock, Error &err);
 
   /// Overload of getTransactionCount() that takes a BigNumber as the block.
-  json eth_getTransactionCount(std::string address, BigNumber defaultBlock, Error &err);
+  json eth_getTransactionCount(const std::string& address, BigNumber defaultBlock, Error &err);
 
   /**
    * Build data for `eth_getBlockTransactionCountByHash`.
    * @param hash The hash of a block.
    * @param &err Error object.
    */
-  json eth_getBlockTransactionCountByHash(std::string hash, Error &err);
+  json eth_getBlockTransactionCountByHash(const std::string& hash, Error &err);
 
   /**
    * Build data for `eth_getBlockTransactionCountByNumber`.
    * @param number The block number.
    * @param &err Error object.
    */
-  json eth_getBlockTransactionCountByNumber(std::string number, Error &err);
+  json eth_getBlockTransactionCountByNumber(const std::string& number, Error &err);
 
   /// Overload of eth_getBlockTransactionCountByNumber() that takes a BigNumber as the block.
   json eth_getBlockTransactionCountByNumber(BigNumber number, Error &err);
@@ -145,14 +145,14 @@ namespace RPC {
    * @param hash The hash of a block.
    * @param &err Error object.
    */
-  json eth_getUncleCountByBlockHash(std::string hash, Error &err);
+  json eth_getUncleCountByBlockHash(const std::string& hash, Error &err);
 
   /**
    * Build data for `eth_getUncleCountByBlockNumber`.
    * @param number The block number.
    * @param &err Error object.
    */
-  json eth_getUncleCountByBlockNumber(std::string number, Error &err);
+  json eth_getUncleCountByBlockNumber(const std::string& number, Error &err);
 
   /// Overload of eth_getUncleCountByBlockNumber() that takes a BigNumber as the block.
   json eth_getUncleCountByBlockNumber(BigNumber number, Error &err);
@@ -163,10 +163,10 @@ namespace RPC {
    * @param defaultBlock The block to use as reference.
    * @param &err Error object.
    */
-  json eth_getCode(std::string address, std::string defaultBlock, Error &err);
+  json eth_getCode(const std::string& address, const std::string& defaultBlock, Error &err);
 
   /// Overload of eth_getCode() that takes a BigNumber as the block.
-  json eth_getCode(std::string address, BigNumber defaultBlock, Error &err);
+  json eth_getCode(const std::string& address, BigNumber defaultBlock, Error &err);
 
   /**
    * Build data for `eth_sign`.
@@ -174,28 +174,28 @@ namespace RPC {
    * @param data The data to sign.
    * @param &err Error object.
    */
-  json eth_sign(std::string address, std::string data, Error &err);
+  json eth_sign(const std::string& address, const std::string& data, Error &err);
 
   /**
    * Build data for `eth_signTransaction`.
    * @param txObj The transaction object to sign.
    * @param &err Error object.
    */
-  json eth_signTransaction(json txObj, Error &err);
+  json eth_signTransaction(const json& txObj, Error &err);
 
   /**
    * Build data for `eth_sendTransaction`.
    * @param txObj The transaction object to send.
    * @param &err Error object.
    */
-  json eth_sendTransaction(json txObj, Error &err);
+  json eth_sendTransaction(const json& txObj, Error &err);
 
   /**
    * Build data for `eth_sendRawTransaction`.
    * @param signedTxData The raw transaction signature to send.
    * @param &err Error object.
    */
-  json eth_sendRawTransaction(std::string signedTxData, Error &err);
+  json eth_sendRawTransaction(const std::string& signedTxData, Error &err);
 
   /**
    * Build data for `eth_call`.
@@ -203,17 +203,17 @@ namespace RPC {
    * @param defaultBlock The block to use as reference.
    * @param &err Error object.
    */
-  json eth_call(json callObject, std::string defaultBlock, Error &err);
+  json eth_call(const json& callObject, const std::string& defaultBlock, Error &err);
 
   /// Overload of eth_call() that takes a BigNumber as the block.
-  json eth_call(json callObject, BigNumber defaultBlock, Error &err);
+  json eth_call(const json& callObject, BigNumber defaultBlock, Error &err);
 
   /**
    * Build data for `eth_estimateGas`.
    * @param callObject The transaction call object.
    * @param &err Error object.
    */
-  json eth_estimateGas(json callObject, Error &err);
+  json eth_estimateGas(const json& callObject, Error &err);
 
   /**
    * Build data for `eth_getBlockByHash`.
@@ -222,7 +222,7 @@ namespace RPC {
    *                                 and if `false` returns only transaction hashes.
    * @param &err Error object.
    */
-  json eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err);
+  json eth_getBlockByHash(const std::string& hash, bool returnTransactionObjects, Error &err);
 
   /**
    * Build data for `eth_getBlockByNumber`.
@@ -231,7 +231,7 @@ namespace RPC {
    *                                 and if `false` returns only transaction hashes.
    * @param &err Error object.
    */
-  json eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err);
+  json eth_getBlockByNumber(const std::string& number, bool returnTransactionObjects, Error &err);
 
   /// Overload of eth_getBlockByNumber() that takes a BigNumber as the block.
   json eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, Error &err);
@@ -241,7 +241,7 @@ namespace RPC {
    * @param hash The hash of a transaction.
    * @param &err Error object.
    */
-  json eth_getTransactionByHash(std::string hash, Error &err);
+  json eth_getTransactionByHash(const std::string& hash, Error &err);
 
   /**
    * Build data for `eth_getTransactionByBlockHashAndIndex`.
@@ -249,7 +249,7 @@ namespace RPC {
    * @param index The index position of the transaction.
    * @param &err Error object.
    */
-  json eth_getTransactionByBlockHashAndIndex(std::string hash, std::string index, Error &err);
+  json eth_getTransactionByBlockHashAndIndex(const std::string& hash, const std::string& index, Error &err);
 
   /**
    * Build data for `eth_getTransactionByBlockNumberAndIndex`.
@@ -257,17 +257,17 @@ namespace RPC {
    * @param index The index position of the transaction.
    * @param &err Error object.
    */
-  json eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err);
+  json eth_getTransactionByBlockNumberAndIndex(const std::string& number, const std::string& index, Error &err);
 
   /// Overload of eth_getTransactionByBlockNumberAndIndex() that takes a BigNumber as the block.
-  json eth_getTransactionByBlockNumberAndIndex(BigNumber number, std::string index, Error &err);
+  json eth_getTransactionByBlockNumberAndIndex(BigNumber number, const std::string& index, Error &err);
 
   /**
    * Build data for `eth_getTransactionReceipt`.
    * @param hash The hash of a transaction.
    * @param &err Error object.
    */
-  json eth_getTransactionReceipt(std::string hash, Error &err);
+  json eth_getTransactionReceipt(const std::string& hash, Error &err);
 
   /**
    * Build data for `eth_getUncleByBlockHashAndIndex`.
@@ -275,7 +275,7 @@ namespace RPC {
    * @param index The index position of the uncle.
    * @param &err Error object.
    */
-  json eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, Error &err);
+  json eth_getUncleByBlockHashAndIndex(const std::string& hash, const std::string& index, Error &err);
 
   /**
    * Build data for `eth_getUncleByBlockNumberAndIndex`.
@@ -283,10 +283,10 @@ namespace RPC {
    * @param index The index position of the uncle.
    * @param &err Error object.
    */
-  json eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err);
+  json eth_getUncleByBlockNumberAndIndex(const std::string& number, const std::string& index, Error &err);
 
   /// Overload of eth_getUncleByBlockNumberAndIndex() that takes a BigNumber as the block.
-  json eth_getUncleByBlockNumberAndIndex(BigNumber number, std::string index, Error &err);
+  json eth_getUncleByBlockNumberAndIndex(BigNumber number, const std::string& index, Error &err);
 
   json eth_getCompilers();  ///< Build data for `eth_getCompilers`.
 
@@ -305,21 +305,21 @@ namespace RPC {
    * @param filterId The filter id.
    * @param &err Error object.
    */
-  json eth_uninstallFilter(std::string filterId, Error &err);
+  json eth_uninstallFilter(const std::string& filterId, Error &err);
 
   /**
    * Build data for `eth_getFilterChanges`.
    * @param filterId The filter id.
    * @param &err Error object.
    */
-  json eth_getFilterChanges(std::string filterId, Error &err);
+  json eth_getFilterChanges(const std::string& filterId, Error &err);
 
   /**
    * Build data for `eth_getFilterLogs`.
    * @param filterId The filter id.
    * @param &err Error object.
    */
-  json eth_getFilterLogs(std::string filterId, Error &err);
+  json eth_getFilterLogs(const std::string& filterId, Error &err);
 
   /**
    * Build data for `eth_getLogs`.
@@ -337,7 +337,7 @@ namespace RPC {
    * @param digest The mix digest (32 bytes string).
    * @param &err Error object.
    */
-  json eth_submitWork(std::string nonce, std::string powHash, std::string digest, Error &err);
+  json eth_submitWork(const std::string& nonce, const std::string& powHash, const std::string& digest, Error &err);
 
   /**
    * Build data for `eth_submitHashrate`.
@@ -345,7 +345,7 @@ namespace RPC {
    * @param id A 32 bytes string representing the client ID.
    * @param &err Error object.
    */
-  json eth_submitHashrate(std::string hashrate, std::string id, Error &err);
+  json eth_submitHashrate(const std::string& hashrate, const std::string& id, Error &err);
 };
 
 #endif  // RPC_H

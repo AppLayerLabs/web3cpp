@@ -41,84 +41,84 @@ namespace Solidity {
    * @param &err Error object.
    * @return `true` if value and type match, `false` otherwise.
    */
-  bool checkType(std::string type, json value, Error &err);
+  bool checkType(const std::string& type, const json& value, Error &err);
 
   /**
    * Pack an individual function into %Solidity format.
    * @param func The full packed function signature (e.g. `foo(bar,baz[])`, not just `foo`).
    * @return The first 8 bytes of the SHA3 hash of the function.
    */
-  std::string packFunction(std::string func);
+  std::string packFunction(const std::string& func);
 
   /**
    * Pack an individual uint256 into %Solidity format.
    * @param num The number string.
    * @return The packed number in hex format, **LEFT** padded to a multiple of 32 hex bytes.
    */
-  std::string packUint(std::string num);
+  std::string packUint(const std::string& num);
 
   /**
    * Pack an individual address into %Solidity format.
    * @param add The address string.
    * @return The packed address, **LEFT** padded to a multiple of 32 hex bytes.
    */
-  std::string packAddress(std::string add);
+  std::string packAddress(const std::string& add);
 
   /**
    * Pack an individual bool into %Solidity format.
    * @param b The boolean string. Can be either `"true"/"false"` or `"0"/"1"`.
    * @return The packed boolean, **LEFT** padded to a multiple of 32 hex bytes.
    */
-  std::string packBool(std::string b);
+  std::string packBool(const std::string& b);
 
   /**
    * Pack an individual bytes into %Solidity format.
    * @param hex The hex string that represents raw bytes.
    * @return The packed bytes, **RIGHT** padded to a multiple of 32 hex bytes.
    */
-  std::string packBytes(std::string hex);
+  std::string packBytes(const std::string& hex);
 
   /**
    * Pack an individual string into %Solidity format.
    * @param str The hex string that represents a UTF-8 formatted string.
    * @return The packed string, **RIGHT** padded to a multiple of 32 hex bytes.
    */
-  std::string packString(std::string str);
+  std::string packString(const std::string& str);
 
   /**
    * Pack an individual uint256[] into %Solidity format.
    * @param numV The array of number strings.
    * @return The packed number array.
    */
-  std::string packUintArray(std::vector<std::string> numV);
+  std::string packUintArray(const std::vector<std::string> numV);
 
   /**
    * Pack an individual address[] into %Solidity format.
    * @param addV The array of address strings.
    * @return The packed address array.
    */
-  std::string packAddressArray(std::vector<std::string> addV);
+  std::string packAddressArray(const std::vector<std::string> addV);
 
   /**
    * Pack an individual bool[] into %Solidity format.
    * @param bV The array of boolean strings. Can be either `"true"/"false"` or `"0"/"1"`.
    * @return The packed boolean array.
    */
-  std::string packBoolArray(std::vector<std::string> bV);
+  std::string packBoolArray(const std::vector<std::string> bV);
 
   /**
    * Pack an individual bytes[] into %Solidity format.
    * @param hexV The array of hex strings that represent raw bytes.
    * @return The packed bytes array.
    */
-  std::string packBytesArray(std::vector<std::string> hexV);
+  std::string packBytesArray(const std::vector<std::string> hexV);
 
   /**
    * Pack an individual string[] into %Solidity format.
    * @param strV The array of hex strings that represent UTF-8 formatted strings.
    * @return The packed string array.
    */
-  std::string packStringArray(std::vector<std::string> strV);
+  std::string packStringArray(const std::vector<std::string> strV);
 
   /**
    * Pack multiple types into %Solidity format at once.
@@ -140,7 +140,7 @@ namespace Solidity {
    * @param &err Error object.
    * @param func (optional) The full function signature to be packed, if it exists.
    */
-  std::string packMulti(json args, Error &err, std::string func = "");
+  std::string packMulti(const json& args, Error &err, const std::string& func = "");
 };
 
 #endif  // SOLIDITY_H

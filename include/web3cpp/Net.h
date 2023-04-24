@@ -15,7 +15,6 @@
 
 #include <web3cpp/Provider.h>
 #include <web3cpp/Utils.h>
-#include <web3cpp/root_certificates.h>
 #include <web3cpp/Error.h>
 
 /**
@@ -34,7 +33,7 @@ namespace Net {
    * @return The response of the request as a string.
    */
   std::string HTTPRequest(
-    Provider *provider, RequestTypes requestType, std::string reqBody
+    const std::unique_ptr<Provider>& provider, const RequestTypes& requestType, const std::string& reqBody
   );
 
   /**
@@ -48,8 +47,8 @@ namespace Net {
    * @return The response of the request as a string.
    */
   std::string customHTTPRequest(
-    std::string reqBody, std::string host, std::string port,
-    std::string target, std::string requestType, std::string contentType
+    const std::string& reqBody, const std::string& host, const std::string& port,
+    const std::string& target, const std::string& requestType, const std::string& contentType
   );
 }
 

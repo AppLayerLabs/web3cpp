@@ -6,7 +6,7 @@
 #include <boost/certify/https_verification.hpp>
 
 std::string Net::HTTPRequest(
-  Provider *provider, RequestTypes requestType, std::string reqBody
+  const std::unique_ptr<Provider>& provider, const RequestTypes& requestType,const std::string& reqBody
 ) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
@@ -105,8 +105,8 @@ std::string Net::HTTPRequest(
 }
 
 std::string Net::customHTTPRequest(
-  std::string reqBody, std::string host, std::string port,
-  std::string target, std::string requestType, std::string contentType
+  const std::string& reqBody, const std::string& host, const std::string& port,
+  const std::string& target, const std::string& requestType, const std::string& contentType
 ) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
@@ -115,21 +115,20 @@ std::string Net::customHTTPRequest(
 
   try {
     // Create context and load certificates into it
+    boost::system::error_code ec;
     boost::asio::io_context ioc;
     ssl::context ctx{ssl::context::sslv23_client};
-    load_root_certificates(ctx);
+    ctx.set_verify_mode(
+      ssl::context::verify_peer | ssl::context::verify_fail_if_no_peer_cert
+    );
+    ctx.set_default_verify_paths();
+    boost::certify::enable_native_https_server_verification(ctx);
 
     tcp::resolver resolver{ioc};
     ssl::stream<tcp::socket> stream{ioc, ctx};
 
     // Set SNI Hostname (many hosts need this to handshake successfully)
-    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str())) {
-      boost::system::error_code ec{
-        static_cast<int>(::ERR_get_error()),
-        boost::asio::error::get_ssl_category()
-      };
-      throw boost::system::system_error{ec};
-    }
+    boost::certify::sni_hostname(stream, host, ec);
     auto const results = resolver.resolve(host, port);
 
     // Connect and Handshake
@@ -174,7 +173,6 @@ std::string Net::customHTTPRequest(
     //Utils::logToDebug("API Result ID " + RequestID + " : " + result);
     //std::cout << "REQUEST RESULT: \n" << result << std::endl; // Uncomment for debugging
 
-    boost::system::error_code ec;
     stream.shutdown(ec);
 
     // SSL Connections return stream_truncated when closed.

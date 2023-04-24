@@ -32,6 +32,7 @@ ExternalProject_Add(
                -DSNAPPY_BUILD_TESTS=OFF
                -DSNAPPY_BUILD_BENCHMARKS=OFF
                -DCMAKE_INSTALL_LIBDIR=lib
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -39,7 +40,7 @@ ExternalProject_Add(
     BUILD_BYPRODUCTS "${SNAPPY_LIBRARY}"
 )
 
-add_library(snappy STATIC IMPORTED)
+add_library(snappy STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${SNAPPY_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET snappy PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET snappy PROPERTY IMPORTED_LOCATION_RELEASE "${SNAPPY_LIBRARY}")

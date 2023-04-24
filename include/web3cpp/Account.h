@@ -4,6 +4,7 @@
 #include <future>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <web3cpp/DB.h>
 #include <web3cpp/Net.h>
@@ -22,19 +23,17 @@ using json = nlohmann::ordered_json;
 
 class Account {
   private:
-    std::string _address;           ///< Address for the account.
-    std::string _name;              ///< Custom name/label for the account.
-    std::string _derivationPath;    ///< Complete derivation path for the account (e.g. "m/44'/60'/0'/0").
-    uint64_t _nonce;                ///< Current nonce for the account.
-    bool _isLedger;                 ///< Indicates the account is imported from a Ledger device.
-    Provider *provider;             ///< Pointer to Web3::defaultProvider.
-    mutable std::mutex accountLock; ///< Mutex for managing read/write access to the account object.
-    Database transactionDB;         ///< Database of transactions made with the account.
+    std::string _address;                                        ///< Address for the account.
+    std::string _name;                                           ///< Custom name/label for the account.
+    std::string _derivationPath;                                 ///< Complete derivation path for the account (e.g. "m/44'/60'/0'/0").
+    uint64_t _nonce;                                             ///< Current nonce for the account.
+    bool _isLedger;                                              ///< Indicates the account is imported from a Ledger device.
+    const std::unique_ptr<Provider>& provider;                   ///< Pointer to Web3::defaultProvider.
+    mutable std::mutex accountLock;                              ///< Mutex for managing read/write access to the account object.
+    Database transactionDB;                                      ///< Database of transactions made with the account.
 
   public:
-    /// Empty constructor.
-    Account(){}
-
+  
     /**
      * Default constructor.
      * @param walletPath The path for the wallet from which the account comes from.
@@ -45,12 +44,12 @@ class Account {
      * @param *_provider Pointer to the provider used by the account.
      */
     Account(
-      boost::filesystem::path walletPath, std::string name, std::string __address,
-      std::string __derivationPath, bool __isLedger, Provider *_provider
+      const boost::filesystem::path& walletPath, const std::string& __address, const std::string& __name,
+      const std::string& __derivationPath, bool __isLedger, const std::unique_ptr<Provider>& _provider
     );
 
     /// Copy constructor.
-    Account(Account& other) noexcept :
+    Account(const Account& other) noexcept :
       _address(other._address),
       _name(other._name),
       _derivationPath(other._derivationPath),
@@ -59,18 +58,29 @@ class Account {
       provider(other.provider),
       transactionDB(other.transactionDB)
     {}
-
-    std::string address() { return _address; }                ///< Getter for the address.
-    std::string name() { return _name; }                      ///< Getter for the custom name/label.
-    std::string derivationPath() { return _derivationPath; }  ///< Getter for the derivation path.
-    uint64_t nonce() { return _nonce; }                       ///< Getter for the nonce.
-    bool isLedger() { return _isLedger; }                     ///< Getter for the Ledger flag.
+    
+    /// Copy constructor from pointer.
+    Account(const std::unique_ptr<Account>& other) noexcept :
+      _address(other->_address),
+      _name(other->_name),
+      _derivationPath(other->_derivationPath),
+      _isLedger(other->_isLedger),
+      _nonce(other->_nonce),
+      provider(other->provider),
+      transactionDB(other->transactionDB)
+    {}
+    
+    const std::string& address()        const { return _address; }           ///< Getter for the address.
+    const std::string& name()           const { return _name; }              ///< Getter for the custom name/label.
+    const std::string& derivationPath() const { return _derivationPath; }    ///< Getter for the derivation path.
+    const uint64_t& nonce()             const { return _nonce; }             ///< Getter for the nonce.
+    bool isLedger()                     const { return _isLedger; }          ///< Getter for the Ledger flag.
 
     /**
      * Request the account's balance from the network.
      * @return The balance in Wei as a BigNumber, or 0 if the request fails.
      */
-    std::future<BigNumber> balance();
+    std::future<BigNumber> balance() const;
 
     /**
      * Save a transaction to the account's local history database.
@@ -83,7 +93,7 @@ class Account {
      * Get all saved transactions from this account's local history database.
      * @return The account's transaction history as a JSON object.
      */
-    json getTxHistory();
+    json getTxHistory() const;
 };
 
 #endif  // ACCOUNTS_H

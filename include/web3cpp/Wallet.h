@@ -35,19 +35,22 @@ using json = nlohmann::ordered_json;
  * Abstraction for a single wallet.
  */
 
+static const std::unique_ptr<Account> NullAccount = nullptr; 
+
 class Wallet {
   private:
-    dev::bytesSec passHash;       ///< Hash for the wallet's password
-    dev::h256 passSalt;           ///< Salt for the wallet's password.
-    int passIterations = 100000;  ///< Number of PBKDF2 iterations to hash+salt the wallet's password.
-    boost::filesystem::path path; ///< The wallet's folder path.
-    Provider* provider;           ///< Pointer to Web3::defaultProvider.
-    Database infoDB;              ///< The wallet's information database.
-    Database accountDB;           ///< The wallet's account database.
-    bool _isLoaded;               ///< Indicates the wallet is properly loaded.
-    std::string _password;        ///< In-memory plain text copy of the wallet's password. Set by the user when they want to "remember" the password.
-    std::time_t _passEnd;         ///< Timestamp after which the password will be "forgotten"/erased from memory.
-    std::thread _passThread;      ///< Thread object that runs passHandler().
+    dev::bytesSec passHash;                             ///< Hash for the wallet's password
+    dev::h256 passSalt;                                 ///< Salt for the wallet's password.
+    int passIterations = 100000;                        ///< Number of PBKDF2 iterations to hash+salt the wallet's password.
+    boost::filesystem::path path;                       ///< The wallet's folder path.
+    const std::unique_ptr<Provider>& provider;          ///< Pointer to Web3::defaultProvider.
+    Database infoDB;                                    ///< The wallet's information database.
+    Database accountDB;                                 ///< The wallet's account database.
+    bool _isLoaded;                                     ///< Indicates the wallet is properly loaded.
+    std::string _password;                              ///< In-memory plain text copy of the wallet's password. Set by the user when they want to "remember" the password.
+    std::time_t _passEnd;                               ///< Timestamp after which the password will be "forgotten"/erased from memory.
+    std::thread _passThread;                            ///< Thread object that runs passHandler().
+    std::vector<std::unique_ptr<Account>> accountList;  ///< List of accounts loaded in this wallet. vector is modified on constructor (load from DB) and createNew 
 
     /// Get the wallet's "wallet.info" file path. Usually used to check if the wallet exists.
     boost::filesystem::path walletExistsPath() { return path.string() + "/wallet.info"; };
@@ -85,7 +88,7 @@ class Wallet {
      * @return `true` if the wallet was successfully created, `false` otherwise.
      *         Will still return `true` if the default account wasn't created.
      */
-    bool createNewWallet(std::string const &password, Error &error);
+    bool createNewWallet(const std::string& password, Error &error);
 
   public:
     /**
@@ -93,13 +96,13 @@ class Wallet {
      * @param *_provider Pointer to the provider that will be used.
      * @param _path The path for the wallet.
      */
-    Wallet(Provider* _provider, boost::filesystem::path _path)
+    Wallet(const std::unique_ptr<Provider>& _provider, boost::filesystem::path _path)
       : provider(_provider), path(_path),
         infoDB("walletInfo", walletFolder()),
         accountDB("accounts", walletFolder())
     {};
 
-    Provider* getProvider() { return this->provider; } ///< Getter for provider.
+    const std::unique_ptr<Provider>& getProvider() const { return this->provider; } ///< Getter for provider.
 
     /**
      * Load a wallet with the given password.
@@ -108,7 +111,7 @@ class Wallet {
      * @param &error Error object.
      * @return `true` if the wallet is successfully loaded, `false` otherwise.
      */
-    bool loadWallet(std::string const &password, Error &error);
+    bool loadWallet(const std::string& password, Error &error);
 
     /**
      * Check if a wallet is loaded.
@@ -121,7 +124,7 @@ class Wallet {
      * @param &password The password to be checked.
      * @return `true` if the password matches the wallet's, `false` otherwise.
      */
-    bool checkPassword(std::string &password);
+    bool checkPassword(const std::string& password);
 
     /**
      * Check if the wallet file and its keys folder exists in a given folder.
@@ -141,7 +144,7 @@ class Wallet {
      * @return The checksum address of the new account, or an empty string on failure.
      */
     std::string createAccount(
-      std::string derivPath, std::string &password, std::string name,
+      std::string derivPath, const std::string& password, std::string name,
       Error &error, std::string seed = ""
     );
 
@@ -243,7 +246,7 @@ class Wallet {
      * @param seconds (optional) The number of seconds to store the password in memory.
      *                Defaults to 0, which means "store indefinitely until cleared manually".
      */
-    void storePassword(std::string password, unsigned int seconds = 0);
+    void storePassword(const std::string& password, unsigned int seconds = 0);
 
     void clearPassword(); ///< Clear the wallet's password from memory.
 
@@ -260,12 +263,21 @@ class Wallet {
     std::vector<std::string> getAccounts();
 
     /**
+     * Get the account seed phrase
+     * @param password the Wallet's password.
+     * @param &err Error object.
+     * @return The wallet seed phrase.
+     */
+
+    std::string getSeedPhrase(const std::string& password, Error &err);
+
+    /**
      * Get the details for a specific account.
      * @param address The address of the account. Will be converted to lowercase.
      * @return A struct with details of the account, or an empty struct
      *         if the address is not found.
      */
-    Account getAccountDetails(std::string address);
+    const std::unique_ptr<Account>& getAccountDetails(std::string address);
 
     /**
      * Get the raw structure of a specific account.

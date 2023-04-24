@@ -1,8 +1,8 @@
 #include <web3cpp/Account.h>
 
 Account::Account(
-  boost::filesystem::path walletPath, std::string __address, std::string __name,
-  std::string __derivationPath, bool __isLedger, Provider *_provider
+  const boost::filesystem::path& walletPath, const std::string& __address, const std::string& __name,
+  const std::string& __derivationPath, bool __isLedger, const std::unique_ptr<Provider>& _provider
 ) : _address(__address), _name(__name), _derivationPath(__derivationPath),
   _isLedger(__isLedger), provider(_provider),
   transactionDB("transactions/" + __address, walletPath)
@@ -16,7 +16,7 @@ Account::Account(
   _nonce = boost::lexical_cast<HexTo<uint64_t>>(nonceJson["result"].get<std::string>());
 }
 
-std::future<BigNumber> Account::balance() {
+std::future<BigNumber> Account::balance() const {
   return std::async([=]{
     Error error;
     BigNumber ret;
@@ -40,7 +40,7 @@ bool Account::saveTxToHistory(std::string signedTx) {
   return this->transactionDB.putKeyValue(txData["hash"], txData.dump());
 }
 
-json Account::getTxHistory() {
+json Account::getTxHistory() const {
   json ret;
   std::map<std::string, std::string> hist = this->transactionDB.getAllPairs();
   for (std::pair<std::string, std::string> item : hist) {

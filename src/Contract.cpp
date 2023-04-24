@@ -1,6 +1,6 @@
 #include <web3cpp/Contract.h>
 
-Contract::Contract(json jsonInterface, std::string address, json options) {
+Contract::Contract(const json& jsonInterface, const std::string& address, json options) {
   // Set option defaults, then parse custom options if given
   this->options.jsonInterface = jsonInterface;
   this->options.address = address;
@@ -82,11 +82,11 @@ Contract::Contract(json jsonInterface, std::string address, json options) {
               ? Types::bytesArr : Types::bytes;
           }
         }
-        methods[functionName].push_back(argType);
+        _methods[functionName].push_back(argType);
       }
       functionAll.pop_back(); // Remove last ,
       functionAll += ")";
-      functors[functionName] = dev::toHex(dev::sha3(functionAll)).substr(0,8);
+      _functors[functionName] = dev::toHex(dev::sha3(functionAll)).substr(0,8);
     }
   }
 }
@@ -116,14 +116,14 @@ Contract Contract::clone() {
   return Contract(this->options.jsonInterface, this->options.address, opts);
 }
 
-std::string Contract::operator() (json arguments, std::string function, Error &error) {
-  if (!methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
+std::string Contract::operator() (const json& arguments, const std::string& function, Error &error) {
+  if (!_methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
   if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
-  if (arguments.size() != methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
+  if (arguments.size() != _methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
 
   // Streamline all types from function into a string
   std::vector<std::string> funcTypes;
-  for (Types t : methods[function]) {
+  for (Types t : _methods[function]) {
     switch (t) {
       case Types::uint256: funcTypes.push_back("uint256"); break;
       case Types::uint256Arr: funcTypes.push_back("uint256[]"); break;
@@ -171,22 +171,22 @@ std::string Contract::operator() (json arguments, std::string function, Error &e
 //   \"189237815123\"]"
 // );
 // contract("Function", jsonArgs, error);
-std::string Contract::operator() (std::string function, json arguments, Error &error) {
+std::string Contract::operator() (const std::string& function, const json& arguments, Error &error) {
   // Check if function exists.
   //std::cout << arguments.dump() << std::endl;
   std::string ret = "0x";
-  if (!methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
+  if (!_methods.count(function)) { error.setCode(17); return ""; } // ABI Functor Not Found
   if (!arguments.is_array()) { error.setCode(19); return ""; } // ABI Invalid JSON Array
-  if (arguments.size() != methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
+  if (arguments.size() != _methods[function].size()) { error.setCode(18); return ""; } // ABI Invalid Arguments Length
 
   // Create function ABI.
-  ret += functors[function];
+  ret += _functors[function];
   uint64_t index = 0;
   std::string arrToAppend;
   uint64_t array_start = 32 * arguments.size();
   while (true) {
-    if (index == arguments.size() || index == methods[function].size()) { break; }
-    Types argType = methods[function][index];
+    if (index == arguments.size() || index == _methods[function].size()) { break; }
+    Types argType = _methods[function][index];
     bool isArray = false;
     if (isTypeArray(argType)) {
       ret += Utils::padLeft(

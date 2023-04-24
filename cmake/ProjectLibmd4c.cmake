@@ -34,9 +34,10 @@ ExternalProject_Add(
     LOG_CONFIGURE 1
     ${_overwrite_install_command}
     BUILD_BYPRODUCTS "${MD4C_LIBRARY}"
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
 )
 
-add_library(md4c STATIC IMPORTED)
+add_library(md4c STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${MD4C_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET md4c PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET md4c PROPERTY IMPORTED_LOCATION_RELEASE "${MD4C_LIBRARY}")

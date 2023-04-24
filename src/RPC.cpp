@@ -1,23 +1,23 @@
 #include <web3cpp/RPC.h>
 
-json RPC::_buildJSON(std::string method, json params) {
+json RPC::_buildJSON(const std::string& method, const json& params) {
   return {{"jsonrpc", "2.0"}, {"method", method}, {"params", params}, {"id", 1}};
 }
 
-bool RPC::_checkHexData(std::string hex, bool strict) {
+bool RPC::_checkHexData(const std::string& hex, bool strict) {
   return (strict) ? Utils::isHexStrict(hex) : Utils::isHex(hex);
 }
 
-bool RPC::_checkHexLength(std::string hex, int hexLength) {
+bool RPC::_checkHexLength(const std::string& hex, int hexLength) {
   int start = (hex.substr(0, 2) == "0x" || hex.substr(0, 2) == "0X") ? 2 : 0;
   return (hex.substr(start).length() / 2 == hexLength);
 }
 
-bool RPC::_checkAddress(std::string add) {
+bool RPC::_checkAddress(const std::string& add) {
   return Utils::isAddress(add);
 }
 
-bool RPC::_checkDefaultBlock(std::string block) {
+bool RPC::_checkDefaultBlock(const std::string& block) {
   return (
     block == "latest" || block == "earliest" || block == "pending" ||
     Utils::isHexStrict(block)
@@ -28,7 +28,7 @@ json RPC::web3_clientVersion() {
   return _buildJSON("web3_clientVersion");
 }
 
-json RPC::web3_sha3(std::string data, Error &err) {
+json RPC::web3_sha3(const std::string& data, Error &err) {
   int errCode = 0;
   if (!_checkHexData(data)) errCode = 4; // Invalid Hex Data
   err.setCode(errCode);
@@ -80,7 +80,7 @@ json RPC::eth_blockNumber() {
   return _buildJSON("eth_blockNumber");
 }
 
-json RPC::eth_getBalance(std::string address, std::string defaultBlock, Error &err) {
+json RPC::eth_getBalance(const std::string& address, const std::string& defaultBlock, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
@@ -91,13 +91,13 @@ json RPC::eth_getBalance(std::string address, std::string defaultBlock, Error &e
     : _buildJSON("eth_getBalance", {address, defaultBlock});
 }
 
-json RPC::eth_getBalance(std::string address, BigNumber defaultBlock, Error &err) {
+json RPC::eth_getBalance(const std::string& address, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
   return eth_getBalance(address, ss.str(), err);
 }
 
-json RPC::eth_getStorageAt(std::string address, std::string position, std::string defaultBlock, Error &err) {
+json RPC::eth_getStorageAt(const std::string& address, const std::string& position, const std::string& defaultBlock, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
@@ -109,13 +109,13 @@ json RPC::eth_getStorageAt(std::string address, std::string position, std::strin
     : _buildJSON("eth_getStorageAt", {address, position, defaultBlock});
 }
 
-json RPC::eth_getStorageAt(std::string address, std::string position, BigNumber defaultBlock, Error &err) {
+json RPC::eth_getStorageAt(const std::string& address, const std::string& position, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
   return eth_getStorageAt(address, position, ss.str(), err);
 }
 
-json RPC::eth_getTransactionCount(std::string address, std::string defaultBlock, Error &err) {
+json RPC::eth_getTransactionCount(const std::string& address, const std::string& defaultBlock, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
@@ -126,13 +126,13 @@ json RPC::eth_getTransactionCount(std::string address, std::string defaultBlock,
     : _buildJSON("eth_getTransactionCount", {address, defaultBlock});
 }
 
-json RPC::eth_getTransactionCount(std::string address, BigNumber defaultBlock, Error &err) {
+json RPC::eth_getTransactionCount(const std::string& address, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
   return eth_getTransactionCount(address, ss.str(), err);
 }
 
-json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
+json RPC::eth_getBlockTransactionCountByHash(const std::string& hash, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
@@ -143,7 +143,7 @@ json RPC::eth_getBlockTransactionCountByHash(std::string hash, Error &err) {
     : _buildJSON("eth_getBlockTransactionCountByHash", {hash});
 }
 
-json RPC::eth_getBlockTransactionCountByNumber(std::string number, Error &err) {
+json RPC::eth_getBlockTransactionCountByNumber(const std::string& number, Error &err) {
   err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockTransactionCountByNumber", {number});
@@ -155,7 +155,7 @@ json RPC::eth_getBlockTransactionCountByNumber(BigNumber number, Error &err) {
   return eth_getBlockTransactionCountByNumber(ss.str(), err);
 }
 
-json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
+json RPC::eth_getUncleCountByBlockHash(const std::string& hash, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
@@ -166,7 +166,7 @@ json RPC::eth_getUncleCountByBlockHash(std::string hash, Error &err) {
     : _buildJSON("eth_getUncleCountByBlockHash", {hash});
 }
 
-json RPC::eth_getUncleCountByBlockNumber(std::string number, Error &err) {
+json RPC::eth_getUncleCountByBlockNumber(const std::string& number, Error &err) {
   err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getUncleCountByBlockNumber", {number});
@@ -178,7 +178,7 @@ json RPC::eth_getUncleCountByBlockNumber(BigNumber number, Error &err) {
   return eth_getUncleCountByBlockNumber(ss.str(), err);
 }
 
-json RPC::eth_getCode(std::string address, std::string defaultBlock, Error &err) {
+json RPC::eth_getCode(const std::string& address, const std::string& defaultBlock, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
@@ -189,13 +189,13 @@ json RPC::eth_getCode(std::string address, std::string defaultBlock, Error &err)
     : _buildJSON("eth_getCode", {address, defaultBlock});
 }
 
-json RPC::eth_getCode(std::string address, BigNumber defaultBlock, Error &err) {
+json RPC::eth_getCode(const std::string& address, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
   return eth_getCode(address, ss.str(), err);
 }
 
-json RPC::eth_sign(std::string address, std::string data, Error &err) {
+json RPC::eth_sign(const std::string& address, const std::string& data, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkAddress(address)) { errCode = 5; return; } // Invalid Address
@@ -206,7 +206,7 @@ json RPC::eth_sign(std::string address, std::string data, Error &err) {
     : _buildJSON("eth_sign", {data});
 }
 
-json RPC::eth_signTransaction(json txObj, Error &err) {
+json RPC::eth_signTransaction(const json& txObj, Error &err) {
   int errCode = 0;
   [&](){
     if (
@@ -226,7 +226,7 @@ json RPC::eth_signTransaction(json txObj, Error &err) {
     : _buildJSON("eth_signTransaction", {txObj});
 }
 
-json RPC::eth_sendTransaction(json txObj, Error &err) {
+json RPC::eth_sendTransaction(const json& txObj, Error &err) {
   int errCode = 0;
   [&](){
     if (
@@ -246,13 +246,13 @@ json RPC::eth_sendTransaction(json txObj, Error &err) {
     : _buildJSON("eth_sendTransaction", {txObj});
 }
 
-json RPC::eth_sendRawTransaction(std::string signedTxData, Error &err) {
+json RPC::eth_sendRawTransaction(const std::string& signedTxData, Error &err) {
   err.setCode((!_checkHexData(signedTxData)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_sendRawTransaction", {signedTxData});
 }
 
-json RPC::eth_call(json callObject, std::string defaultBlock, Error &err) {
+json RPC::eth_call(const json& callObject, const std::string& defaultBlock, Error &err) {
   int errCode = 0;
   [&](){
     if (
@@ -272,13 +272,13 @@ json RPC::eth_call(json callObject, std::string defaultBlock, Error &err) {
     : _buildJSON("eth_call", {callObject, defaultBlock});
 }
 
-json RPC::eth_call(json callObject, BigNumber defaultBlock, Error &err) {
+json RPC::eth_call(const json& callObject, BigNumber defaultBlock, Error &err) {
   std::stringstream ss;
   ss << defaultBlock;
   return eth_call(callObject, ss.str(), err);
 }
 
-json RPC::eth_estimateGas(json callObject, Error &err) {
+json RPC::eth_estimateGas(const json& callObject, Error &err) {
   int errCode = 0;
   [&](){
     if (
@@ -297,7 +297,7 @@ json RPC::eth_estimateGas(json callObject, Error &err) {
     : _buildJSON("eth_estimateGas", {callObject});
 }
 
-json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Error &err) {
+json RPC::eth_getBlockByHash(const std::string& hash, bool returnTransactionObjects, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
@@ -308,7 +308,7 @@ json RPC::eth_getBlockByHash(std::string hash, bool returnTransactionObjects, Er
     : _buildJSON("eth_getBlockByHash", {hash, returnTransactionObjects});
 }
 
-json RPC::eth_getBlockByNumber(std::string number, bool returnTransactionObjects, Error &err) {
+json RPC::eth_getBlockByNumber(const std::string& number, bool returnTransactionObjects, Error &err) {
   err.setCode((!_checkHexData(number)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getBlockByNumber", {number, returnTransactionObjects});
@@ -320,7 +320,7 @@ json RPC::eth_getBlockByNumber(BigNumber number, bool returnTransactionObjects, 
   return eth_getBlockByNumber(ss.str(), returnTransactionObjects, err);
 }
 
-json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
+json RPC::eth_getTransactionByHash(const std::string& hash, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
@@ -331,7 +331,7 @@ json RPC::eth_getTransactionByHash(std::string hash, Error &err) {
     : _buildJSON("eth_getTransactionByHash", {hash});
 }
 
-json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
+json RPC::eth_getTransactionByBlockHashAndIndex(const std::string& hash, const std::string& index, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
@@ -342,7 +342,7 @@ json RPC::eth_getTransactionByBlockHashAndIndex(std::string hash, std::string in
     : _buildJSON("eth_getTransactionByBlockHashAndIndex", {hash, index});
 }
 
-json RPC::eth_getTransactionByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
+json RPC::eth_getTransactionByBlockNumberAndIndex(const std::string& number, const std::string& index, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(number) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
@@ -352,13 +352,13 @@ json RPC::eth_getTransactionByBlockNumberAndIndex(std::string number, std::strin
     : _buildJSON("eth_getTransactionByBlockNumberAndIndex", {number, index});
 }
 
-json RPC::eth_getTransactionByBlockNumberAndIndex(BigNumber number, std::string index, Error &err) {
+json RPC::eth_getTransactionByBlockNumberAndIndex(BigNumber number, const std::string& index, Error &err) {
   std::stringstream ss;
   ss << number;
   return eth_getTransactionByBlockNumberAndIndex(ss.str(), index, err);
 }
 
-json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
+json RPC::eth_getTransactionReceipt(const std::string& hash, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash)) { errCode = 4; return; } // Invalid Hex Data
@@ -369,7 +369,7 @@ json RPC::eth_getTransactionReceipt(std::string hash, Error &err) {
     : _buildJSON("eth_getTransactionReceipt", {hash});
 }
 
-json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, Error &err) {
+json RPC::eth_getUncleByBlockHashAndIndex(const std::string& hash, const std::string& index, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(hash) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
@@ -380,7 +380,7 @@ json RPC::eth_getUncleByBlockHashAndIndex(std::string hash, std::string index, E
     : _buildJSON("eth_getUncleByBlockHashAndIndex", {hash, index});
 }
 
-json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string index, Error &err) {
+json RPC::eth_getUncleByBlockNumberAndIndex(const std::string& number, const std::string& index, Error &err) {
   int errCode = 0;
   [&](){
     if (!_checkHexData(number) || !_checkHexData(index)) { errCode = 4; return; } // Invalid Hex Data
@@ -390,7 +390,7 @@ json RPC::eth_getUncleByBlockNumberAndIndex(std::string number, std::string inde
     : _buildJSON("eth_getUncleByBlockNumberAndIndex", {number, index});
 }
 
-json RPC::eth_getUncleByBlockNumberAndIndex(BigNumber number, std::string index, Error &err) {
+json RPC::eth_getUncleByBlockNumberAndIndex(BigNumber number, const std::string& index, Error &err) {
   std::stringstream ss;
   ss << number;
   return eth_getUncleByBlockNumberAndIndex(ss.str(), index, err);
@@ -419,8 +419,8 @@ json RPC::eth_newFilter(json filterOptions, Error &err) {
           errCode = 5; return; // Invalid Address
         }
       } else if (filterOptions["address"].is_array()) {
-        for (json address : filterOptions["address"]) {
-          std::string addressStr = address.get<std::string>();
+        for (const json& address : filterOptions["address"]) {
+          const std::string& addressStr = address.get<std::string>();
           if (!_checkAddress(addressStr)) {
             errCode = 5; return; // Invalid Address
           }
@@ -428,8 +428,8 @@ json RPC::eth_newFilter(json filterOptions, Error &err) {
       }
     }
     if (filterOptions.count("topics")) {
-      for (json topic : filterOptions["topics"]) {
-        std::string topicStr = topic.get<std::string>();
+      for (const json& topic : filterOptions["topics"]) {
+        const std::string& topicStr = topic.get<std::string>();
         if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
       }
     }
@@ -447,19 +447,19 @@ json RPC::eth_newPendingTransactionFilter() {
   return _buildJSON("eth_newPendingTransactionFilter");
 }
 
-json RPC::eth_uninstallFilter(std::string filterId, Error &err) {
+json RPC::eth_uninstallFilter(const std::string& filterId, Error &err) {
   err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_uninstallFilter", {filterId});
 }
 
-json RPC::eth_getFilterChanges(std::string filterId, Error &err) {
+json RPC::eth_getFilterChanges(const std::string& filterId, Error &err) {
   err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getFilterChanges", {filterId});
 }
 
-json RPC::eth_getFilterLogs(std::string filterId, Error &err) {
+json RPC::eth_getFilterLogs(const std::string& filterId, Error &err) {
   err.setCode((!_checkHexData(filterId)) ? 4 : 0);  // Invalid Hex Data
   return (err.getCode() != 0) ? json::object()
     : _buildJSON("eth_getFilterLogs", {filterId});
@@ -484,8 +484,8 @@ json RPC::eth_getLogs(json filterOptions, Error &err) {
           errCode = 5; return; // Invalid Address
         }
       } else if (filterOptions["address"].is_array()) {
-        for (json address : filterOptions["address"]) {
-          std::string addressStr = address.get<std::string>();
+        for (const json& address : filterOptions["address"]) {
+          const std::string& addressStr = address.get<std::string>();
           if (!_checkAddress(addressStr)) {
             errCode = 5; return; // Invalid Address
           }
@@ -493,8 +493,8 @@ json RPC::eth_getLogs(json filterOptions, Error &err) {
       }
     }
     if (filterOptions.count("topics")) {
-      for (json topic : filterOptions["topics"]) {
-        std::string topicStr = topic.get<std::string>();
+      for (const json& topic : filterOptions["topics"]) {
+        const std::string& topicStr = topic.get<std::string>();
         if (!_checkHexData(topicStr)) { errCode = 4; return; } // Invalid Hex Data
       }
     }
@@ -512,7 +512,7 @@ json RPC::eth_getWork() {
   return _buildJSON("eth_getWork");
 }
 
-json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string digest, Error &err) {
+json RPC::eth_submitWork(const std::string& nonce, const std::string& powHash, const std::string& digest, Error &err) {
   int errCode = 0;
   [&](){
     if (
@@ -527,7 +527,7 @@ json RPC::eth_submitWork(std::string nonce, std::string powHash, std::string dig
     : _buildJSON("eth_submitWork", {nonce, powHash, digest});
 }
 
-json RPC::eth_submitHashrate(std::string hashrate, std::string id, Error &err) {
+json RPC::eth_submitHashrate(const std::string& hashrate, const std::string& id, Error &err) {
   int errCode = 0;
   [&](){
     if (

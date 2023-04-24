@@ -2,22 +2,27 @@
 cmake_minimum_required(VERSION 3.19.0)
 include(FetchContent)
 
-include(cmake/cable/bootstrap.cmake)
-include(CableBuildInfo)
-include(CableBuildType)
-include(GNUInstallDirs)
-cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
-
 # Map current configuration to configurations of imported targets.
 set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release)
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
 
+# Include cable
+include(cmake/cable/bootstrap.cmake)
+include(CableBuildType)
+include(CableCompilerSettings)
+include(CablePackage)
+include(CableToolchains)
+include(CMakePackageConfigHelpers)
+include(CableBuildInfo)
+
+# Setup CXX
+
+cable_configure_toolchain(DEFAULT cxx17-pic)
+cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
+
 # Project data
 project(web3cpp VERSION 0.0.1 DESCRIPTION "Custom implementation of Web3 in C++")
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+cable_add_buildinfo_library(PROJECT_NAME web3cpp)
 set(BUILD_STATIC ON CACHE BOOL "Build library as static, turn off to build as shared")
 set(BUILD_TESTS ON CACHE BOOL "Build helper unit testing program")
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
@@ -28,7 +33,9 @@ message("Building as static: ${BUILD_STATIC}")
 message("Building tests: ${BUILD_TESTS}")
 
 # Fetch and set up external libraries
-# TODO: add options to set boost path and openssl non-system-wise
+# As this is a library, it checks if it is being a externalProject added with multiple DEPENDS
+# If it is, it doens't need to include the Project .cmake files, as the libraries are being brought by the parent project.
+include(CheckLibraryExists)
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -36,48 +43,81 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/deps") # "deps", not "_deps"
 find_package(Boost REQUIRED filesystem system thread)
 find_package(OpenSSL REQUIRED)
 message("Fetching nlohmann/json...")
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_Declare(json 
+                      URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
+                      DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_MakeAvailable(json)
 
-cable_add_buildinfo_library(PROJECT_NAME web3cpp)
-set(DEPENDS_PREFIX "")
-if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
-  set(DEPENDS_PREFIX "x86_64-w64-mingw32")
-  message("Toolchain: x86_64-w64-mingw32")
-  message("Loading Windows Libraries")
-  include("${CMAKE_SOURCE_DIR}/cmake/WindowsLibraries.cmake")
-else()
-  if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-apple-darwin20")
-    message("Toolchain: x86_64-apple-darwin20")
-    set(DEPENDS_PREFIX "x86_64-apple-darwin20.5.0")
-    message("Loading Darwin Libraries")
-    include("${CMAKE_SOURCE_DIR}/cmake/DarwinLibraries.cmake")
-  else()
-    if("${TOOLCHAIN_PREFIX}" STREQUAL "arm-apple-darwin21.2.0")
-      message("Toolchain: arm-apple-darwin21.2.0")
-      set(DEPENDS_PREFIX "arm-apple-darwin21.2.0")
-      include("${CMAKE_SOURCE_DIR}/cmake/DarwinArmLibraries.cmake")
-      message("Loading Darwin Libraries")
-    else()
-      message("Toolchain: x86_64-pc-linux-gnu")
-      set(DEPENDS_PREFIX "x86_64-pc-linux-gnu")
-      include("${CMAKE_SOURCE_DIR}/cmake/LinuxLibraries.cmake")
-      message("Loading Linux Libraries")
-    endif()
-  endif()
-endif()
+# Build catch2 to a library.
+add_library(catch2
+  ${CMAKE_SOURCE_DIR}/src/libs/catch2/catch_amalgamated.hpp
+  ${CMAKE_SOURCE_DIR}/src/libs/catch2/catch_amalgamated.cpp
+)
 
 # Add external modules
-include(ProjectCryptoPP)
-include(ProjectScrypt)
-include(ProjectEthash)
-include(ProjectSecp256k1)
-include(ProjectToolbox)
-include(ProjectBip3x)
-include(ProjectSnappy)
-include(ProjectLevelDB)
-include(ProjectBoostCertify)
-find_package(Threads)
+
+find_package(CryptoPP)
+if(NOT CRYPTOPP_FOUND)
+  message(WARNING "CryptoPP Not found, compiling from source.")
+  include(ProjectCryptoPP)
+  find_package(CryptoPP)
+endif()
+
+find_package(Scrypt)
+if (NOT SCRYPT_FOUND)
+  message(WARNING "Scrypt not found, compiling from source.")
+  include(ProjectScrypt)
+  find_package(Scrypt)
+endif()
+
+find_package(Ethash)
+if(NOT ETHASH_FOUND)
+  message(WARNING "Ethash not found, compiling from source.")
+  include(ProjectEthash)
+  find_package(Ethash)
+endif()
+
+find_package(Secp256k1)
+if(NOT SECP256K1_FOUND)
+  message(WARNING "Secp256k1 not found, compiling from source.")
+  include(ProjectSecp256k1)
+  find_package(Secp256k1)
+endif()
+
+find_package(Toolbox)
+if(NOT TOOLBOX_FOUND)
+  message(WARNING "Toolbox not found, compiling from source.")
+  include(ProjectToolbox)
+  find_package(Toolbox)
+endif()
+
+find_package(Bip3x)
+if(NOT BIP3X_FOUND)
+  message(WARNING "Bip3x not found, compiling from source.")
+  include(ProjectBip3x)
+  find_package(Bip3x)
+endif()
+
+find_package(Snappy)
+if(NOT SNAPPY_FOUND)
+  message(WARNING "Snappy not found, compiling from source.")
+  include(ProjectSnappy)
+  find_package(Snappy)
+endif()
+
+find_package(LevelDB)
+if(NOT LEVELDB_FOUND)
+  message(WARNING "LevelDB not found, compiling from source.")
+  include(ProjectLevelDB)
+  find_package(LevelDB)
+endif()
+
+find_package(BoostCertify)
+if (NOT BOOSTCERTIFY_FOUND)
+  message(WARNING "BoostCertify not found, compiling from source.")
+  include(ProjectBoostCertify)
+  find_package(BoostCertify)
+endif()
 
 # Include headers and libs
 include_directories(
@@ -131,21 +171,45 @@ else()
 endif()
 
 # Configure directories to search for header files
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+# For linking openssl on MacOS
+target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${LEVELDB_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SNAPPY_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${ETHASH_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SECP256K1_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TOOLBOX_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${BIP3X_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CRYPTOPP_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SCRYPT_INCLUDE_DIR})
+
 
 # Link project to dependencies and external libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${Boost_LIBRARIES} ssl crypto nlohmann_json::nlohmann_json cryptopp scrypt
-  Secp256k1 bip39 toolbox ${ETHASH_BYPRODUCTS} Ethash LevelDB snappy
+  ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} nlohmann_json::nlohmann_json cryptopp scrypt
+  secp256k1 bip3x toolbox ${ETHASH_BYPRODUCTS} ethash ${LEVELDB_LIBRARY} ${SNAPPY_LIBRARY}
 )
+
+# For certify to work on MacOS
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} INTERFACE "-framework CoreFoundation" "-framework Security")
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
+endif()
 
 # Build helper test program
 if(BUILD_TESTS)
   file(GLOB TESTS_HEADERS "tests/*.h")
   file(GLOB TESTS_SOURCES "tests/*.cpp")
   add_executable(${PROJECT_NAME}-tests ${TESTS_HEADERS} ${TESTS_SOURCES})
-  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME})
+  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
+  target_include_directories(${PROJECT_NAME}-tests PRIVATE ${OPENSSL_INCLUDE_DIR})
+  # For certify to work on MacOS
+  if(APPLE)
+    target_link_libraries(${PROJECT_NAME}-tests INTERFACE "-framework CoreFoundation" "-framework Security")
+    set_target_properties(${PROJECT_NAME}-tests PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
+  endif()
+  target_link_libraries(${PROJECT_NAME}-tests PUBLIC ${PROJECT_NAME} catch2)
 endif()
 
 # Set required properties
@@ -155,3 +219,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "include/web3cpp/
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(${PROJECT_NAME} PROPERTIES LANGUAGE CXX)
 
+install(TARGETS web3cpp
+  EXPORT web3cppTargets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/ DESTINATION include)

@@ -10,12 +10,16 @@
 
 using json = nlohmann::ordered_json;
 
+// Forward declaration
+class Web3;
+
 /**
  * Abstraction for a single provider.
  */
 
 class Provider {
   private:
+    const std::string _id;    ///< The ID of the provider.
     std::string name;         ///< The name of the provider.
     std::string host;         ///< The host of the provider.
     std::string target;       ///< The RPC target of the provider.
@@ -36,6 +40,7 @@ class Provider {
      * @param data The provider template object.
      */
     void _setData(json data);
+    void setProvider(const Provider &p);
 
   public:
     std::mutex mutable lock;  ///< Mutex to manage read/write access to the provider object.
@@ -64,17 +69,16 @@ class Provider {
       uint64_t chainId, std::string currency, std::string explorerUrl
     );
 
-    /// Operators.
-    Provider& operator=(const Provider &p);
+    const std::string& getName()        const { return this->name; }                ///< Getter for provider name.
+    const std::string& getHost()        const { return this->host; }                ///< Getter for provider host.
+    const std::string& getTarget()      const { return this->target; }            ///< Getter for provider %RPC endpoint target.
+    const uint64_t& getPort()           const { return this->port; }                   ///< Getter for provider port.
+    const uint64_t& getChainId()        const { return this->chainId; }             ///< Getter for provider chain ID.
+    const std::string& getCurrency()    const { return this->currency; }        ///< Getter for provider currency.
+    const std::string& getExplorerUrl() const { return this->explorerUrl; }  ///< Getter for provider block explorer URL.
+    const static json& getPresets()           { return Provider::presets; }      ///< Getter for provider presets.
 
-    std::string getName() { return this->name; }                ///< Getter for provider name.
-    std::string getHost() { return this->host; }                ///< Getter for provider host.
-    std::string getTarget() { return this->target; }            ///< Getter for provider %RPC endpoint target.
-    uint64_t getPort() { return this->port; }                   ///< Getter for provider port.
-    uint64_t getChainId() { return this->chainId; }             ///< Getter for provider chain ID.
-    std::string getCurrency() { return this->currency; }        ///< Getter for provider currency.
-    std::string getExplorerUrl() { return this->explorerUrl; }  ///< Getter for provider block explorer URL.
-    static json getPresets() { return Provider::presets; }      ///< Getter for provider presets.
+    friend class Web3;
 };
 
 #endif  // PROVIDER_H

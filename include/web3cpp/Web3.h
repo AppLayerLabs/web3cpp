@@ -19,8 +19,8 @@
 
 class Web3 {
   private:
-    boost::filesystem::path defaultPath;  ///< Path for the %Web3 wallet.
-    Provider defaultProvider;             ///< Provider used for the whole %Web3 library.
+    const std::unique_ptr<Provider> defaultProvider;             ///< Provider used for the whole %Web3 library.
+    const boost::filesystem::path defaultPath;                   ///< Path for the %Web3 wallet.
 
   public:
     /**
@@ -30,29 +30,34 @@ class Web3 {
      * @param *path (optional) The folder where the wallet is and will be
      *              opened/created. Defaults to Utils::getDefaultDataDir().
      */
-    Web3(Provider *provider = NULL, boost::filesystem::path *path = NULL);
+
+    // Default Constructor
+    Web3();
 
     /// Constructor overload that uses a custom Provider.
-    Web3(Provider provider) : Web3(&provider, NULL) {}
+    Web3(Provider provider);
 
     /// Constructor overload that uses a custom wallet path.
-    Web3(boost::filesystem::path path) : Web3(NULL, &path) {}
+    Web3(boost::filesystem::path path);
+
+    /// Constructor overload that uses both custom Provider & custom Path.
+    Web3(Provider provider, boost::filesystem::path path);
 
     std::string version;  ///< Current version of the library.
-    Eth eth;              ///< Object for accessing functions from the Eth class.
     Wallet wallet;        ///< Object for accessing the wallet.
+    Eth eth;              ///< Object for accessing functions from the Eth class.
 
     /**
      * Getter for the library provider.
      * @returns A pointer to Web3::defaultProvider.
      */
-    Provider* getProvider() { return &this->defaultProvider; }
+    const std::unique_ptr<Provider>& getProvider() const { return this->defaultProvider; }
 
     /**
      * Setter for the library provider.
      * @param p The provider to use.
      */
-    void setProvider(Provider p) { this->defaultProvider = p; }
+    void setProvider(Provider p) { this->defaultProvider->setProvider(p); }
 };
 
 #endif  // WEB3_H

@@ -28,11 +28,12 @@ ExternalProject_Add(libff
     LOG_BUILD 1
     INSTALL_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release --target install
     BUILD_BYPRODUCTS "${libff_library}"
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
 )
 add_dependencies(libff mpir)
 
 # Create snark imported library
-add_library(libff::ff STATIC IMPORTED)
+add_library(libff::ff STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY ${libff_inlcude_dir})
 set_property(TARGET libff::ff PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET libff::ff PROPERTY IMPORTED_LOCATION_RELEASE ${libff_library})

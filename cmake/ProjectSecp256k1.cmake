@@ -10,7 +10,7 @@ set(SECP256K1_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}secp256k1${CM
 set(SECP256K1_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
-    secp256k1
+    Secp256k1
     PREFIX "${prefix}"
     DOWNLOAD_NAME secp256k1-ac8ccf29.tar.gz
     DOWNLOAD_NO_PROGRESS 1
@@ -25,6 +25,7 @@ ExternalProject_Add(
                -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
                ${_only_release_configuration}
                -DCMAKE_INSTALL_LIBDIR=lib
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -33,9 +34,9 @@ ExternalProject_Add(
 )
 
 # Create imported library
-add_library(Secp256k1 STATIC IMPORTED)
+add_library(secp256k1 STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${SECP256K1_INCLUDE_DIR}")  # Must exist.
-set_property(TARGET Secp256k1 PROPERTY IMPORTED_CONFIGURATIONS Release)
-set_property(TARGET Secp256k1 PROPERTY IMPORTED_LOCATION_RELEASE "${SECP256K1_LIBRARY}")
-set_property(TARGET Secp256k1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SECP256K1_INCLUDE_DIR}")
-add_dependencies(Secp256k1 secp256k1)
+set_property(TARGET secp256k1 PROPERTY IMPORTED_CONFIGURATIONS Release)
+set_property(TARGET secp256k1 PROPERTY IMPORTED_LOCATION_RELEASE "${SECP256K1_LIBRARY}")
+set_property(TARGET secp256k1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${SECP256K1_INCLUDE_DIR}")
+add_dependencies(secp256k1 Secp256k1)

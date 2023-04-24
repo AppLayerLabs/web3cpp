@@ -11,10 +11,8 @@ set(SCRYPT_INCLUDE_DIR "${prefix}/include")
 ExternalProject_Add(
   libscrypt
   PREFIX "${prefix}"
-  DOWNLOAD_NAME scrypt-1.22.tar.gz
   DOWNLOAD_NO_PROGRESS 1
-  URL https://github.com/technion/libscrypt/archive/refs/tags/v1.22.tar.gz
-  URL_HASH SHA256=a2d30ea16e6d288772791de68be56153965fe4fd4bcd787777618b8048708936
+  GIT_REPOSITORY https://github.com/itamarcps/libscrypt
   UPDATE_DISCONNECTED true
   BUILD_IN_SOURCE true
   CONFIGURE_COMMAND ""
@@ -24,9 +22,10 @@ ExternalProject_Add(
   LOG_BUILD 1
   LOG_INSTALL 1
   BUILD_BYPRODUCTS "${SCRYPT_LIBRARY}"
+  DOWNLOAD_EXTRACT_TIMESTAMP 1
 )
 
-add_library(scrypt STATIC IMPORTED)
+add_library(scrypt STATIC IMPORTED GLOBAL)
 file(MAKE_DIRECTORY "${SCRYPT_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET scrypt PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET scrypt PROPERTY IMPORTED_LOCATION_RELEASE "${SCRYPT_LIBRARY}")

@@ -40,31 +40,22 @@ Provider::Provider(std::string id) {
   _setData(presets[id]);
 }
 
-Provider::Provider(const Provider &p) {
-  json pJ = {
-    {"name", p.name}, {"host", p.host}, {"target", p.target}, {"port", p.port},
-    {"chainId", p.chainId}, {"currency", p.currency}, {"explorerUrl", p.explorerUrl}
-  };
-  _setData(pJ);
-}
+Provider::Provider(const Provider &p) :
+  _id(p._id),
+  name(p.name), host(p.host), target(p.target), port(p.port),
+  chainId(p.chainId), currency(p.currency), explorerUrl(p.explorerUrl)
+ {}
 
 Provider::Provider(
   std::string name, std::string host, std::string target, uint64_t port,
-  uint64_t chainId, std::string currency, std::string explorerUrl
-) {
-  json pJ = {
-    {"name", name}, {"host", host}, {"target", target}, {"port", port},
-    {"chainId", chainId}, {"currency", currency}, {"explorerUrl", explorerUrl}
-  };
-  _setData(pJ);
-}
+  uint64_t chainId, std::string currency, std::string explorerUrl) 
+  : name(name), host(host), target(target), port(port), chainId(chainId),
+  currency(currency), explorerUrl(explorerUrl) { }
 
-Provider& Provider::operator=(const Provider &p) {
+void Provider::setProvider(const Provider &p) {
   json pJ = {
     {"name", p.name}, {"host", p.host}, {"target", p.target}, {"port", p.port},
     {"chainId", p.chainId}, {"currency", p.currency}, {"explorerUrl", p.explorerUrl}
   };
-  _setData(pJ);
-  return *this;
-}
-
+  this->_setData(pJ);
+};

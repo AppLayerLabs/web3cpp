@@ -1,0 +1,19 @@
+# Find the Secp256k1 library and define the following variables:
+# SECP256K1_FOUND
+# SECP256K1_INCLUDE_DIR
+# SECP256K1_LIBRARY
+
+include(SelectLibraryConfigurations)
+include(FindPackageHandleStandardArgs)
+
+find_path(SECP256K1_INCLUDE_DIR NAMES secp256k1.h)
+find_library(SECP256K1_LIBRARY NAMES libsecp256k1.a)
+
+SELECT_LIBRARY_CONFIGURATIONS(Secp256k1)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+  Secp256k1 DEFAULT_MSG
+  SECP256K1_LIBRARY SECP256K1_INCLUDE_DIR
+)
+
+mark_as_advanced(SECP256K1_INCLUDE_DIR SECP256K1_LIBRARY)

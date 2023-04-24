@@ -26,16 +26,16 @@ using json = nlohmann::ordered_json;
 
 class Eth {
   private:
-    Provider *provider; ///< Pointer to Web3::defaultProvider.
+    const std::unique_ptr<Provider>& provider; ///< Pointer to Web3::defaultProvider.
 
   public:
     /**
      * Constructor.
      * @param _provider Pointer to the provider that will be used.
      */
-    Eth(Provider* _provider) : provider(_provider) {};
+    Eth(const std::unique_ptr<Provider>& _provider) : provider(_provider) {};
 
-    Provider* getProvider() { return this->provider; } ///< Getter for the provider pointer.
+    const std::unique_ptr<Provider>& getProvider() { return this->provider; } ///< Getter for the provider pointer.
 
     /**
      * Address used as the default "from" property, if no "from"
@@ -108,7 +108,7 @@ class Eth {
      * @return The current balance for the given address in Wei.
      */
     std::future<json> getBalance(
-      std::string address, std::string defaultBlock = ""
+      const std::string& address, const std::string& defaultBlock = ""
     );
 
     /**
@@ -119,7 +119,7 @@ class Eth {
      * @return The value in storage at the given position.
      */
     std::future<json> getStorageAt(
-      std::string address, std::string position, std::string defaultBlock = ""
+      std::string address, std::string position, const std::string& defaultBlock = ""
     );
 
     /**
@@ -127,7 +127,7 @@ class Eth {
      * Said position will be automatically converted to hex.
      */
     std::future<json> getStorageAt(
-      std::string address, BigNumber position, std::string defaultBlock = ""
+      const std::string& address, const BigNumber& position, const std::string& defaultBlock = ""
     );
 
     /**
@@ -136,7 +136,7 @@ class Eth {
      * @param defaultBlock (optional) The block to use as reference. Defaults to Eth::defaultBlock.
      * @return The data at the given address.
      */
-    std::future<json> getCode(std::string address, std::string defaultBlock = "");
+    std::future<json> getCode(const std::string& address, const std::string& defaultBlock = "");
 
     /**
      * Get a block matching the given block number or hash.
@@ -199,7 +199,7 @@ class Eth {
      * @param transactionHash The transaction hash.
      * @return The transaction object.
      */
-    std::future<json> getTransaction(std::string transactionHash);
+    std::future<json> getTransaction(const std::string& transactionHash);
 
     /**
      * Get a transaction from a block.
@@ -218,7 +218,7 @@ class Eth {
      * @param hash The transaction hash.
      * @return The transaction receipt object, or an empty object for pending/non-existant transactions.
      */
-    std::future<json> getTransactionReceipt(std::string hash);
+    std::future<json> getTransactionReceipt(const std::string& hash);
 
     /**
      * Get the number of transactions sent from an address.
@@ -227,7 +227,7 @@ class Eth {
      * @return The number of transactions sent from the given address.
      */
     std::future<json> getTransactionCount(
-      std::string address, std::string defaultBlock = ""
+      const std::string& address, std::string defaultBlock = ""
     );
 
     /**
@@ -237,14 +237,14 @@ class Eth {
      * @param address The address to use for signing.
      * @return The signature.
      */
-    std::future<json> sign(std::string dataToSign, std::string address);
+    std::future<json> sign(std::string dataToSign, const std::string& address);
 
     /**
      * Sign a transaction. 
      * @param txObj The transaction data to sign.
      * @return The RLP encoded transaction.
      */
-    std::future<json> signTransaction(json txObj);
+    std::future<json> signTransaction(const json& txObj);
 
     /**
      * Execute a message call transaction, which is directly executed in the
@@ -253,7 +253,7 @@ class Eth {
      * @param defaultBlock (optional) The block to use as reference. Defaults to Eth::defaultBlock.
      * @return The data of the call, e.g. a smart contract function's return value.
      */
-    std::future<json> call(json callObject, std::string defaultBlock = "");
+    std::future<json> call(const json& callObject,const std::string& defaultBlock = "");
 
     /**
      * Execute a message call or transaction and return the amount of gas used.
@@ -261,14 +261,14 @@ class Eth {
      *                   specified, otherwise odd behaviour may be experienced.
      * @return The used gas for the simulated call or transaction.
      */
-    std::future<json> estimateGas(json callObject);
+    std::future<json> estimateGas(const json& callObject);
 
     /**
      * Get past logs matching the given options.
      * @param options The filter options.
      * @return An array of log objects, or an empty array on failure.
      */
-    std::future<json> getPastLogs(json options);
+    std::future<json> getPastLogs(const json& options);
 
     /**
      * Get work for miners to mine on.
