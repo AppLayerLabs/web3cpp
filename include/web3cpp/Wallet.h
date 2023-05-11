@@ -74,7 +74,7 @@ class Wallet {
         if (now >= this->_passEnd) break;
         std::this_thread::sleep_for(std::chrono::seconds(1));
       }
-      this->_password = "";
+      this->_password.clear();
       this->_passEnd = 0;
       return;
     }

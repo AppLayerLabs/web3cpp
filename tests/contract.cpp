@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "../old_tests/Tests.h"
 
 
 using namespace std;
@@ -31,7 +30,6 @@ namespace TContract
             Error jsonErr;
             json contractJson = Utils::readJSONFile(contractPath, jsonErr);
 
-            REQUIRE(jsonErr.getCode() != 0);
             REQUIRE(jsonErr.getCode() == 0);
 
             Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
@@ -99,7 +97,7 @@ namespace TContract
                                                                             "0xbbb",
                                                                             "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})}),
                                                   error);
-            REQUIRE(error.getCode() != 0);
+            REQUIRE(error.getCode() == 0);
             REQUIRE(addToAddressList == addToAddressListExpected);
             REQUIRE(addToStringList == addToStringListExpected);
             REQUIRE(addToStringListFour == addToStringListFourExpected);
@@ -130,7 +128,7 @@ namespace TContract
                 boost::filesystem::current_path().parent_path().string() + "/tests/ArrayTest.json");
             Error jsonErr;
             json contractJson = Utils::readJSONFile(contractPath, jsonErr);
-            REQUIRE(jsonErr.getCode() != 0);
+            REQUIRE(jsonErr.getCode() == 0);
 
             Contract ArrayTest(contractJson, "0x0000000000000000000000000000000000000000");
             std::string addToAddressList = ArrayTest(
@@ -197,15 +195,15 @@ namespace TContract
                                           "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})}),
                 "testAlmostAll", e9);
 
-            REQUIRE(e1.getCode() != 0);
-            REQUIRE(e2.getCode() != 0);
-            REQUIRE(e3.getCode() != 0);
-            REQUIRE(e4.getCode() != 0);
-            REQUIRE(e5.getCode() != 0);
-            REQUIRE(e6.getCode() != 0);
-            REQUIRE(e7.getCode() != 0);
-            REQUIRE(e8.getCode() != 0);
-            REQUIRE(e9.getCode() != 0);
+            REQUIRE(e1.getCode() == 0);
+            REQUIRE(e2.getCode() == 0);
+            REQUIRE(e3.getCode() == 0);
+            REQUIRE(e4.getCode() == 0);
+            REQUIRE(e5.getCode() == 0);
+            REQUIRE(e6.getCode() == 0);
+            REQUIRE(e7.getCode() == 0);
+            REQUIRE(e8.getCode() == 0);
+            REQUIRE(e9.getCode() == 0);
 
             REQUIRE(addToAddressList == addToAddressListExpected);
             REQUIRE(addToStringList == addToStringListExpected);

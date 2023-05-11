@@ -18,9 +18,10 @@ bool Database::openDB() {
 
 bool Database::closeDB() {
   this->dbMutex.lock();
-  this->db = NULL;
+  delete this->db;
+  this->db = nullptr;
   this->dbMutex.unlock();
-  return (db == NULL);
+  return true;
 }
 
 bool Database::keyExists(std::string const &key) const {

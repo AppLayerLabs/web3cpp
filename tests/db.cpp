@@ -1,5 +1,5 @@
 #include "../src/libs/catch2/catch_amalgamated.hpp"
-#include "../old_tests/Tests.h"
+#include "Tests.h"
 #include "../include/web3cpp/DB.h"
 #include <iostream>
 #include <fstream>
@@ -24,6 +24,8 @@ namespace TDb
                 {"value4", "Test Value 4"}};
             bool okC, okR, okU, okD;
             std::string logC = "", logR = "", logU = "", logD = "";
+
+            // (C)reate (putKeyValue)
             logC = "* Subtest: CREATE (add values to DB)\n";
             int ctC = 0;
             for (std::pair<std::string, std::string> testPair : testData)
