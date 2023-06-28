@@ -18,7 +18,7 @@ bool Database::openDB() {
 
 bool Database::closeDB() {
   this->dbMutex.lock();
-  if (this->db == ) {
+  if (this->db == nullptr) {
     return true;
   }
   delete this->db;
