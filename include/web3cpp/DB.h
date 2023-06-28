@@ -18,7 +18,7 @@ class Database {
   private:
     std::string name;             ///< Name for the database.
     boost::filesystem::path path; ///< Full path for the database (includes name).
-    leveldb::DB* db;              ///< Pointer to the actual LevelDB database object.
+    leveldb::DB* db = nullptr;     ///< Pointer to the actual LevelDB database object.
     leveldb::Options dbOpts;      ///< Struct with options for the database.
     leveldb::Status dbStatus;     ///< Struct with the status of the last database operation.
     std::string tmpValue;         ///< Buffer for a temporary value.
