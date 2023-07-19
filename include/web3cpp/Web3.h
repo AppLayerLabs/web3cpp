@@ -9,6 +9,7 @@
 #include <web3cpp/Provider.h>
 #include <web3cpp/Utils.h>
 #include <web3cpp/Wallet.h>
+#include <web3cpp/Account.h>
 
 #include "version.h"
 
