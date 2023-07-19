@@ -47,7 +47,6 @@ class Web3 {
     std::string version;  ///< Current version of the library.
     Wallet wallet;        ///< Object for accessing the wallet.
     Eth eth;              ///< Object for accessing functions from the Eth class.
-    Account account;      ///< Object for accessing the accounts within the wallet.
 
     /**
      * Getter for the library provider.
